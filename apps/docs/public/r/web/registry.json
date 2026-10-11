@@ -83,7 +83,7 @@
       "name": "fold-stack",
       "type": "registry:component",
       "title": "Fold Stack",
-      "description": "A deck of cards with one in front, the rest folded in behind it, and tabs to bring any forward.",
+      "description": "A stack of one-line summaries, one of them opened out into its card.",
       "dependencies": [
         "tailwind-variants"
       ],

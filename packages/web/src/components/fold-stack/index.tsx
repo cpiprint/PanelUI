@@ -1,36 +1,38 @@
 'use client';
 
 /**
- * FoldStack — a deck of cards with one in front, the rest folded in behind
- * it, and a row of tabs to bring any of them forward.
+ * FoldStack — a stack of summaries, one of them opened out into its card.
  *
  * ```tsx
- * <FoldStack defaultValue="test">
- *   <FoldStack.Item value="build" label="Build" color="success">…</FoldStack.Item>
- *   <FoldStack.Item value="test" label="Test" color="destructive">…</FoldStack.Item>
+ * <FoldStack defaultValue="latency">
+ *   <FoldStack.Item value="latency" color="info">
+ *     <FoldStack.Summary icon={<ActivityIcon />} value="182 ms" level={0.4}>
+ *       Latency
+ *     </FoldStack.Summary>
+ *     <FoldStack.Panel>…</FoldStack.Panel>
+ *   </FoldStack.Item>
  * </FoldStack>
  * ```
  *
- * ## A real pile, drawn from the front
+ * ## One surface that changes shape
  *
- * Every card is in the same place. The chosen one is in front at full size,
- * and the next two lie behind it, each a little smaller and a little lower,
- * so only their bottom edges show. Choosing another card moves it to the
- * front and sends the one that was there to the back, and each card in
- * between steps forward one place. The edges under the front card are how
- * many are waiting, which a row of tabs alone would not show.
+ * An item is a single card. Folded, it is one row: a tile with its icon, its
+ * name, a figure and a few lights that show how high the figure is. Open, it
+ * is as tall as its panel. Nothing is swapped: the summary's row closes as the
+ * panel's row opens, in one movement, so the row is seen growing into the card
+ * and not being replaced by it.
  *
- * ## The deck does not change height
+ * ## The stack narrows away from the open card
  *
- * All the cards share one cell of a grid, so the deck is as tall as its
- * tallest card whichever is in front. Nothing under it moves when the card
- * changes.
+ * A folded item is narrower the further it is from the open one. The open
+ * card is then the widest thing in the stack and the eye goes to it, and the
+ * folded ones read as stacked on it and not as a list beside it.
  *
- * ## It is a set of tabs to everything but the eye
+ * ## Exactly one is open
  *
- * The row above the deck is a tab list and each card is its panel. Left and
- * right move between tabs. The cards behind stay mounted and are made inert,
- * so a field somebody filled in is still filled when its card comes back.
+ * Pressing a folded item opens it and folds the one that was open. The folded
+ * side of an item is a button, and whichever side cannot be seen is made
+ * inert, so it cannot be tabbed into or read.
  */
 import {
   Children,
@@ -44,99 +46,105 @@ import {
   useRef,
   useState,
   type ComponentProps,
-  type KeyboardEvent,
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
 
-/** Which of the theme's roles a card's light is drawn in. */
+/** Which of the theme's roles an item's tile and lights are drawn in. */
 export type FoldStackColor = 'primary' | 'info' | 'success' | 'warning' | 'destructive';
 
 const foldStackVariants = tv({
   slots: {
-    root: 'flex w-full flex-col gap-3',
-    list: 'flex flex-wrap gap-1.5',
-    tab: 'inline-flex h-8 cursor-pointer items-center gap-2 rounded-full px-3 text-sm font-medium outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-    // A light in the card's colour, which is how a tab and its card are
-    // matched at a glance.
-    beacon: 'size-2 shrink-0 rounded-full bg-[var(--pu-color)] transition-shadow duration-300',
-    // One cell for every card. The room under it is for the edges of the two
-    // cards behind, so they are inside the deck's own box.
-    deck: 'grid pb-[var(--pu-under)]',
-    /*
-     * Scaled from the middle of its bottom edge, so a card behind keeps its
-     * bottom corners under the front card's and shows as an edge beneath it.
-     * The shade is the page's colour laid over a card, thicker the further
-     * back it is, which is what makes it recede.
-     */
-    card: 'relative col-start-1 row-start-1 origin-bottom rounded-3xl border bg-card text-card-foreground [scale:var(--pu-scale)] [translate:0_var(--pu-drop)] transition-[scale,translate,opacity,box-shadow] duration-500 ease-[cubic-bezier(0.3,1.2,0.5,1)] after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:bg-background after:opacity-[var(--pu-shade)] after:transition-opacity after:duration-500 motion-reduce:transition-none',
-    content: 'h-full p-5 transition-opacity duration-300 motion-reduce:transition-none',
+    root: 'flex w-full flex-col items-center gap-2',
+    item: 'grid overflow-hidden rounded-[1.75rem] border bg-card text-card-foreground transition-[grid-template-rows,width,box-shadow] duration-500 ease-[cubic-bezier(0.3,1.15,0.5,1)] motion-reduce:transition-none',
+    summary:
+      'group/summary flex min-h-0 w-full cursor-pointer items-center overflow-hidden text-start outline-none transition-[opacity,background-color] duration-300 hover:bg-accent focus-visible:bg-accent motion-reduce:transition-none',
+    summaryInner: 'flex h-16 w-full min-w-0 items-center gap-3 pe-5 ps-3',
+    // The item's colour as a soft square behind its icon.
+    tile: 'flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_oklab,var(--pu-color)_16%,transparent)] text-[var(--pu-color)] transition-transform duration-300 group-hover/summary:scale-105 motion-reduce:transition-none [&_svg]:size-5',
+    title: 'min-w-0 flex-1 truncate text-base font-medium',
+    value: 'shrink-0 text-base font-semibold tabular-nums',
+    // Four lights of rising height. How many are lit says how high the
+    // figure is, without the reader having to know its scale.
+    lights: 'flex shrink-0 items-end gap-[3px]',
+    light: 'w-1 rounded-full',
+    panel: 'min-h-0 overflow-hidden transition-opacity duration-300 motion-reduce:transition-none',
+    panelInner: 'p-5',
   },
-  compoundVariants: [
-    // The neutral light on the filled tab would be the tab's own colour and
-    // vanish, so there it is drawn in the page's colour.
-    { color: 'primary', selected: true, class: { tab: '[--pu-color:var(--background)]' } },
-  ],
   variants: {
     color: {
-      primary: { tab: '[--pu-color:var(--primary)]' },
-      info: { tab: '[--pu-color:var(--info)]' },
-      success: { tab: '[--pu-color:var(--success)]' },
-      warning: { tab: '[--pu-color:var(--warning)]' },
-      destructive: { tab: '[--pu-color:var(--destructive)]' },
+      primary: { item: '[--pu-color:var(--primary)]' },
+      info: { item: '[--pu-color:var(--info)]' },
+      success: { item: '[--pu-color:var(--success)]' },
+      warning: { item: '[--pu-color:var(--warning)]' },
+      destructive: { item: '[--pu-color:var(--destructive)]' },
     },
-    selected: {
+    open: {
       true: {
-        tab: 'bg-foreground text-background',
-        beacon: 'shadow-[0_0_0_3px_color-mix(in_oklab,var(--pu-color)_30%,transparent)]',
+        item: 'shadow-lg',
+        summary: 'pointer-events-none opacity-0',
+        panel: 'opacity-100 delay-150',
       },
-      false: { tab: 'bg-muted text-muted-foreground hover:text-foreground' },
+      false: { summary: 'opacity-100', panel: 'opacity-0' },
     },
-    /** Where a card lies in the pile. */
-    place: {
-      front: { card: 'z-30 shadow-lg', content: 'opacity-100 delay-150' },
-      // Its edge is a way to the next card, so it can be pressed.
-      behind: { card: 'cursor-pointer shadow-sm', content: 'opacity-0' },
-      // Too far back to be seen. Kept in the cell so the deck keeps its height.
-      buried: { card: 'pointer-events-none opacity-0', content: 'opacity-0' },
+    lit: {
+      true: { light: 'bg-[var(--pu-color)]' },
+      false: { light: 'bg-muted-foreground/25' },
     },
   },
+  defaultVariants: { color: 'primary' },
 });
 
-/** How many cards show behind the front one. */
-const BEHIND = 2;
-/** How much smaller each card behind is than the one in front of it. */
-const SHRINK = 0.06;
-/** How far below the card in front each one's edge shows, in pixels. */
-const DROP = 12;
+/** How much narrower an item is for each step it is from the open one, in percent. */
+const NARROWING = 8;
+/** The narrowest an item is drawn, in percent. */
+const NARROWEST = 76;
+/** The heights of the four lights, in pixels. */
+const LIGHTS = [7, 10, 13, 16];
 
 interface FoldStackContextValue {
   value: string | null;
   setValue(value: string): void;
-  /** The items' values in the order they are written. */
+  /** The items' values in the order they are written, to measure distance by. */
   order: string[];
-  id: string;
 }
 
 const FoldStackContext = createContext<FoldStackContextValue | null>(null);
 
-/** What the stack reads off each of its items to draw the row of tabs. */
-interface ItemShape {
+interface ItemContextValue {
   value: string;
-  label?: ReactNode;
-  color?: FoldStackColor;
+  open: boolean;
+  summaryId: string;
+  panelId: string;
+}
+
+const ItemContext = createContext<ItemContextValue | null>(null);
+
+function useItem(part: string): ItemContextValue {
+  const item = useContext(ItemContext);
+  if (!item) throw new Error(`${part} must be used inside a <FoldStack.Item>.`);
+  return item;
+}
+
+/** Keeps an element out of the tab order and the accessibility tree while it cannot be seen. */
+function useInert<T extends HTMLElement>(inert: boolean) {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    // Set on the element, not passed as a prop: how a boolean `inert` prop is
+    // written to the page differs between React versions.
+    ref.current?.toggleAttribute('inert', inert);
+  }, [inert]);
+  return ref;
 }
 
 export interface FoldStackProps extends Omit<ComponentProps<'div'>, 'onChange' | 'defaultValue'> {
-  /** The `value` of the card in front, when the caller holds it. */
+  /** The `value` of the open item, when the caller holds it. */
   value?: string;
-  /** The card in front to begin with, when the caller does not hold it. Defaults to the first. */
+  /** The item open to begin with, when the caller does not hold it. Defaults to the first. */
   defaultValue?: string;
-  /** Called with a card's `value` when it is brought to the front. */
+  /** Called with an item's `value` when it is opened. */
   onValueChange?: (value: string) => void;
-  /** What a screen reader calls the row of tabs. */
-  label?: string;
-  /** The cards. They have to be direct children, so the stack can count them. */
+  /** The items. They have to be direct children, so the stack can count them. */
   children?: ReactNode;
 }
 
@@ -144,30 +152,26 @@ function FoldStackRoot({
   value,
   defaultValue,
   onValueChange,
-  label = 'Cards',
   className,
   children,
   ...props
 }: FoldStackProps) {
   const slots = foldStackVariants();
-  const id = useId();
-  const tabs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const items = useMemo(() => {
-    const found: ItemShape[] = [];
+  const order = useMemo(() => {
+    const values: string[] = [];
     Children.forEach(children, (child) => {
-      if (isValidElement<ItemShape>(child) && typeof child.props.value === 'string') {
-        found.push(child.props);
+      if (isValidElement<{ value?: unknown }>(child) && typeof child.props.value === 'string') {
+        values.push(child.props.value);
       }
     });
-    return found;
+    return values;
   }, [children]);
-  const order = useMemo(() => items.map((item) => item.value), [items]);
 
   const [internal, setInternal] = useState<string | null>(defaultValue ?? null);
   const wanted = value ?? internal;
-  // A value that names no card would leave the deck with nothing in front, so
-  // it falls back to the first.
+  // A value that names no item would leave every one folded, so it falls back
+  // to the first.
   const resolved = wanted !== null && order.includes(wanted) ? wanted : (order[0] ?? null);
 
   const setValue = useCallback(
@@ -178,65 +182,12 @@ function FoldStackRoot({
     [value, onValueChange]
   );
 
-  const context = useMemo(
-    () => ({ value: resolved, setValue, order, id }),
-    [resolved, setValue, order, id]
-  );
-
-  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
-    const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
-    const forward = rtl ? -1 : 1;
-    const moves: Record<string, number> = {
-      ArrowLeft: index - forward,
-      ArrowRight: index + forward,
-      Home: 0,
-      End: items.length - 1,
-    };
-    const target = moves[event.key];
-    if (target === undefined) return;
-    event.preventDefault();
-    const next = (target + items.length) % items.length;
-    const item = items[next];
-    if (!item) return;
-    tabs.current[next]?.focus();
-    setValue(item.value);
-  };
-
-  // Enough room under the deck for as many edges as there are cards to show.
-  const under = Math.min(BEHIND, Math.max(0, items.length - 1)) * DROP;
+  const context = useMemo(() => ({ value: resolved, setValue, order }), [resolved, setValue, order]);
 
   return (
     <FoldStackContext.Provider value={context}>
       <div className={slots.root({ className })} {...props}>
-        <div role="tablist" aria-label={label} className={slots.list()}>
-          {items.map((item, index) => {
-            const selected = item.value === resolved;
-            const part = foldStackVariants({ color: item.color ?? 'primary', selected });
-            return (
-              <button
-                key={item.value}
-                ref={(node) => {
-                  tabs.current[index] = node;
-                }}
-                type="button"
-                role="tab"
-                id={`${id}-tab-${item.value}`}
-                aria-selected={selected}
-                aria-controls={`${id}-card-${item.value}`}
-                tabIndex={selected ? 0 : -1}
-                onClick={() => setValue(item.value)}
-                onKeyDown={(event) => onKeyDown(event, index)}
-                className={part.tab()}
-              >
-                <span aria-hidden="true" className={part.beacon()} />
-                {item.label ?? item.value}
-              </button>
-            );
-          })}
-        </div>
-        <div className={slots.deck()} style={{ ['--pu-under' as string]: `${under}px` }}>
-          {children}
-        </div>
+        {children}
       </div>
     </FoldStackContext.Provider>
   );
@@ -244,80 +195,147 @@ function FoldStackRoot({
 FoldStackRoot.displayName = 'FoldStack';
 
 export interface FoldStackItemProps extends Omit<ComponentProps<'div'>, 'color'> {
-  /** What identifies this card to `value` and `onValueChange`. */
+  /** What identifies this item to `value` and `onValueChange`. */
   value: string;
-  /** What its tab says. Defaults to the `value`. */
-  label?: ReactNode;
-  /** One of the theme's roles for the light on its tab. */
+  /** One of the theme's roles for the item's tile and lights. */
   color?: FoldStackColor;
 }
 
-/** One card, and through its `label` and `color`, the tab that brings it forward. */
-function FoldStackItem({
-  value,
-  // Read by the stack to draw the tab. Taken out here so they are not
-  // written on to the card's element.
-  label: _label,
-  color: _color,
-  className,
-  style,
-  children,
-  onClick,
-  ...props
-}: FoldStackItemProps) {
+function FoldStackItem({ value, color, className, style, children, ...props }: FoldStackItemProps) {
   const stack = useContext(FoldStackContext);
   if (!stack) throw new Error('FoldStack.Item must be used inside a <FoldStack>.');
-  const card = useRef<HTMLDivElement>(null);
+  const id = useId();
+  const open = stack.value === value;
+  const slots = foldStackVariants({ color, open });
 
-  const count = stack.order.length;
-  const at = stack.order.indexOf(value);
-  const frontAt = stack.order.indexOf(stack.value ?? value);
-  // How many places back from the front, going round: the card after the
-  // front one is the first behind it, and the one before it is the last.
-  const depth = (at - frontAt + count) % count;
-  const place = depth === 0 ? 'front' : depth <= BEHIND ? 'behind' : 'buried';
-  const shown = Math.min(depth, BEHIND);
-  const slots = foldStackVariants({ place });
+  const distance = Math.abs(stack.order.indexOf(value) - stack.order.indexOf(stack.value ?? value));
+  const width = Math.max(NARROWEST, 100 - distance * NARROWING);
 
-  useEffect(() => {
-    // Set on the element, not passed as a prop: how a boolean `inert` prop is
-    // written to the page differs between React versions.
-    card.current?.firstElementChild?.toggleAttribute('inert', depth !== 0);
-  }, [depth]);
+  const item = useMemo(
+    () => ({ value, open, summaryId: `${id}-summary`, panelId: `${id}-panel` }),
+    [value, open, id]
+  );
 
   return (
-    <div
-      ref={card}
-      role="tabpanel"
-      id={`${stack.id}-card-${value}`}
-      aria-labelledby={`${stack.id}-tab-${value}`}
-      aria-hidden={depth !== 0 || undefined}
-      data-place={place}
-      className={slots.card({ className })}
-      style={{
-        ['--pu-scale' as string]: 1 - shown * SHRINK,
-        ['--pu-drop' as string]: `${shown * DROP}px`,
-        ['--pu-shade' as string]: shown * 0.3,
-        // Nearer the front is drawn over further back.
-        zIndex: place === 'front' ? undefined : BEHIND + 1 - shown,
-        ...style,
-      }}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented && place === 'behind') stack.setValue(value);
-      }}
-      {...props}
-    >
-      <div className={slots.content()}>{children}</div>
-    </div>
+    <ItemContext.Provider value={item}>
+      <div
+        data-open={open ? '' : undefined}
+        className={slots.item({ className })}
+        style={{
+          width: `${width}%`,
+          // The summary's row and the panel's, trading places.
+          gridTemplateRows: open ? '0fr 1fr' : '1fr 0fr',
+          ...style,
+        }}
+        {...props}
+      >
+        {children}
+      </div>
+    </ItemContext.Provider>
   );
 }
 FoldStackItem.displayName = 'FoldStack.Item';
 
+export interface FoldStackSummaryProps extends Omit<ComponentProps<'button'>, 'value'> {
+  /** Drawn in the tile at the start of the row. */
+  icon?: ReactNode;
+  /** The figure at the end of the row. */
+  value?: ReactNode;
+  /**
+   * How high the figure is on its own scale, from 0 to 1. Drawn as four
+   * lights after the figure. Leave it out for a row without them.
+   */
+  level?: number;
+  /** The item's name. */
+  children?: ReactNode;
+}
+
+/** The folded form: one row, and the button that opens the item. */
+function FoldStackSummary({
+  icon,
+  value,
+  level,
+  className,
+  children,
+  onClick,
+  ...props
+}: FoldStackSummaryProps) {
+  const stack = useContext(FoldStackContext);
+  const item = useItem('FoldStack.Summary');
+  const slots = foldStackVariants({ open: item.open });
+  const ref = useInert<HTMLButtonElement>(item.open);
+  const lit = level === undefined ? 0 : Math.round(Math.min(1, Math.max(0, level)) * LIGHTS.length);
+
+  return (
+    <button
+      ref={ref}
+      type="button"
+      id={item.summaryId}
+      aria-expanded={item.open}
+      aria-controls={item.panelId}
+      className={slots.summary()}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) stack?.setValue(item.value);
+      }}
+      {...props}
+    >
+      <span className={slots.summaryInner({ className })}>
+        {icon !== undefined && icon !== null ? (
+          <span aria-hidden="true" className={slots.tile()}>
+            {icon}
+          </span>
+        ) : null}
+        <span className={slots.title()}>{children}</span>
+        {value !== undefined && value !== null ? (
+          <span className={slots.value()}>{value}</span>
+        ) : null}
+        {level !== undefined ? (
+          <span aria-hidden="true" className={slots.lights()}>
+            {LIGHTS.map((height, index) => (
+              <span
+                key={height}
+                className={foldStackVariants({ lit: index < lit }).light()}
+                style={{ height }}
+              />
+            ))}
+          </span>
+        ) : null}
+      </span>
+    </button>
+  );
+}
+FoldStackSummary.displayName = 'FoldStack.Summary';
+
+export interface FoldStackPanelProps extends ComponentProps<'div'> {}
+
+/** The open form: the card's contents. */
+function FoldStackPanel({ className, children, ...props }: FoldStackPanelProps) {
+  const item = useItem('FoldStack.Panel');
+  const slots = foldStackVariants({ open: item.open });
+  const ref = useInert<HTMLDivElement>(!item.open);
+
+  return (
+    <div
+      ref={ref}
+      role="region"
+      id={item.panelId}
+      aria-labelledby={item.summaryId}
+      className={slots.panel()}
+      {...props}
+    >
+      <div className={slots.panelInner({ className })}>{children}</div>
+    </div>
+  );
+}
+FoldStackPanel.displayName = 'FoldStack.Panel';
+
 export const FoldStack = Object.assign(FoldStackRoot, {
   Item: FoldStackItem,
+  Summary: FoldStackSummary,
+  Panel: FoldStackPanel,
 });
 
 /* By name as well, for a Server Component, which cannot dot into a client
    module. */
-export { FoldStackItem };
+export { FoldStackItem, FoldStackSummary, FoldStackPanel };

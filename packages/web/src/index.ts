@@ -68,7 +68,11 @@ export {
 export {
   FoldStack,
   FoldStackItem,
+  FoldStackSummary,
+  FoldStackPanel,
   type FoldStackProps,
   type FoldStackItemProps,
+  type FoldStackSummaryProps,
+  type FoldStackPanelProps,
   type FoldStackColor,
 } from './components/fold-stack';

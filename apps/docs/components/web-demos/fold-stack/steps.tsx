@@ -1,5 +1,6 @@
 'use client';
 
+import { BellIcon, GitBranchIcon, UsersIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { FoldStack } from 'panelui-web/fold-stack';
@@ -7,32 +8,35 @@ import { FoldStack } from 'panelui-web/fold-stack';
 const STEPS = [
   {
     id: 'invite',
-    tab: 'Invite',
+    icon: <UsersIcon />,
     title: 'Invite your team',
     body: 'Anyone with an address at your domain can join without being asked twice.',
   },
   {
     id: 'connect',
-    tab: 'Connect',
+    icon: <GitBranchIcon />,
     title: 'Connect a repository',
     body: 'Read access is enough to start. Write access is only needed for automatic fixes.',
   },
   {
     id: 'notify',
-    tab: 'Notify',
+    icon: <BellIcon />,
     title: 'Choose where alerts go',
     body: 'One channel for failures is usually plenty. You can split them up later.',
   },
 ];
 
-export default function FoldStackOneAtATime() {
+export default function FoldStackSteps() {
   const [step, setStep] = useState(STEPS[0].id);
 
   return (
-    <FoldStack value={step} onValueChange={setStep} label="Setup steps" className="max-w-sm">
+    <FoldStack value={step} onValueChange={setStep} className="max-w-sm">
       {STEPS.map((entry, index) => (
-        <FoldStack.Item key={entry.id} value={entry.id} label={entry.tab}>
-          <div className="flex h-full flex-col items-start gap-2">
+        <FoldStack.Item key={entry.id} value={entry.id}>
+          <FoldStack.Summary icon={entry.icon} value={`${index + 1}/${STEPS.length}`}>
+            {entry.title}
+          </FoldStack.Summary>
+          <FoldStack.Panel className="flex flex-col items-start gap-2">
             <p className="text-xs font-medium text-muted-foreground">
               Step {index + 1} of {STEPS.length}
             </p>
@@ -52,7 +56,7 @@ export default function FoldStackOneAtATime() {
                 Start again
               </Button>
             )}
-          </div>
+          </FoldStack.Panel>
         </FoldStack.Item>
       ))}
     </FoldStack>

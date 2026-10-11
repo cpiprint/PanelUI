@@ -69,8 +69,8 @@
   ],
   "fold-stack": [
     "FoldStack",
-    "A deck of cards with one in front, the rest folded in behind it, and tabs to bring any forward.",
-    "react card stack deck tabs component",
+    "A stack of one-line summaries, one of them opened out into its card.",
+    "react stacked cards expanding summary component",
     {
       "addedIn": "0.1.0",
       "category": "layout",

@@ -1,97 +1,112 @@
 ---
 title: Fold Stack
-description: A deck of cards with one in front, the rest folded in behind it, and tabs to bring any forward.
+description: A stack of one-line summaries, one of them opened out into its card.
 status: new
 ---
 
-<ComponentPreview name="fold-stack/pipeline" height={480}>
+<ComponentPreview name="fold-stack/service" height={520}>
 
 ```tsx
 'use client';
 
+import { GaugeIcon, LayersIcon, TriangleAlertIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { FoldStack, type FoldStackColor } from '@/components/panelui/fold-stack';
+import { RangeMeter } from '@/components/panelui/range-meter';
 
-interface Stage {
+interface Reading {
   id: string;
   name: string;
-  state: string;
+  icon: ReactNode;
   color: FoldStackColor;
-  /** Three short facts about the stage. */
-  facts: [string, string][];
-  detail: string;
+  /** The figure now, and the scale it is read on. */
+  now: number;
+  low: number;
+  high: number;
+  /** The value the team has agreed to stay under. */
+  limit: number;
+  unit: string;
+  note: string;
 }
 
-const STAGES: Stage[] = [
+/** How one service is doing, over the last five minutes. */
+const READINGS: Reading[] = [
   {
-    id: 'build',
-    name: 'Build',
-    state: 'Passed',
-    color: 'success',
-    facts: [
-      ['Time', '2 min 14 s'],
-      ['Modules', '1,284'],
-      ['Bundle', '\u22124 kB'],
-    ],
-    detail: 'Built with a warm cache. The bundle is smaller than the last one.',
-  },
-  {
-    id: 'test',
-    name: 'Test',
-    state: '2 failing',
-    color: 'destructive',
-    facts: [
-      ['Passed', '316'],
-      ['Failed', '2'],
-      ['Time', '4 min 02 s'],
-    ],
-    detail: 'Both failures are in the date picker, and both expect a week that starts on Sunday.',
-  },
-  {
-    id: 'review',
-    name: 'Review',
-    state: 'Waiting',
-    color: 'warning',
-    facts: [
-      ['Approved', '1 of 2'],
-      ['Comments', '5'],
-      ['Open for', '3 h'],
-    ],
-    detail: 'The design owner has approved. The platform owner has not answered yet.',
-  },
-  {
-    id: 'ship',
-    name: 'Ship',
-    state: 'Queued',
+    id: 'latency',
+    name: 'Latency',
+    icon: <GaugeIcon />,
     color: 'info',
-    facts: [
-      ['First', '5% of users'],
-      ['Then', 'Everyone'],
-      ['After', '1 h'],
-    ],
-    detail: 'Goes out in two steps, and the second waits for errors to stay flat.',
+    now: 182,
+    low: 80,
+    high: 600,
+    limit: 300,
+    unit: 'ms',
+    note: 'Slowest one request in twenty, across every region.',
+  },
+  {
+    id: 'errors',
+    name: 'Errors',
+    icon: <TriangleAlertIcon />,
+    color: 'destructive',
+    now: 34,
+    low: 0,
+    high: 50,
+    limit: 10,
+    unit: 'per 10k',
+    note: 'Most are timeouts from one region. Nothing is being lost.',
+  },
+  {
+    id: 'queue',
+    name: 'Queue',
+    icon: <LayersIcon />,
+    color: 'warning',
+    now: 312,
+    low: 0,
+    high: 1000,
+    limit: 500,
+    unit: 'jobs',
+    note: 'Drains in about four minutes at the present rate.',
   },
 ];
 
-export default function FoldStackPipeline() {
+export default function FoldStackService() {
   return (
-    <FoldStack defaultValue="test" label="Pipeline stages" className="max-w-sm">
-      {STAGES.map((stage) => (
-        <FoldStack.Item key={stage.id} value={stage.id} label={stage.name} color={stage.color}>
-          <div className="flex flex-col gap-4">
-            <div className="flex items-baseline justify-between gap-3">
-              <h3 className="text-lg font-semibold tracking-tight">{stage.name}</h3>
-              <p className="text-sm text-muted-foreground">{stage.state}</p>
+    <FoldStack defaultValue="queue" className="max-w-sm">
+      {READINGS.map((reading) => (
+        <FoldStack.Item key={reading.id} value={reading.id} color={reading.color}>
+          <FoldStack.Summary
+            icon={reading.icon}
+            value={reading.now}
+            level={(reading.now - reading.low) / (reading.high - reading.low)}
+          >
+            {reading.name}
+          </FoldStack.Summary>
+          <FoldStack.Panel className="flex flex-col gap-4">
+            <div className="flex items-end justify-between gap-4">
+              <div className="flex flex-col gap-1">
+                <p className="text-sm text-muted-foreground">{reading.name}</p>
+                <p className="text-4xl font-bold leading-none tracking-tight">
+                  {reading.now}
+                  <span className="ms-1.5 text-base font-medium text-muted-foreground">
+                    {reading.unit}
+                  </span>
+                </p>
+              </div>
+              <p className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                Limit {reading.limit}
+              </p>
             </div>
-            <dl className="grid grid-cols-3 gap-2">
-              {stage.facts.map(([term, fact]) => (
-                <div key={term} className="rounded-xl bg-muted px-3 py-2">
-                  <dt className="text-xs text-muted-foreground">{term}</dt>
-                  <dd className="text-sm font-semibold">{fact}</dd>
-                </div>
-              ))}
-            </dl>
-            <p className="text-sm text-muted-foreground">{stage.detail}</p>
-          </div>
+            <RangeMeter
+              min={reading.low}
+              max={reading.high}
+              value={reading.now}
+              marker={reading.limit}
+              color={reading.color}
+              label={reading.name}
+              valueText={`${reading.now} ${reading.unit}`}
+            />
+            <p className="text-sm text-muted-foreground">{reading.note}</p>
+          </FoldStack.Panel>
         </FoldStack.Item>
       ))}
     </FoldStack>
@@ -101,11 +116,11 @@ export default function FoldStackPipeline() {
 
 </ComponentPreview>
 
-Use it for a few things of the same kind where one is looked at at a time and it helps to see that there are more: the stages of a pipeline, the steps of a setup, a handful of plans. It is a deck of cards. One is in front, the next two show as edges under it, and a row of tabs brings any card forward.
+Use it for a few readings or steps where one is looked at in full and the rest only need a line each: the vital signs of a service, the steps of a setup. Each item is one row with an icon, a name and a figure. Pressing a row opens it out into its card, and the one that was open folds back to a row.
 
-The deck is as tall as its tallest card and stays that height, so nothing under it moves when the card changes.
+Exactly one item is always open. The folded rows get narrower the further they are from it.
 
-Every card has to fit that one size. For sections of very different lengths use an accordion, and past about six cards the row of tabs wraps and a list is the better shape.
+For sections that can all be closed, or several open at once, use an accordion. Past about five items the narrowing runs out, and a list is the better shape.
 
 ## Installation
 
@@ -160,12 +175,18 @@ import { FoldStack } from "@/components/panelui/fold-stack"
 ```
 
 ```tsx
-<FoldStack defaultValue="test">
-  <FoldStack.Item value="build" label="Build" color="success">
-    Passed in 2 min 14 s.
+<FoldStack defaultValue="latency">
+  <FoldStack.Item value="latency" color="info">
+    <FoldStack.Summary icon={<GaugeIcon />} value="182" level={0.2}>
+      Latency
+    </FoldStack.Summary>
+    <FoldStack.Panel>Slowest one request in twenty.</FoldStack.Panel>
   </FoldStack.Item>
-  <FoldStack.Item value="test" label="Test" color="destructive">
-    2 of 318 failing.
+  <FoldStack.Item value="queue" color="warning">
+    <FoldStack.Summary icon={<LayersIcon />} value="312" level={0.3}>
+      Queue
+    </FoldStack.Summary>
+    <FoldStack.Panel>Drains in about four minutes.</FoldStack.Panel>
   </FoldStack.Item>
 </FoldStack>
 ```
@@ -174,23 +195,29 @@ import { FoldStack } from "@/components/panelui/fold-stack"
 
 ```tsx
 <FoldStack>
-  <FoldStack.Item value="…" label="…">…</FoldStack.Item>
+  <FoldStack.Item value="…">
+    <FoldStack.Summary icon={…} value="…">…</FoldStack.Summary>
+    <FoldStack.Panel>…</FoldStack.Panel>
+  </FoldStack.Item>
 </FoldStack>
 ```
 
-- **`FoldStack.Item`** — One card, and its tab. `value` identifies it, `label` is what the tab says, and `color` is the light on the tab. Its children are the card's contents. Items have to be direct children of the stack.
+- **`FoldStack.Item`** — One item. `value` identifies it and `color` is the theme role its tile and lights are drawn in. Items have to be direct children of the stack.
+- **`FoldStack.Summary`** — The folded form, and the button that opens the item. `icon` goes in the tile, the children are the name, `value` is the figure at the end and `level` lights up to four small bars after it.
+- **`FoldStack.Panel`** — The open form: the card's contents. Anything can go in it, another component included.
 
 ## Examples
 
-### Holding the front card yourself
+### Holding the open item yourself
 
-`value` and `onValueChange` put the front card in your own state, so a button inside one card can bring the next forward.
+`value` and `onValueChange` put the open item in your own state, so a button inside one card can open the next. A summary's `value` can be any short text, here the step's number.
 
-<ComponentPreview name="fold-stack/one-at-a-time" height={400}>
+<ComponentPreview name="fold-stack/steps" height={420}>
 
 ```tsx
 'use client';
 
+import { BellIcon, GitBranchIcon, UsersIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { FoldStack } from '@/components/panelui/fold-stack';
@@ -198,32 +225,35 @@ import { FoldStack } from '@/components/panelui/fold-stack';
 const STEPS = [
   {
     id: 'invite',
-    tab: 'Invite',
+    icon: <UsersIcon />,
     title: 'Invite your team',
     body: 'Anyone with an address at your domain can join without being asked twice.',
   },
   {
     id: 'connect',
-    tab: 'Connect',
+    icon: <GitBranchIcon />,
     title: 'Connect a repository',
     body: 'Read access is enough to start. Write access is only needed for automatic fixes.',
   },
   {
     id: 'notify',
-    tab: 'Notify',
+    icon: <BellIcon />,
     title: 'Choose where alerts go',
     body: 'One channel for failures is usually plenty. You can split them up later.',
   },
 ];
 
-export default function FoldStackOneAtATime() {
+export default function FoldStackSteps() {
   const [step, setStep] = useState(STEPS[0].id);
 
   return (
-    <FoldStack value={step} onValueChange={setStep} label="Setup steps" className="max-w-sm">
+    <FoldStack value={step} onValueChange={setStep} className="max-w-sm">
       {STEPS.map((entry, index) => (
-        <FoldStack.Item key={entry.id} value={entry.id} label={entry.tab}>
-          <div className="flex h-full flex-col items-start gap-2">
+        <FoldStack.Item key={entry.id} value={entry.id}>
+          <FoldStack.Summary icon={entry.icon} value={`${index + 1}/${STEPS.length}`}>
+            {entry.title}
+          </FoldStack.Summary>
+          <FoldStack.Panel className="flex flex-col items-start gap-2">
             <p className="text-xs font-medium text-muted-foreground">
               Step {index + 1} of {STEPS.length}
             </p>
@@ -243,7 +273,7 @@ export default function FoldStackOneAtATime() {
                 Start again
               </Button>
             )}
-          </div>
+          </FoldStack.Panel>
         </FoldStack.Item>
       ))}
     </FoldStack>
@@ -259,57 +289,65 @@ export default function FoldStackOneAtATime() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `value` | `string` | — | The `value` of the card in front, when the caller holds it. |
-| `defaultValue` | `string` | — | The card in front to begin with, when the caller does not hold it. Defaults to the first. |
-| `onValueChange` | `(value: string) => void` | — | Called with a card's `value` when it is brought to the front. |
-| `label` | `string` | `'Cards'` | What a screen reader calls the row of tabs. |
+| `value` | `string` | — | The `value` of the open item, when the caller holds it. |
+| `defaultValue` | `string` | — | The item open to begin with, when the caller does not hold it. Defaults to the first. |
+| `onValueChange` | `(value: string) => void` | — | Called with an item's `value` when it is opened. |
 
 ### FoldStack.Item
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `value` | `string` | — | What identifies this card to `value` and `onValueChange`. |
-| `label` | `ReactNode` | — | What its tab says. Defaults to the `value`. |
-| `color` | `FoldStackColor` | — | One of the theme's roles for the light on its tab. |
+| `value` | `string` | — | What identifies this item to `value` and `onValueChange`. |
+| `color` | `FoldStackColor` | `primary` | One of the theme's roles for the item's tile and lights. |
+
+### FoldStack.Summary
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `icon` | `ReactNode` | — | Drawn in the tile at the start of the row. |
+| `value` | `ReactNode` | — | The figure at the end of the row. |
+| `level` | `number` | — | How high the figure is on its own scale, from 0 to 1. Drawn as four lights after the figure. Leave it out for a row without them. |
 
 Every part also takes the props of the element it renders, and a `className`.
 
 ## Notes
 
-### Which card is in front
+### Which item is open
 
-`defaultValue` names the card in front to begin with. Without it, or if it names no card, the first one is.
+`defaultValue` names the item open to begin with. Without it, or if it names no item, the first one is open.
 
-### The pile
+### Summary and panel are two views of one thing
 
-The two cards after the front one show under it, each 6 percent smaller and 12px lower than the card before, and a shade further back. The order goes round: behind the last card is the first. Any further cards are hidden until they come within two of the front.
+The summary is not a header that stays above the panel. When an item opens its summary goes and the panel takes its place, so put the name and the figure in the panel as well, at whatever size the card wants them.
 
-Pressing the edge of a card behind brings that card forward, which is a quick way to the next one.
+### The lights
 
-### Height
+`level` is how high the figure is on its own scale, from 0 to 1, and is drawn as four bars of rising height with that share of them lit. It is a rough reading for comparing rows at a glance. Leave it out and the row ends at the figure.
 
-All the cards share one size, the height of the tallest. A short card is stretched to it, so give a card's contents `h-full` if something in it should sit at the bottom.
+### Widths
+
+The open item is the full width of the stack. Each step away from it an item is 8 percent narrower, down to 76 percent.
 
 ### Colour
 
-`color` on an item is the small light on its tab, in one of the theme's roles. It defaults to `primary`. Use the status colours when the colour says something, such as the state of a stage.
+`color` on an item tints the tile behind its icon and lights its bars. It defaults to `primary`, the theme's neutral. Use the status colours when the colour says something.
 
 ### Contents stay mounted
 
-The cards behind stay in the page, so a field somebody filled in is still filled when its card comes back. They are made inert and hidden from screen readers while they are behind.
+A folded item's panel stays in the page, so a field somebody filled in is still filled when it opens again. Whichever of the summary and the panel cannot be seen is made inert.
 
 ### Keyboard
 
-The row of tabs is one Tab stop. Left and right move to the next tab and bring its card forward, wrapping at the ends, and Home and End go to the first and last.
+Each folded row is a button: Tab moves between them and Enter or Space opens one.
 
 ### Motion
 
-Changing the card moves each one to its new place in the pile over half a second. With reduced motion on, it happens at once.
+Opening an item grows its row into the card and changes the widths over half a second. With reduced motion on, it happens at once.
 
 ### Server Components
 
-`FoldStack` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `FoldStack.Item` off the import, so each part is also exported by name: `FoldStackItem` is `FoldStack.Item`.
+`FoldStack` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `FoldStack.Item` off the import, so each part is also exported by name: `FoldStackItem` is `FoldStack.Item`, and so on for the others.
 
 ```tsx
-import { FoldStack, FoldStackItem } from "@/components/panelui/fold-stack"
+import { FoldStack, FoldStackItem, FoldStackSummary, FoldStackPanel } from "@/components/panelui/fold-stack"
 ```
