@@ -94,6 +94,33 @@ const selectVariants = tv({
     groupLabel: 'px-3 pb-1 pt-2',
   },
   variants: {
+    /*
+     * The trigger only. The options are read in a sheet or a list of their
+     * own, at one size, however compact the field that opened them is.
+     */
+    size: {
+      xs: {
+        trigger: 'gap-2 px-2.5 py-1.5',
+        triggerLabel: 'text-[13px]',
+        placeholder: 'text-[13px]',
+      },
+      sm: {
+        trigger: 'gap-2 px-3 py-2.5',
+        triggerLabel: 'text-sm',
+        placeholder: 'text-sm',
+      },
+      md: {},
+      lg: {
+        trigger: 'py-4',
+        triggerLabel: 'text-lg',
+        placeholder: 'text-lg',
+      },
+      xl: {
+        trigger: 'px-5 py-5',
+        triggerLabel: 'text-lg',
+        placeholder: 'text-lg',
+      },
+    },
     selected: {
       true: { item: 'bg-accent' },
     },
@@ -111,10 +138,23 @@ const selectVariants = tv({
   },
   defaultVariants: {
     presentation: 'sheet',
+    size: 'md',
   },
 });
 
 export type SelectPresentation = 'sheet' | 'inline' | 'overlay';
+
+/** How big the trigger is. */
+export type SelectSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+
+/** The chevron keeps step with the label beside it. */
+const CHEVRON_SIZE: Record<SelectSize, number> = { xs: 12, sm: 14, md: 16, lg: 18, xl: 20 };
+
+/**
+ * What the `xs` trigger is short of a 44pt target, above and below. The
+ * trigger is as wide as its container, so there is nothing to add at the sides.
+ */
+const XS_TRIGGER_HIT_SLOP = { top: 7, bottom: 7 };
 
 interface SelectContextValue {
   value: string | undefined;
@@ -399,6 +439,12 @@ export interface SelectProps {
   placeholder?: string;
   /** Refuses the trigger and dims it. The options cannot be opened. */
   disabled?: boolean;
+  /**
+   * How big the trigger is: its padding, its text and its chevron. The options
+   * it opens are not resized. Ignored in `native` mode, where the platform
+   * draws the picker. For the height of the sheet, see `sheetProps.size`.
+   */
+  size?: SelectSize;
   /** Extra classes for the trigger — the field you press to open the list. */
   triggerClassName?: string;
   /** Extra classes for the selected option's text on the trigger. */
@@ -490,6 +536,7 @@ function SelectRoot({
   searchContainerClassName,
   emptyClassName,
   presentation = 'sheet',
+  size = 'md',
   title,
   sheetProps,
   contentWidth = 'trigger',
@@ -604,7 +651,7 @@ function SelectRoot({
     [value, onValueChange, close, query]
   );
 
-  const slots = selectVariants({ disabled: !!disabled, presentation });
+  const slots = selectVariants({ disabled: !!disabled, presentation, size });
   const chevronColor = useCSSVariable('--color-muted-foreground');
 
   const chevronStyle = useAnimatedStyle(() => ({
@@ -646,6 +693,7 @@ function SelectRoot({
        */
       accessibilityRole="combobox"
       accessibilityState={{ disabled: !!disabled, expanded: open }}
+      hitSlop={size === 'xs' ? XS_TRIGGER_HIT_SLOP : undefined}
       disabled={disabled}
       onPress={toggle}
       className={slots.trigger({ className: triggerClassName })}
@@ -657,6 +705,7 @@ function SelectRoot({
       )}
       <Animated.View style={chevronStyle}>
         <ChevronDownIcon
+          size={CHEVRON_SIZE[size]}
           color={typeof chevronColor === 'string' ? chevronColor : '#737373'}
         />
       </Animated.View>

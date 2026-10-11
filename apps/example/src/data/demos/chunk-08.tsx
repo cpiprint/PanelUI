@@ -13,6 +13,36 @@ import { Alert, Avatar, Badge, Button, Card, CheckIcon, Chip, CircularText, Flip
 import { useCSSVariable } from 'uniwind';
 import type { ComponentEntry } from '../component-types';
 
+/** The same two options at each size, each group holding its own choice. */
+function RadioGroupSizesDemo() {
+  const [picked, setPicked] = useState<Record<string, string>>({});
+
+  return (
+    <View className="gap-4">
+      {(
+        [
+          ['xs', 'Extra small'],
+          ['sm', 'Small'],
+          ['md', 'Medium'],
+          ['lg', 'Large'],
+          ['xl', 'Extra large'],
+        ] as const
+      ).map(([size, name]) => (
+        <RadioGroup
+          key={size}
+          size={size}
+          orientation="horizontal"
+          value={picked[size] ?? 'monthly'}
+          onValueChange={(value) => setPicked((current) => ({ ...current, [size]: value }))}
+        >
+          <RadioGroup.Item value="monthly" label={`${name}, monthly`} />
+          <RadioGroup.Item value="yearly" label="Yearly" />
+        </RadioGroup>
+      ))}
+    </View>
+  );
+}
+
 function RadioGroupDemo() {
   const [plan, setPlan] = useState('pro');
 
@@ -149,6 +179,31 @@ function RadioGroupSelectedLabelDemo() {
         />
       ))}
     </RadioGroup>
+  );
+}
+
+/** One value behind all five, so picking in one shows the label at every size. */
+function SelectSizesDemo() {
+  const [status, setStatus] = useState<string>('review');
+
+  return (
+    <View className="w-full gap-3">
+      {(['xs', 'sm', 'md', 'lg', 'xl'] as const).map((size) => (
+        <Select
+          key={size}
+          size={size}
+          value={status}
+          onValueChange={setStatus}
+          placeholder="Status"
+          title="Status"
+        >
+          <Select.Item value="draft" label="Draft" />
+          <Select.Item value="review" label="In review" />
+          <Select.Item value="approved" label="Approved" />
+          <Select.Item value="shipped" label="Shipped" />
+        </Select>
+      ))}
+    </View>
   );
 }
 
@@ -1889,6 +1944,7 @@ export const ENTRIES: ComponentEntry[] = [
     demos: [
       { label: 'Plans', render: () => <RadioGroupDemo /> },
       { label: 'Horizontal', render: () => <RadioGroupRowDemo /> },
+      { label: 'Sizes', render: () => <RadioGroupSizesDemo /> },
       { label: 'Cards', render: () => <RadioGroupCardDemo /> },
       { label: 'Styled labels', render: () => <RadioGroupStyledDemo /> },
       { label: 'Colouring the selected label', render: () => <RadioGroupSelectedLabelDemo /> },
@@ -2013,6 +2069,7 @@ export const ENTRIES: ComponentEntry[] = [
     summary: 'Picker shown in a sheet, in place, or floating over the page',
     demos: [
       { label: 'Sheet (default)', render: () => <SelectDemo /> },
+      { label: 'Sizes', render: () => <SelectSizesDemo /> },
       { label: 'Sheet — a long list', render: () => <LongSelectDemo /> },
       {
         label: 'Inline — the row grows',

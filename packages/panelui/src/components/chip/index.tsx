@@ -72,9 +72,11 @@ const chipVariants = tv({
       },
     },
     size: {
+      xs: { root: 'h-5 gap-0.5 px-1.5', label: 'text-[11px]' },
       sm: { root: 'h-6 gap-1 px-2', label: 'text-xs' },
       md: { root: 'h-7 gap-1.5 px-2.5', label: 'text-sm' },
       lg: { root: 'h-9 gap-2 px-3.5', label: 'text-base' },
+      xl: { root: 'h-11 gap-2 px-4', label: 'text-base' },
     },
     /**
      * The filter "on" state — a loud accent surface that wins over the resting
@@ -95,9 +97,11 @@ const chipVariants = tv({
     },
   },
   compoundVariants: [
+    { size: 'xs', closable: true, class: { close: 'h-3.5' } },
     { size: 'sm', closable: true, class: { close: 'h-4' } },
     { size: 'md', closable: true, class: { close: 'h-5' } },
     { size: 'lg', closable: true, class: { close: 'h-6' } },
+    { size: 'xl', closable: true, class: { close: 'h-7' } },
   ],
   defaultVariants: {
     variant: 'default',
@@ -121,7 +125,7 @@ const TINT_VAR: Record<ChipVariant, string> = {
 };
 
 /** The ✕ scales with the pill so it never looks stranded in a large chip. */
-const CLOSE_ICON: Record<ChipSize, number> = { sm: 11, md: 13, lg: 15 };
+const CLOSE_ICON: Record<ChipSize, number> = { xs: 9, sm: 11, md: 13, lg: 15, xl: 17 };
 
 /* -------------------------------------------------------------------------- */
 /* State context                                                              */

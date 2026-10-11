@@ -1830,6 +1830,29 @@ export const ENTRIES: ComponentEntry[] = [
           </View>
         ),
       },
+      {
+        label: 'Sizes',
+        render: () => (
+          <View className="gap-5">
+            {(
+              [
+                ['xs', 'Extra small'],
+                ['sm', 'Small'],
+                ['md', 'Medium'],
+                ['lg', 'Large'],
+                ['xl', 'Extra large'],
+              ] as const
+            ).map(([size, name]) => (
+              <View key={size} className="flex-row items-center gap-3">
+                <Switch size={size} value onValueChange={() => {}} label={name} />
+                <Text size="sm" muted>
+                  {name}
+                </Text>
+              </View>
+            ))}
+          </View>
+        ),
+      },
       { label: 'Haptics', render: () => <HapticSwitchDemo /> },
       { label: 'Native', render: () => <NativeSwitchDemo /> },
     ],
@@ -2042,6 +2065,22 @@ export const ENTRIES: ComponentEntry[] = [
               </Text>
             </Tabs.Content>
           </Tabs>
+        ),
+      },
+      {
+        label: 'Sizes',
+        render: () => (
+          <View className="w-full gap-5">
+            {(['xs', 'sm', 'md', 'lg', 'xl'] as const).map((size) => (
+              <Tabs key={size} size={size} defaultValue="week">
+                <Tabs.List>
+                  <Tabs.Trigger value="day">Day</Tabs.Trigger>
+                  <Tabs.Trigger value="week">Week</Tabs.Trigger>
+                  <Tabs.Trigger value="month">Month</Tabs.Trigger>
+                </Tabs.List>
+              </Tabs>
+            ))}
+          </View>
         ),
       },
       {

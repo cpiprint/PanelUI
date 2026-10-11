@@ -16,7 +16,7 @@ import { Switch } from 'panelui-native';
 
 ### Variants
 
-- **size** — `sm`, `md` *(default)*
+- **size** — `xs`, `sm`, `md` *(default)*, `lg`, `xl`
 - **disabled** — `true`
 
 ### Props

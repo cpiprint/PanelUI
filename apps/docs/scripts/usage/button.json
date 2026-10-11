@@ -56,7 +56,7 @@
   ],
   "variantCode": {
     "variant": "<Button>Primary</Button>\n<Button variant=\"secondary\">Secondary</Button>\n<Button variant=\"outline\">Outline</Button>\n<Button variant=\"ghost\">Ghost</Button>\n<Button variant=\"destructive\">Delete</Button>\n<Button variant=\"social\" startContent={<GoogleIcon size={18} />}>\n  Continue with Google\n</Button>",
-    "size": "<Button size=\"sm\">Small</Button>\n<Button size=\"md\">Medium</Button>\n<Button size=\"lg\">Large</Button>\n<Button size=\"xl\">Extra large</Button>\n<Button size=\"icon\" accessibilityLabel=\"Search\">\n  <SearchIcon size={18} />\n</Button>",
+    "size": "<Button size=\"xs\">Extra small</Button>\n<Button size=\"sm\">Small</Button>\n<Button size=\"md\">Medium</Button>\n<Button size=\"lg\">Large</Button>\n<Button size=\"xl\">Extra large</Button>\n<Button size=\"icon\" accessibilityLabel=\"Search\">\n  <SearchIcon size={18} />\n</Button>",
     "fullWidth": "<Button fullWidth>Spans its container</Button>"
   },
   "variantMedia": {

@@ -119,6 +119,21 @@ const MEASURE_WIDTH = 400;
 
 export type TabsVariant = 'segmented' | 'underline' | 'pill' | 'expanding';
 
+/** How big the triggers and their labels are. */
+export type TabsSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+
+/**
+ * Room above and below the two smallest sizes, so a row that is drawn 20 or 24
+ * points tall is still pressed like one that is 44.
+ *
+ * Vertical only. The triggers sit edge to edge in a row, and slop to the side
+ * would reach into the neighbouring tab and take its presses.
+ */
+const TRIGGER_HIT_SLOP: Partial<Record<TabsSize, { top: number; bottom: number }>> = {
+  xs: { top: 12, bottom: 12 },
+  sm: { top: 8, bottom: 8 },
+};
+
 /**
  * How much of an inactive panel survives a switch away from it.
  *
@@ -187,6 +202,21 @@ const tabsVariants = tv({
         trigger: 'rounded-full bg-muted px-3.5 py-2.5',
       },
     },
+    /*
+     * The label's type size. `md` adds nothing, so it is whatever the label
+     * was drawn at before sizes existed.
+     *
+     * How tall a trigger is depends on the variant as well, since each draws
+     * its tab differently, so the padding per size is in the compound variants
+     * below rather than here.
+     */
+    size: {
+      xs: { label: 'text-xs' },
+      sm: { label: 'text-[13px]' },
+      md: {},
+      lg: { label: 'text-base' },
+      xl: { label: 'text-lg' },
+    },
     active: {
       true: { label: 'text-foreground' },
       false: { label: 'text-muted-foreground' },
@@ -207,9 +237,27 @@ const tabsVariants = tv({
     // exists to avoid.
     { variant: 'expanding', class: { trigger: 'flex-none' } },
     { variant: 'expanding', active: true, class: { trigger: 'bg-surface-tertiary' } },
+    // Half a step of padding per size, either side of the variant's own.
+    { variant: 'segmented', size: 'xs', class: { trigger: 'py-0.5' } },
+    { variant: 'segmented', size: 'sm', class: { trigger: 'py-1' } },
+    { variant: 'segmented', size: 'lg', class: { trigger: 'py-2' } },
+    { variant: 'segmented', size: 'xl', class: { trigger: 'py-2.5' } },
+    { variant: 'underline', size: 'xs', class: { trigger: 'py-1.5' } },
+    { variant: 'underline', size: 'sm', class: { trigger: 'py-2' } },
+    { variant: 'underline', size: 'lg', class: { trigger: 'py-3' } },
+    { variant: 'underline', size: 'xl', class: { trigger: 'py-3.5' } },
+    { variant: 'pill', size: 'xs', class: { trigger: 'py-1' } },
+    { variant: 'pill', size: 'sm', class: { trigger: 'py-1.5' } },
+    { variant: 'pill', size: 'lg', class: { trigger: 'py-2.5' } },
+    { variant: 'pill', size: 'xl', class: { trigger: 'py-3' } },
+    { variant: 'expanding', size: 'xs', class: { trigger: 'px-2.5 py-1.5' } },
+    { variant: 'expanding', size: 'sm', class: { trigger: 'px-3 py-2' } },
+    { variant: 'expanding', size: 'lg', class: { trigger: 'px-4 py-3' } },
+    { variant: 'expanding', size: 'xl', class: { trigger: 'px-5 py-3.5' } },
   ],
   defaultVariants: {
     variant: 'segmented',
+    size: 'md',
     scrollable: false,
   },
 });
@@ -225,6 +273,7 @@ interface TabsContextValue {
   registerLayout: (value: string, layout: TabLayout) => void;
   layouts: Record<string, TabLayout>;
   variant: TabsVariant;
+  size: TabsSize;
   keepMounted: TabsKeepMounted;
   /**
    * Whether the panels are in a strip rather than stacked in place.
@@ -280,6 +329,13 @@ export interface TabsProps extends ViewProps {
    * every trigger an `icon` — a closed tab has nothing else.
    */
   variant?: TabsVariant;
+  /**
+   * How big the triggers and their labels are. `xs` and `sm` are for a tab set
+   * inside something else, such as a card or a toolbar; `lg` and `xl` are for
+   * one that is the main navigation of a screen. Icons and badges you pass are
+   * not resized.
+   */
+  size?: TabsSize;
   /**
    * Mount every panel up front instead of only the ones that have been
    * reached, so a scroll position or a half-filled form is there from the
@@ -378,6 +434,7 @@ function TabsRoot({
   onValueChange,
   defaultValue,
   variant = 'segmented',
+  size = 'md',
   keepMounted = false,
   swipeable = false,
   animation,
@@ -427,6 +484,7 @@ function TabsRoot({
       registerLayout,
       layouts,
       variant,
+      size,
       keepMounted,
       pager: paged,
       animationDisabled,
@@ -437,6 +495,7 @@ function TabsRoot({
       registerLayout,
       layouts,
       variant,
+      size,
       keepMounted,
       paged,
       animationDisabled,
@@ -901,6 +960,7 @@ function TabsTrigger({
   const active = context.value === value;
   const slots = tabsVariants({
     variant: context.variant,
+    size: context.size,
     active,
     disabled,
     scrollable,
@@ -948,6 +1008,7 @@ function TabsTrigger({
       disabled={disabled}
       onPress={() => context.setValue(value)}
       onLayout={handleLayout}
+      hitSlop={TRIGGER_HIT_SLOP[context.size]}
       className={cn(slots.trigger(), (icon || badge) && 'flex-row gap-1.5', className)}
     >
       {icon}

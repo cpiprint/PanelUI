@@ -1,6 +1,7 @@
 ---
 title: Checkbox
 description: Animated checkbox, as a row or a selectable card.
+status: updated
 ---
 
 <PreviewVideo
@@ -149,6 +150,22 @@ const some = selected.length > 0 && !all;
 
 ## Variants
 
+### `size`
+
+- `xs`
+- `sm`
+- `md` *(default)*
+- `lg`
+- `xl`
+
+```tsx
+<Checkbox size="xs" checked={on} onCheckedChange={setOn} label="Extra small" />
+<Checkbox size="sm" checked={on} onCheckedChange={setOn} label="Small" />
+<Checkbox size="md" checked={on} onCheckedChange={setOn} label="Medium" />
+<Checkbox size="lg" checked={on} onCheckedChange={setOn} label="Large" />
+<Checkbox size="xl" checked={on} onCheckedChange={setOn} label="Extra large" />
+```
+
 ### `variant`
 
 - `default` *(default)*
@@ -199,4 +216,4 @@ With a `description` the row aligns the box to the label rather than centring it
 
 **Values:** `Checkbox`
 
-**Types:** `CheckboxProps`
+**Types:** `CheckboxProps`, `CheckboxSize`

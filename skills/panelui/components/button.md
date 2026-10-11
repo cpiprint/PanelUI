@@ -29,7 +29,7 @@ import { Button } from 'panelui-native';
 ### Variants
 
 - **variant** — `primary` *(default)*, `secondary`, `outline`, `ghost`, `destructive`, `social`
-- **size** — `sm`, `md` *(default)*, `lg`, `xl`, `icon`
+- **size** — `xs`, `sm`, `md` *(default)*, `lg`, `xl`, `icon`
 - **fullWidth** — `true`
 - **disabled** — `true`
 

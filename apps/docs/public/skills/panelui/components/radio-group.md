@@ -18,6 +18,7 @@ import { RadioGroup } from 'panelui-native';
 
 ### Variants
 
+- **size** — `xs`, `sm`, `md` *(default)*, `lg`, `xl`
 - **variant** — `dot` *(default)*, `card`
 - **selected** — `true`
 - **disabled** — `true`
@@ -40,6 +41,7 @@ Extends `ViewProps`.
 | `onValueChange` | `(value: string) => void` | **required** | — |
 | `disabled` | `boolean` | — | — |
 | `variant` | `RadioVariant` | `dot` | `dot` is the label-beside-a-disc row. `card` makes the whole surface the target and highlights the selected option — for a plan picker or a settings choice where each option carries a description. |
+| `size` | `RadioSize` | `md` | How big every option's disc and label are. Set on the group rather than per option, because options of different sizes read as though one of them matters more. The row keeps a 48-point target at every size. |
 | `orientation` | `RadioOrientation` | `vertical` | `horizontal` lays the options out along a row that wraps — for two or three short choices, where a stacked list wastes the width and reads as longer than it is. |
 | `children` | `ReactNode` | **required** | — |
 

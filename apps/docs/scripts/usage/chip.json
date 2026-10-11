@@ -60,7 +60,7 @@
   ],
   "variantCode": {
     "variant": "<Chip variant=\"default\">Default</Chip>\n<Chip variant=\"primary\">Primary</Chip>\n<Chip variant=\"outline\">Outline</Chip>\n<Chip variant=\"success\">Success</Chip>\n<Chip variant=\"warning\">Warning</Chip>\n<Chip variant=\"info\">Info</Chip>\n<Chip variant=\"destructive\">Destructive</Chip>",
-    "size": "<Chip size=\"sm\">Small</Chip>\n<Chip size=\"md\">Medium</Chip>\n<Chip size=\"lg\">Large</Chip>"
+    "size": "<Chip size=\"xs\">Extra small</Chip>\n<Chip size=\"sm\">Small</Chip>\n<Chip size=\"md\">Medium</Chip>\n<Chip size=\"lg\">Large</Chip>\n<Chip size=\"xl\">Extra large</Chip>"
   },
   "notes": "A chip is only pressable when you give it an `onPress` or a `selected` state — otherwise it is a plain tag and is not announced as a control. A `selected` chip is read out as checked or unchecked; a plain pressable one as a button.\n\nThe close button carries its own `accessibilityLabel` (“Remove” by default — override with `closeLabel`) and a generous hit slop, since a small pill leaves little room for the finger.\n\nSet `haptics` for a tick under the finger on press or removal. It needs the optional `expo-haptics` and is silent without it.\n\nA pressable chip forwards ordinary Pressable props, but keeps ownership of its role, selected/disabled semantics, classes, and haptic-aware `onPress` composition. The consumer callback receives the native event after the optional haptic tick.",
   "variantMedia": {

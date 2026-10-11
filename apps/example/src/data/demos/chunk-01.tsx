@@ -1677,6 +1677,34 @@ export const ENTRIES: ComponentEntry[] = [
         ),
       },
       {
+        label: 'Sizes',
+        render: () => (
+          <View className="items-center gap-4">
+            <View className="flex-row flex-wrap items-center justify-center gap-2">
+              <Badge size="xs">Extra small</Badge>
+              <Badge size="sm">Small</Badge>
+              <Badge size="md">Medium</Badge>
+              <Badge size="lg">Large</Badge>
+              <Badge size="xl">Extra large</Badge>
+            </View>
+            <View className="flex-row items-center gap-3">
+              <Badge size="xs" count={3} />
+              <Badge size="sm" count={3} />
+              <Badge size="md" count={3} />
+              <Badge size="lg" count={3} />
+              <Badge size="xl" count={3} />
+            </View>
+            <View className="flex-row items-center gap-3">
+              <Badge size="xs" shape="dot" variant="success" />
+              <Badge size="sm" shape="dot" variant="success" />
+              <Badge size="md" shape="dot" variant="success" />
+              <Badge size="lg" shape="dot" variant="success" />
+              <Badge size="xl" shape="dot" variant="success" />
+            </View>
+          </View>
+        ),
+      },
+      {
         label: 'With status dot',
         render: () => (
           <View className="gap-2">

@@ -1,9 +1,9 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1421,
+    "exports": 1427,
     "values": 356,
-    "types": 1065,
+    "types": 1071,
     "modules": 165,
     "components": 138,
     "hooks": 13
@@ -306,6 +306,10 @@
           },
           {
             "name": "BadgeProps",
+            "kind": "type"
+          },
+          {
+            "name": "BadgeSize",
             "kind": "type"
           }
         ]
@@ -830,6 +834,10 @@
           },
           {
             "name": "CheckboxProps",
+            "kind": "type"
+          },
+          {
+            "name": "CheckboxSize",
             "kind": "type"
           }
         ]
@@ -3994,6 +4002,10 @@
           {
             "name": "RadioGroupItemProps",
             "kind": "type"
+          },
+          {
+            "name": "RadioSize",
+            "kind": "type"
           }
         ]
       },
@@ -4514,6 +4526,10 @@
           },
           {
             "name": "SelectPresentation",
+            "kind": "type"
+          },
+          {
+            "name": "SelectSize",
             "kind": "type"
           },
           {
@@ -5163,6 +5179,10 @@
           {
             "name": "SwitchProps",
             "kind": "type"
+          },
+          {
+            "name": "SwitchSize",
+            "kind": "type"
           }
         ]
       },
@@ -5252,6 +5272,10 @@
           },
           {
             "name": "TabsVariant",
+            "kind": "type"
+          },
+          {
+            "name": "TabsSize",
             "kind": "type"
           },
           {

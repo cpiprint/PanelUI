@@ -21,9 +21,15 @@ const switchVariants = tv({
     thumb: 'rounded-full bg-white shadow-sm',
   },
   variants: {
+    // Each track is its thumb plus the 3pt of padding and 1pt of border on
+    // either side, and twice as wide as it is tall. `TRAVEL` below is what is
+    // left of that width once the thumb is in it.
     size: {
+      xs: { track: 'h-5 w-8', thumb: 'h-3 w-3' },
       sm: { track: 'h-6 w-10', thumb: 'h-4 w-4' },
       md: { track: 'h-7 w-12', thumb: 'h-5 w-5' },
+      lg: { track: 'h-8 w-14', thumb: 'h-6 w-6' },
+      xl: { track: 'h-9 w-16', thumb: 'h-7 w-7' },
     },
     disabled: {
       true: { track: 'opacity-50' },
@@ -34,19 +40,25 @@ const switchVariants = tv({
   },
 });
 
-const TRAVEL: Record<'sm' | 'md', number> = { sm: 16, md: 20 };
+/** How big a switch is. */
+export type SwitchSize = NonNullable<VariantProps<typeof switchVariants>['size']>;
+
+const TRAVEL: Record<SwitchSize, number> = { xs: 12, sm: 16, md: 20, lg: 24, xl: 28 };
 
 /**
  * Room around each track so the target reaches 48dp on both axes.
  *
  * Slop rather than a bigger box, because a box is layout: a switch sized to
  * its target would stand 48dp tall in every row it has ever been placed in,
- * and the tracks are only 24 and 28 tall. The `md` track is already 48 wide,
- * which is why the horizontal figures differ between the two sizes.
+ * and the tracks are 20 to 36 tall. From `md` up the track is already 48 wide,
+ * which is why only the two smallest have horizontal figures.
  */
-const SWITCH_HIT_SLOP: Record<'sm' | 'md', { top: number; bottom: number; left: number; right: number }> = {
+const SWITCH_HIT_SLOP: Record<SwitchSize, { top: number; bottom: number; left: number; right: number }> = {
+  xs: { top: 14, bottom: 14, left: 8, right: 8 },
   sm: { top: 12, bottom: 12, left: 4, right: 4 },
   md: { top: 10, bottom: 10, left: 0, right: 0 },
+  lg: { top: 8, bottom: 8, left: 0, right: 0 },
+  xl: { top: 6, bottom: 6, left: 0, right: 0 },
 };
 
 export interface SwitchProps

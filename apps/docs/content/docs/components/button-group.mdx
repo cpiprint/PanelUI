@@ -1,6 +1,7 @@
 ---
 title: ButtonGroup
 description: Several buttons drawn as one control — a segmented run, a split action, a toolbar.
+status: updated
 ---
 
 <Preview
@@ -213,7 +214,7 @@ A segment carries its own state. `loading` swaps its label for a spinner and sto
 
 ### Three sizes
 
-`size` on the group is the size of every segment in it, and it sets the height, the padding and the type together so the joined edges still meet. A segment that names its own size wins, which is how the chevron on a split action stays square while the rest of the run is not.
+`size` on the group is the size of every segment in it, and it sets the height, the padding and the type together so the joined edges still meet. It takes every size a button does, `xs` to `xl`; three are shown here. A segment that names its own size wins, which is how the chevron on a split action stays square while the rest of the run is not.
 
 <Preview
   src="/previews/button-group-three-sizes.jpg"
@@ -256,6 +257,7 @@ A segment carries its own state. `loading` swaps its label for a spinner and sto
 
 ### `size`
 
+- `xs`
 - `sm`
 - `md` *(default)*
 - `lg`
@@ -263,6 +265,7 @@ A segment carries its own state. `loading` swaps its label for a spinner and sto
 - `icon`
 
 ```tsx
+<ButtonGroup size="xs">…</ButtonGroup>
 <ButtonGroup size="sm">…</ButtonGroup>
 <ButtonGroup size="md">…</ButtonGroup>
 <ButtonGroup size="lg">…</ButtonGroup>

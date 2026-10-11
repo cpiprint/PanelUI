@@ -21,6 +21,42 @@ const checkboxVariants = tv({
     description: 'text-sm text-muted-foreground',
   },
   variants: {
+    /*
+     * The box, its tick and the text beside it move together. The row does
+     * not: it stays 48 points tall at every size, because that is the touch
+     * target and a smaller box is not a reason for a smaller one.
+     *
+     * Listed before `variant` so the card keeps the label weight it sets.
+     */
+    size: {
+      xs: {
+        row: 'gap-2',
+        box: 'h-3.5 w-3.5 rounded-sm',
+        fill: 'rounded-sm',
+        label: 'text-xs',
+        description: 'text-xs',
+      },
+      sm: {
+        row: 'gap-2',
+        box: 'h-4 w-4 rounded-sm',
+        fill: 'rounded-sm',
+        label: 'text-[13px]',
+        description: 'text-xs',
+      },
+      md: {},
+      lg: {
+        row: 'gap-3',
+        box: 'h-6 w-6',
+        label: 'text-base',
+      },
+      xl: {
+        row: 'gap-3',
+        box: 'h-7 w-7 rounded-lg',
+        fill: 'rounded-lg',
+        label: 'text-lg',
+        description: 'text-base',
+      },
+    },
     variant: {
       default: {},
       /**
@@ -48,8 +84,15 @@ const checkboxVariants = tv({
   ],
   defaultVariants: {
     variant: 'default',
+    size: 'md',
   },
 });
+
+/** How big a checkbox is. */
+export type CheckboxSize = NonNullable<VariantProps<typeof checkboxVariants>['size']>;
+
+/** The tick and the dash, sized to leave the same share of the box around them. */
+const GLYPH_SIZE: Record<CheckboxSize, number> = { xs: 8, sm: 10, md: 12, lg: 14, xl: 16 };
 
 export interface CheckboxProps extends VariantProps<typeof checkboxVariants> {
   /**
@@ -92,6 +135,7 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
       description,
       descriptionClassName,
       variant,
+      size = 'md',
     },
     ref
   ) => {
@@ -99,7 +143,7 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
     // what changes is the glyph, not whether the fill is shown.
     const on = checked || !!indeterminate;
     const progress = useSharedValue(on ? 1 : 0);
-    const slots = checkboxVariants({ variant, checked: on, disabled: !!disabled });
+    const slots = checkboxVariants({ variant, size, checked: on, disabled: !!disabled });
     const checkColor = useCSSVariable('--color-primary-foreground');
 
     useEffect(() => {
@@ -118,9 +162,9 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
       <View className={slots.box()}>
         <Animated.View style={fillStyle} className={slots.fill()}>
           {indeterminate ? (
-            <MinusIcon size={12} color={glyphColor} />
+            <MinusIcon size={GLYPH_SIZE[size]} color={glyphColor} />
           ) : (
-            <CheckIcon size={12} color={glyphColor} />
+            <CheckIcon size={GLYPH_SIZE[size]} color={glyphColor} />
           )}
         </Animated.View>
       </View>

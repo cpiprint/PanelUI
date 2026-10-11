@@ -75,7 +75,7 @@
   ],
   "variantCode": {
     "variant": "{/* On the page, where the field draws its own edge. */}\n<Input variant=\"outline\" label=\"Email\" />\n\n{/* Inside a card or a sheet, where a second border reads as a seam. */}\n<Input variant=\"filled\" label=\"Email\" />",
-    "size": "<Input size=\"sm\" placeholder=\"40 tall\" />\n<Input size=\"md\" placeholder=\"48 tall\" />\n<Input size=\"lg\" placeholder=\"56 tall\" />"
+    "size": "<Input size=\"xs\" placeholder=\"32 tall\" />\n<Input size=\"sm\" placeholder=\"40 tall\" />\n<Input size=\"md\" placeholder=\"48 tall\" />\n<Input size=\"lg\" placeholder=\"56 tall\" />\n<Input size=\"xl\" placeholder=\"64 tall\" />"
   },
   "variantMedia": {
     "variant": [

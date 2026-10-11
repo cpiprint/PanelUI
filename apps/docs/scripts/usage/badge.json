@@ -33,7 +33,8 @@
   ],
   "variantCode": {
     "variant": "<Badge>Default</Badge>\n<Badge variant=\"secondary\">Secondary</Badge>\n<Badge variant=\"outline\">Outline</Badge>\n<Badge variant=\"destructive\">Failed</Badge>\n<Badge variant=\"success\">Paid</Badge>\n<Badge variant=\"warning\">Pending</Badge>\n<Badge variant=\"info\">Info</Badge>",
-    "shape": "<Badge shape=\"default\">Label</Badge>\n<Badge shape=\"dot\" variant=\"success\" />\n<Badge shape=\"count\" count={12} />"
+    "shape": "<Badge shape=\"default\">Label</Badge>\n<Badge shape=\"dot\" variant=\"success\" />\n<Badge shape=\"count\" count={12} />",
+    "size": "<Badge size=\"xs\">Extra small</Badge>\n<Badge size=\"sm\">Small</Badge>\n<Badge size=\"md\">Medium</Badge>\n<Badge size=\"lg\">Large</Badge>\n<Badge size=\"xl\">Extra large</Badge>\n\n{/* A count and a dot follow the same steps. */}\n<Badge size=\"lg\" count={12} />\n<Badge size=\"sm\" shape=\"dot\" variant=\"success\" />"
   },
   "extraImports": [
     "Text"

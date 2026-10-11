@@ -58,10 +58,14 @@ const toggleVariants = tv({
       /** Nothing at rest — for a dense toolbar where six fills would be noise. */
       ghost: { root: 'bg-transparent' },
     },
+    // The same five heights as Button, so a toggle and a button side by side
+    // in a toolbar are one row rather than two.
     size: {
+      xs: { root: 'h-7 gap-1 rounded-md px-2', label: 'text-xs' },
       sm: { root: 'h-9 gap-1.5 px-2.5', label: 'text-sm' },
       md: { root: 'h-11 px-4', label: 'text-base' },
       lg: { root: 'h-12 px-6', label: 'text-lg' },
+      xl: { root: 'h-14 px-8', label: 'text-lg' },
     },
     selected: {
       true: { root: 'border-primary/24 bg-accent', label: 'text-accent-foreground' },
@@ -76,15 +80,20 @@ const toggleVariants = tv({
   },
   compoundVariants: [
     // Square, and sized from the height so the icon sits in the middle.
+    { iconOnly: true, size: 'xs', class: { root: 'w-7' } },
     { iconOnly: true, size: 'sm', class: { root: 'w-9' } },
     { iconOnly: true, size: 'md', class: { root: 'w-11' } },
     { iconOnly: true, size: 'lg', class: { root: 'w-12' } },
+    { iconOnly: true, size: 'xl', class: { root: 'w-14' } },
   ],
   defaultVariants: {
     variant: 'default',
     size: 'md',
   },
 });
+
+/** What `xs` is short of a 44pt target on each side. */
+const XS_HIT_SLOP = 8;
 
 type ToggleVariantProps = VariantProps<typeof toggleVariants>;
 export type ToggleButtonSize = NonNullable<ToggleVariantProps['size']>;
@@ -274,6 +283,7 @@ const ToggleButtonRoot = forwardRef<View, ToggleButtonProps>(
       selectedClassName,
       unselectedClassName,
       onPress,
+      hitSlop,
       ...props
     },
     ref
@@ -291,9 +301,10 @@ const ToggleButtonRoot = forwardRef<View, ToggleButtonProps>(
     const isDisabled = disabled || (group?.disabled ?? false);
     const enableHaptics = haptics ?? group?.haptics ?? false;
 
+    const resolvedSize = size ?? group?.size;
     const slots = toggleVariants({
       variant: variant ?? group?.variant,
-      size: size ?? group?.size,
+      size: resolvedSize,
       selected,
       iconOnly,
       disabled: isDisabled,
@@ -342,6 +353,10 @@ const ToggleButtonRoot = forwardRef<View, ToggleButtonProps>(
             aria-pressed={selected}
             disabled={isDisabled}
             onPress={handlePress}
+            // A 28pt toggle standing alone is given the rest of a 44pt target.
+            // Not inside a group, where the slop would reach into its
+            // neighbours and take their presses. A caller's own figure wins.
+            hitSlop={hitSlop ?? (!group && resolvedSize === 'xs' ? XS_HIT_SLOP : undefined)}
             className={cn(
               slots.root({ className }),
               selected ? selectedClassName : unselectedClassName

@@ -21,6 +21,7 @@ import { Select } from 'panelui-native';
 
 ### Variants
 
+- **size** — `xs`, `sm`, `md` *(default)*, `lg`, `xl`
 - **selected** — `true`
 - **disabled** — `true`
 - **itemDisabled** — `true`
@@ -59,7 +60,7 @@ import { Select } from 'panelui-native';
 | `native` | `boolean` | — | Present the platform's own sheet — SwiftUI on iOS, Jetpack Compose on Android — instead of the styled one. Requires the optional `@expo/ui` package; without it the styled sheet is shown. Only the container is the platform's. The options inside are still the select's own, so groups, disabled options and `searchable` all work. |
 | `snapPoints` | `('half' \| 'full' \| { fraction: number } \| { height: number })[]` | — | Heights the native sheet can rest at. Omit to size to the options. The list fills the first one and scrolls inside it. `{ fraction }` and `{ height }` are iOS-only. Native sheet only. |
 | `nativeBackground` | `boolean \| string` | — | Paint the native sheet a solid colour instead of the platform's translucent material. `true` uses the theme's popover surface; a string paints that colour. Native sheet only. |
-| `size` | `'auto' \| 'half' \| 'full'` | — | How tall the sheet opens. `auto`, the default, sizes to the options and scrolls once they pass 384 points; `half` and `full` fix the height and the list fills it. On the native sheet these map onto the platform's detents, and `snapPoints` wins over them. |
+| `size` | `'auto' \| 'half' \| 'full'` | `md` | How tall the sheet opens. `auto`, the default, sizes to the options and scrolls once they pass 384 points; `half` and `full` fix the height and the list fills it. On the native sheet these map onto the platform's detents, and `snapPoints` wins over them. |
 
 #### `SelectProps`
 
@@ -71,6 +72,7 @@ import { Select } from 'panelui-native';
 | `onValueChange` | `(value: string) => void` | **required** | Called with the `value` of the option that was picked. |
 | `placeholder` | `string` | `Select an option` | Shown on the trigger while nothing is selected. |
 | `disabled` | `boolean` | — | Refuses the trigger and dims it. The options cannot be opened. |
+| `size` | `SelectSize` | `md` | How big the trigger is: its padding, its text and its chevron. The options it opens are not resized. Ignored in `native` mode, where the platform draws the picker. For the height of the sheet, see `sheetProps.size`. |
 | `triggerClassName` | `string` | — | Extra classes for the trigger — the field you press to open the list. |
 | `valueClassName` | `string` | — | Extra classes for the selected option's text on the trigger. |
 | `placeholderClassName` | `string` | — | Extra classes for the placeholder text on the trigger. |

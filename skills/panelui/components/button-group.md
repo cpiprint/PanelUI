@@ -22,7 +22,7 @@ import { ButtonGroup } from 'panelui-native';
 
 - **orientation** — `horizontal` *(default)*, `vertical`
 - **attached** — `true` *(default)*, `false`
-- **size** — `sm`, `md` *(default)*, `lg`, `xl`, `icon`
+- **size** — `xs`, `sm`, `md` *(default)*, `lg`, `xl`, `icon`
 - **fullWidth** — `true`
 
 ### Props

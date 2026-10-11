@@ -108,7 +108,7 @@ export {
   type AnimatedBadgeSize,
   type AnimatedBadgeStatus,
 } from './components/animated-badge';
-export { Badge, type BadgeProps } from './components/badge';
+export { Badge, type BadgeProps, type BadgeSize } from './components/badge';
 export {
   BarChart,
   useBarChart,
@@ -382,6 +382,7 @@ export {
   type SelectItemProps,
   type SelectGroupProps,
   type SelectPresentation,
+  type SelectSize,
   type SelectSheetProps,
 } from './components/select';
 export {
@@ -419,6 +420,7 @@ export {
   type TabsTriggerProps,
   type TabsContentProps,
   type TabsVariant,
+  type TabsSize,
   type TabsKeepMounted,
   type TabsAnimation,
 } from './components/tabs';
@@ -464,7 +466,7 @@ export {
   type DateRange,
 } from './components/calendar';
 export { Card, type CardProps } from './components/card';
-export { Checkbox, type CheckboxProps } from './components/checkbox';
+export { Checkbox, type CheckboxProps, type CheckboxSize } from './components/checkbox';
 export {
   Chip,
   useChip,
@@ -1112,6 +1114,7 @@ export {
   RadioGroup,
   type RadioGroupProps,
   type RadioGroupItemProps,
+  type RadioSize,
 } from './components/radio-group';
 export {
   Rating,
@@ -1410,7 +1413,7 @@ export {
   type SwipeOpenSide,
   type SwipeHandle,
 } from './components/swipe';
-export { Switch, type SwitchProps } from './components/switch';
+export { Switch, type SwitchProps, type SwitchSize } from './components/switch';
 export {
   TimePicker,
   type TimePickerProps,

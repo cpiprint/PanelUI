@@ -21,11 +21,15 @@ test('labelled Button sizes are floors with scalable intrinsic line boxes', () =
     source,
     /lg: \{ root: 'min-h-12 px-6 py-2\.5', label: 'text-\[18px\]' \}/
   );
-  assert.doesNotMatch(source, /(?:sm|md|lg): \{ root: 'h-/);
+  assert.match(
+    source,
+    /xs: \{ root: 'min-h-7 min-w-7 gap-1 rounded-md px-2 py-1', label: 'text-\[12px\]' \}/
+  );
+  assert.doesNotMatch(source, /(?:xs|sm|md|lg|xl): \{ root: 'h-/);
 });
 
 test('icon Button geometry and 48dp interaction targets stay stable', () => {
   assert.match(source, /icon: \{ root: 'h-11 w-11 px-0' \}/);
-  assert.match(source, /const BUTTON_HIT_SLOP = \{ sm: 6, md: 2, lg: 0, xl: 0, icon: 2 \}/);
+  assert.match(source, /const BUTTON_HIT_SLOP = \{ xs: 10, sm: 6, md: 2, lg: 0, xl: 0, icon: 2 \}/);
   assert.match(source, /hitSlop=\{attached \? undefined : BUTTON_HIT_SLOP/);
 });

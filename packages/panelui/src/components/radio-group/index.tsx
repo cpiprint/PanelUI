@@ -49,10 +49,49 @@ const itemVariants = tv({
     row: 'min-h-12 min-w-12 flex-row items-center gap-2.5 self-start',
     indicator:
       'h-5 w-5 items-center justify-center rounded-full border border-input bg-background',
+    // Half the disc it sits in, at every size.
+    dot: 'h-2.5 w-2.5 rounded-full bg-primary',
     label: 'text-sm text-foreground',
     description: 'text-xs text-muted-foreground',
   },
   variants: {
+    /*
+     * The disc, its dot and the text beside it move together, on the same
+     * steps as Checkbox so the two line up in one form. The row stays 48
+     * points tall at every size, because that is the touch target.
+     *
+     * Listed before `variant` so the card keeps the label weight it sets.
+     */
+    size: {
+      xs: {
+        row: 'gap-2',
+        indicator: 'h-3.5 w-3.5',
+        dot: 'h-1.5 w-1.5',
+        label: 'text-xs',
+        description: 'text-[11px]',
+      },
+      sm: {
+        row: 'gap-2',
+        indicator: 'h-4 w-4',
+        dot: 'h-2 w-2',
+        label: 'text-[13px]',
+      },
+      md: {},
+      lg: {
+        row: 'gap-3',
+        indicator: 'h-6 w-6',
+        dot: 'h-3 w-3',
+        label: 'text-base',
+        description: 'text-sm',
+      },
+      xl: {
+        row: 'gap-3',
+        indicator: 'h-7 w-7',
+        dot: 'h-3.5 w-3.5',
+        label: 'text-lg',
+        description: 'text-sm',
+      },
+    },
     variant: {
       dot: {},
       card: {
@@ -85,14 +124,19 @@ const itemVariants = tv({
   ],
   defaultVariants: {
     variant: 'dot',
+    size: 'md',
   },
 });
+
+/** How big a group's discs and labels are. */
+type RadioSize = NonNullable<VariantProps<typeof itemVariants>['size']>;
 
 interface RadioGroupContextValue {
   value: string | undefined;
   onValueChange: (value: string) => void;
   disabled?: boolean;
   variant: RadioVariant;
+  size: RadioSize;
   orientation: RadioOrientation;
 }
 
@@ -110,6 +154,12 @@ export interface RadioGroupProps extends ViewProps {
    */
   variant?: RadioVariant;
   /**
+   * How big every option's disc and label are. Set on the group rather than
+   * per option, because options of different sizes read as though one of them
+   * matters more. The row keeps a 48-point target at every size.
+   */
+  size?: RadioSize;
+  /**
    * `horizontal` lays the options out along a row that wraps — for two or
    * three short choices, where a stacked list wastes the width and reads as
    * longer than it is.
@@ -126,6 +176,7 @@ const RadioGroupRoot = forwardRef<View, RadioGroupProps>(
       onValueChange,
       disabled,
       variant = 'dot',
+      size = 'md',
       orientation = 'vertical',
       children,
       ...props
@@ -133,8 +184,8 @@ const RadioGroupRoot = forwardRef<View, RadioGroupProps>(
     ref
   ) => {
     const context = useMemo(
-      () => ({ value, onValueChange, disabled, variant, orientation }),
-      [value, onValueChange, disabled, variant, orientation]
+      () => ({ value, onValueChange, disabled, variant, size, orientation }),
+      [value, onValueChange, disabled, variant, size, orientation]
     );
 
     return (
@@ -220,6 +271,7 @@ const RadioGroupItem = forwardRef<View, RadioGroupItemProps>(
 
     const slots = itemVariants({
       variant,
+      size: context.size,
       selected,
       disabled: !!disabled,
       horizontal: context.orientation === 'horizontal',
@@ -227,7 +279,7 @@ const RadioGroupItem = forwardRef<View, RadioGroupItemProps>(
 
     const indicator = hideIndicator ? null : (
       <View className={slots.indicator()}>
-        <Animated.View style={dotStyle} className="h-2.5 w-2.5 rounded-full bg-primary" />
+        <Animated.View style={dotStyle} className={slots.dot()} />
       </View>
     );
 
@@ -287,4 +339,4 @@ export const RadioGroup = Object.assign(RadioGroupRoot, {
   Item: RadioGroupItem,
 });
 
-export type { RadioVariant };
+export type { RadioVariant, RadioSize };

@@ -1949,9 +1949,11 @@ export const ENTRIES: ComponentEntry[] = [
         label: 'Sizes',
         render: () => (
           <View className="flex-row flex-wrap items-center justify-center gap-2">
+            <Chip size="xs">Extra small</Chip>
             <Chip size="sm">Small</Chip>
             <Chip size="md">Medium</Chip>
             <Chip size="lg">Large</Chip>
+            <Chip size="xl">Extra large</Chip>
           </View>
         ),
       },

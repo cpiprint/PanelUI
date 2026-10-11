@@ -19,7 +19,7 @@ import { Chip } from 'panelui-native';
 ### Variants
 
 - **variant** — `default` *(default)*, `primary`, `outline`, `success`, `warning`, `info`, `destructive`
-- **size** — `sm`, `md` *(default)*, `lg`
+- **size** — `xs`, `sm`, `md` *(default)*, `lg`, `xl`
 - **selected** — `true`
 - **closable** — `true`
 - **disabled** — `true`

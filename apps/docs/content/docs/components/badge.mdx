@@ -1,6 +1,7 @@
 ---
 title: Badge
 description: Compact status label, dot, or notification count.
+status: updated
 ---
 
 <Preview
@@ -95,6 +96,26 @@ A small dot inside the badge, for a status row.
 
 ## Variants
 
+### `size`
+
+- `xs`
+- `sm`
+- `md` *(default)*
+- `lg`
+- `xl`
+
+```tsx
+<Badge size="xs">Extra small</Badge>
+<Badge size="sm">Small</Badge>
+<Badge size="md">Medium</Badge>
+<Badge size="lg">Large</Badge>
+<Badge size="xl">Extra large</Badge>
+
+{/* A count and a dot follow the same steps. */}
+<Badge size="lg" count={12} />
+<Badge size="sm" shape="dot" variant="success" />
+```
+
 ### `shape`
 
 - `default` *(default)*
@@ -149,4 +170,4 @@ Every part also accepts the underlying React Native props (`ViewProps` or `TextP
 
 **Values:** `Badge`
 
-**Types:** `BadgeProps`
+**Types:** `BadgeProps`, `BadgeSize`

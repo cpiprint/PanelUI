@@ -77,7 +77,7 @@
   ],
   "variantCode": {
     "variant": "{/* On the page, where the field draws its own edge. */}\n<Textarea variant=\"outline\" label=\"Notes\" />\n\n{/* Inside a card or a sheet, where a second border reads as a seam. */}\n<Textarea variant=\"filled\" label=\"Notes\" />",
-    "size": "<Textarea size=\"sm\" rows={3} placeholder=\"14px type\" />\n<Textarea size=\"md\" rows={3} placeholder=\"16px type\" />\n<Textarea size=\"lg\" rows={3} placeholder=\"16px type, roomier\" />"
+    "size": "<Textarea size=\"xs\" rows={3} placeholder=\"13px type\" />\n<Textarea size=\"sm\" rows={3} placeholder=\"14px type\" />\n<Textarea size=\"md\" rows={3} placeholder=\"16px type\" />\n<Textarea size=\"lg\" rows={3} placeholder=\"16px type, roomier\" />\n<Textarea size=\"xl\" rows={3} placeholder=\"18px type\" />"
   },
   "extraImports": [
     "Card"

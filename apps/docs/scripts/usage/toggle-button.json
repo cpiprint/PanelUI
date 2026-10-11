@@ -50,7 +50,7 @@
   ],
   "variantCode": {
     "variant": "{/* A soft fill at rest, so the control is visible before you touch it. */}\n<ToggleButton variant=\"default\">Follow</ToggleButton>\n\n{/* Nothing at rest — for a dense toolbar where six fills would be noise. */}\n<ToggleButton variant=\"ghost\" iconOnly accessibilityLabel=\"Bold\">\n  <BoldIcon size={18} />\n</ToggleButton>",
-    "size": "<ToggleButton size=\"sm\">Small</ToggleButton>\n<ToggleButton size=\"md\">Medium</ToggleButton>\n<ToggleButton size=\"lg\">Large</ToggleButton>"
+    "size": "<ToggleButton size=\"xs\">Extra small</ToggleButton>\n<ToggleButton size=\"sm\">Small</ToggleButton>\n<ToggleButton size=\"md\">Medium</ToggleButton>\n<ToggleButton size=\"lg\">Large</ToggleButton>\n<ToggleButton size=\"xl\">Extra large</ToggleButton>"
   },
   "hideVariants": [
     "iconOnly"

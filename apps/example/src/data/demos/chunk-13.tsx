@@ -1478,6 +1478,10 @@ export const ENTRIES: ComponentEntry[] = [
         label: 'Sizes',
         render: () => (
           <View className="w-full gap-3">
+            <ToggleButtonGroup defaultValue={['xs']} size="xs">
+              <ToggleButton id="xs">Extra small</ToggleButton>
+              <ToggleButton id="xs2">Extra small</ToggleButton>
+            </ToggleButtonGroup>
             <ToggleButtonGroup defaultValue={['s']} size="sm">
               <ToggleButton id="s">Small</ToggleButton>
               <ToggleButton id="s2">Small</ToggleButton>
@@ -1489,6 +1493,10 @@ export const ENTRIES: ComponentEntry[] = [
             <ToggleButtonGroup defaultValue={['l']} size="lg">
               <ToggleButton id="l">Large</ToggleButton>
               <ToggleButton id="l2">Large</ToggleButton>
+            </ToggleButtonGroup>
+            <ToggleButtonGroup defaultValue={['xl']} size="xl">
+              <ToggleButton id="xl">Extra large</ToggleButton>
+              <ToggleButton id="xl2">Extra large</ToggleButton>
             </ToggleButtonGroup>
             <ToggleButton disabled defaultSelected>
               Disabled
@@ -1564,6 +1572,18 @@ export const ENTRIES: ComponentEntry[] = [
         ),
       },
       { label: 'Counting characters', render: () => <TextareaCountDemo /> },
+      {
+        label: 'Sizes',
+        render: () => (
+          <View className="w-full gap-4">
+            <Textarea size="xs" label="Extra small" rows={2} placeholder="13px type" />
+            <Textarea size="sm" label="Small" rows={2} placeholder="14px type" />
+            <Textarea size="md" label="Medium" rows={2} placeholder="16px type" />
+            <Textarea size="lg" label="Large" rows={2} placeholder="16px type, roomier" />
+            <Textarea size="xl" label="Extra large" rows={2} placeholder="18px type" />
+          </View>
+        ),
+      },
       {
         label: 'Filled',
         render: () => (

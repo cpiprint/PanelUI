@@ -45,7 +45,8 @@
     }
   ],
   "variantCode": {
-    "variant": "<Checkbox variant=\"default\" checked={a} onCheckedChange={setA} label=\"Default\" />\n\n{/* A bordered surface that fills its width. */}\n<Checkbox\n  variant=\"card\"\n  checked={b}\n  onCheckedChange={setB}\n  label=\"Card\"\n  description=\"For options that are real choices, not small toggles.\"\n/>"
+    "variant": "<Checkbox variant=\"default\" checked={a} onCheckedChange={setA} label=\"Default\" />\n\n{/* A bordered surface that fills its width. */}\n<Checkbox\n  variant=\"card\"\n  checked={b}\n  onCheckedChange={setB}\n  label=\"Card\"\n  description=\"For options that are real choices, not small toggles.\"\n/>",
+    "size": "<Checkbox size=\"xs\" checked={on} onCheckedChange={setOn} label=\"Extra small\" />\n<Checkbox size=\"sm\" checked={on} onCheckedChange={setOn} label=\"Small\" />\n<Checkbox size=\"md\" checked={on} onCheckedChange={setOn} label=\"Medium\" />\n<Checkbox size=\"lg\" checked={on} onCheckedChange={setOn} label=\"Large\" />\n<Checkbox size=\"xl\" checked={on} onCheckedChange={setOn} label=\"Extra large\" />"
   },
   "previewVideo": {
     "src": "/previews/checkbox.mp4",

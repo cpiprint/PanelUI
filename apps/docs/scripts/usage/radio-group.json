@@ -50,7 +50,8 @@
     "Text"
   ],
   "variantCode": {
-    "variant": "<RadioGroup variant=\"dot\" value={value} onValueChange={setValue}>\n  <RadioGroup.Item value=\"a\" label=\"Option A\" />\n</RadioGroup>\n\n<RadioGroup variant=\"card\" value={value} onValueChange={setValue}>\n  <RadioGroup.Item value=\"a\" label=\"Option A\" description=\"With a supporting line\" />\n</RadioGroup>"
+    "variant": "<RadioGroup variant=\"dot\" value={value} onValueChange={setValue}>\n  <RadioGroup.Item value=\"a\" label=\"Option A\" />\n</RadioGroup>\n\n<RadioGroup variant=\"card\" value={value} onValueChange={setValue}>\n  <RadioGroup.Item value=\"a\" label=\"Option A\" description=\"With a supporting line\" />\n</RadioGroup>",
+    "size": "{/* Set once on the group; every option follows it. */}\n<RadioGroup size=\"sm\" value={plan} onValueChange={setPlan}>\n  <RadioGroup.Item value=\"free\" label=\"Free\" />\n  <RadioGroup.Item value=\"pro\" label=\"Pro\" />\n</RadioGroup>\n\n<RadioGroup size=\"lg\" value={plan} onValueChange={setPlan}>\n  <RadioGroup.Item value=\"free\" label=\"Free\" />\n  <RadioGroup.Item value=\"pro\" label=\"Pro\" />\n</RadioGroup>"
   },
   "notes": "The row of a `dot` item is only as wide as its label, so the empty space beside it is not part of the target — pressing nothing selects nothing. A `card` is the opposite on purpose: there the whole surface is what you aim at.\n\nThe options wrap rather than scroll when laid out horizontally. A choice that has run off the edge of the screen is a choice nobody knows is there.\n\nPressing the already selected option is a no-op: `onValueChange` runs only when an item requests a different value. This keeps controlled form side effects tied to real selection changes.",
   "hideVariants": [

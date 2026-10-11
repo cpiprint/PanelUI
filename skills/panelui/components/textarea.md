@@ -38,7 +38,7 @@ import { Textarea } from 'panelui-native';
 ### Variants
 
 - **variant** — `outline` *(default)*, `filled`
-- **size** — `sm`, `md` *(default)*, `lg`
+- **size** — `xs`, `sm`, `md` *(default)*, `lg`, `xl`
 - **disabled** — `true`
 - **over** — `true`
 

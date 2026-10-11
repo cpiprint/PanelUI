@@ -60,6 +60,11 @@ const buttonVariants = tv({
       // These padding + intrinsic-font pairs equal the old 36/44/48dp boxes
       // at the default scale. `min-h-*`, rather than `h-*`, lets the same box
       // grow when the label's system-scaled glyphs or wrapped lines need it.
+      //
+      // `xs` is for a row that is already dense: a toolbar, a table cell, a
+      // filter beside a heading. At 28pt the default radius starts to read as
+      // a pill, so it steps down one with the height.
+      xs: { root: 'min-h-7 min-w-7 gap-1 rounded-md px-2 py-1', label: 'text-[12px]' },
       sm: { root: 'min-h-9 min-w-9 gap-1.5 px-2.5 py-2', label: 'text-[14px]' },
       md: { root: 'min-h-11 min-w-11 px-4 py-2.5', label: 'text-[16px]' },
       lg: { root: 'min-h-12 px-6 py-2.5', label: 'text-[18px]' },
@@ -146,10 +151,10 @@ export function useButtonGroup(): ButtonGroupContextValue | null {
  */
 const ATTACHED = 'rounded-none border-transparent shadow-none active:bg-accent';
 
-const SPINNER_SIZE = { sm: 'sm', md: 'sm', lg: 'md', xl: 'md', icon: 'sm' } as const;
+const SPINNER_SIZE = { xs: 'sm', sm: 'sm', md: 'sm', lg: 'md', xl: 'md', icon: 'sm' } as const;
 
 /** Extra room around the styled sizes so even the compact button reaches 48dp. */
-const BUTTON_HIT_SLOP = { sm: 6, md: 2, lg: 0, xl: 0, icon: 2 } as const;
+const BUTTON_HIT_SLOP = { xs: 10, sm: 6, md: 2, lg: 0, xl: 0, icon: 2 } as const;
 
 /**
  * The theme token each variant's content reads against. Icons in the content
@@ -265,6 +270,7 @@ export interface ButtonProps
  * axis that is genuinely unknown. See the host in the native branch below.
  */
 const NATIVE_HEIGHT: Record<NonNullable<ButtonVariantProps['size']>, number> = {
+  xs: 28,
   sm: 36,
   md: 44,
   lg: 48,
@@ -310,6 +316,7 @@ const NATIVE_ICON_FRAME = 44;
  * measurement to get wrong — so there is no reason to find out on both at once.
  */
 const NATIVE_CONTROL_SIZE = {
+  xs: 'mini',
   sm: 'small',
   md: 'regular',
   lg: 'large',

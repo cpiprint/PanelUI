@@ -1133,9 +1133,11 @@ export const ENTRIES: ComponentEntry[] = [
         label: 'Sizes',
         render: () => (
           <View className="w-full gap-4">
+            <Input size="xs" label="Extra small" placeholder="32 tall" />
             <Input size="sm" label="Small" placeholder="40 tall" />
             <Input size="md" label="Medium" placeholder="48 tall" />
             <Input size="lg" label="Large" placeholder="56 tall" />
+            <Input size="xl" label="Extra large" placeholder="64 tall" />
           </View>
         ),
       },

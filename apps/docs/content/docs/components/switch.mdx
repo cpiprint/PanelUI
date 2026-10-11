@@ -1,6 +1,7 @@
 ---
 title: Switch
 description: Animated on/off toggle.
+status: updated
 ---
 
 <Preview
@@ -76,12 +77,18 @@ Renders the platform switch, which brings a `label` the styled one does not have
 
 ### `size`
 
+- `xs`
 - `sm`
 - `md` *(default)*
+- `lg`
+- `xl`
 
 ```tsx
+<Switch size="xs" value={on} onValueChange={setOn} />
 <Switch size="sm" value={on} onValueChange={setOn} />
 <Switch size="md" value={on} onValueChange={setOn} />
+<Switch size="lg" value={on} onValueChange={setOn} />
+<Switch size="xl" value={on} onValueChange={setOn} />
 ```
 
 ## API Reference
@@ -118,4 +125,4 @@ See [Native rendering](/docs/native) for the full prop-by-prop breakdown.
 
 **Values:** `Switch`
 
-**Types:** `SwitchProps`
+**Types:** `SwitchProps`, `SwitchSize`

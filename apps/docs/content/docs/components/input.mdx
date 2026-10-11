@@ -1,6 +1,7 @@
 ---
 title: Input
 description: Text field with label, description and error message.
+status: updated
 ---
 
 <Preview
@@ -290,9 +291,11 @@ const insets = useSafeAreaInsets();
 
 ### `size`
 
+- `xs`
 - `sm`
 - `md` *(default)*
 - `lg`
+- `xl`
 
 <Preview
   src="/previews/input-size.jpg"
@@ -302,9 +305,11 @@ const insets = useSafeAreaInsets();
 />
 
 ```tsx
+<Input size="xs" placeholder="32 tall" />
 <Input size="sm" placeholder="40 tall" />
 <Input size="md" placeholder="48 tall" />
 <Input size="lg" placeholder="56 tall" />
+<Input size="xl" placeholder="64 tall" />
 ```
 
 ## API Reference

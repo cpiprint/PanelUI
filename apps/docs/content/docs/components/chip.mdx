@@ -1,6 +1,7 @@
 ---
 title: Chip
 description: Interactive pill — a filter, a tag, or a removable token.
+status: updated
 ---
 
 <Preview
@@ -168,9 +169,11 @@ const [people, setPeople] = useState(['Ada', 'Grace', 'Alan']);
 
 ### `size`
 
+- `xs`
 - `sm`
 - `md` *(default)*
 - `lg`
+- `xl`
 
 <Preview
   src="/previews/chip-size.jpg"
@@ -180,9 +183,11 @@ const [people, setPeople] = useState(['Ada', 'Grace', 'Alan']);
 />
 
 ```tsx
+<Chip size="xs">Extra small</Chip>
 <Chip size="sm">Small</Chip>
 <Chip size="md">Medium</Chip>
 <Chip size="lg">Large</Chip>
+<Chip size="xl">Extra large</Chip>
 ```
 
 ### `closable`

@@ -24,7 +24,7 @@
     }
   ],
   "variantCode": {
-    "size": "<Switch size=\"sm\" value={on} onValueChange={setOn} />\n<Switch size=\"md\" value={on} onValueChange={setOn} />"
+    "size": "<Switch size=\"xs\" value={on} onValueChange={setOn} />\n<Switch size=\"sm\" value={on} onValueChange={setOn} />\n<Switch size=\"md\" value={on} onValueChange={setOn} />\n<Switch size=\"lg\" value={on} onValueChange={setOn} />\n<Switch size=\"xl\" value={on} onValueChange={setOn} />"
   },
   "extraImports": [
     "Text"

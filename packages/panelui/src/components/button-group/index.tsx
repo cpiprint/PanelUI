@@ -82,6 +82,7 @@ const buttonGroupVariants = tv({
     /* Matched to the height the buttons will be, since a radius that suited a
        36pt run reads as a rectangle around a 48pt one. */
     size: {
+      xs: { root: 'rounded-md' },
       sm: { root: 'rounded-lg' },
       md: { root: 'rounded-xl' },
       lg: { root: 'rounded-xl' },

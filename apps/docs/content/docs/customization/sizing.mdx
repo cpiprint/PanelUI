@@ -1,0 +1,111 @@
+---
+title: Sizing
+description: The five sizes every control shares, what each one sets, and how the small ones stay easy to press.
+---
+
+Controls take a `size` of `xs`, `sm`, `md`, `lg` or `xl`. `md` is the default, so leaving the
+prop off gives a control the size it has always had.
+
+```tsx
+<Button size="sm">Save</Button>
+<Input size="lg" placeholder="Search" />
+<Select size="sm" value={value} onValueChange={setValue} placeholder="Status">
+  <Select.Item value="open" label="Open" />
+</Select>
+<Badge size="xs">Active</Badge>
+<Checkbox size="md" checked={done} onCheckedChange={setDone} label="Done" />
+<Tabs size="lg" defaultValue="day">…</Tabs>
+```
+
+## When to use each
+
+| Size | Use it for |
+| --- | --- |
+| `xs` | A row that is already dense: a table cell, a toolbar, a filter beside a heading |
+| `sm` | Secondary controls, and screens that have to fit a lot |
+| `md` | The default. Most forms and most screens |
+| `lg` | Forms filled in with a thumb, and the main control of a section |
+| `xl` | The one control a screen is built around |
+
+## What each size sets
+
+Figures are in points.
+
+| Component | `xs` | `sm` | `md` | `lg` | `xl` | Measured as |
+| --- | --- | --- | --- | --- | --- | --- |
+| [Button](/docs/components/button) | 28 | 36 | 44 | 48 | 56 | Minimum height |
+| [Toggle button](/docs/components/toggle-button) | 28 | 36 | 44 | 48 | 56 | Height |
+| [Input](/docs/components/input) | 32 | 40 | 48 | 56 | 64 | Height |
+| [Textarea](/docs/components/textarea) | 13 | 14 | 16 | 16 | 18 | Type size |
+| [Select](/docs/components/select) | 13 | 14 | 16 | 18 | 18 | Type size of the trigger |
+| [Chip](/docs/components/chip) | 20 | 24 | 28 | 36 | 44 | Height |
+| [Badge](/docs/components/badge) | 10 | 11 | 12 | 14 | 16 | Type size |
+| [Checkbox](/docs/components/checkbox) | 14 | 16 | 20 | 24 | 28 | The box |
+| [Radio group](/docs/components/radio-group) | 14 | 16 | 20 | 24 | 28 | The disc |
+| [Switch](/docs/components/switch) | 20 | 24 | 28 | 32 | 36 | Track height |
+| [Tabs](/docs/components/tabs) | 12 | 13 | 14 | 16 | 18 | Label type size |
+
+A size is a step on that component's own scale, not one number shared by all of them. An `sm`
+Button is 36 points tall and an `sm` Input is 40.
+
+To give two different controls the same height, set it with `className`, which wins over the
+size's own:
+
+```tsx
+<View className="flex-row gap-2">
+  <Input size="sm" containerClassName="flex-1" placeholder="Email" />
+  <Button size="sm" className="min-h-10">Invite</Button>
+</View>
+```
+
+## Sizes on a group
+
+`ButtonGroup`, `ToggleButton.Group`, `RadioGroup` and `Tabs` take `size` once and pass it to
+everything inside them. A button inside a `ButtonGroup` that sets its own `size` keeps it.
+
+```tsx
+<RadioGroup size="sm" value={plan} onValueChange={setPlan}>
+  <RadioGroup.Item value="free" label="Free" />
+  <RadioGroup.Item value="pro" label="Pro" />
+</RadioGroup>
+```
+
+## Touch targets
+
+Most small sizes are drawn small and pressed as though they were about 44 points:
+
+- **Button** and **Switch** extend their target past their own edges.
+- A **Toggle button** at `xs` does the same when it is not inside a group.
+- **Tabs** at `xs` and `sm`, and **Select** at `xs`, extend theirs above and below.
+- **Checkbox** and **Radio group** rows stay 48 points tall at every size. `size` changes the
+  box and the text, not the row.
+
+**Chip** and **Input** are only as large to press as they are drawn. An `xs` Chip is a 20-point
+target, so use `xs` and `sm` for chips that label something and `lg` or `xl` for ones that are
+pressed.
+
+The extended target has two limits:
+
+- It overlaps a neighbour that is closer than the extension. Leave at least 8 points between two
+  `xs` controls, or the one written later takes presses meant for the other.
+- On Android it cannot reach outside the control's parent view. A small control in a row exactly
+  as tall as itself gets no extra target there, so give the row some vertical padding.
+
+## Native controls
+
+A control handed to the platform with `native` is drawn by the platform, which has its own
+sizes.
+
+- **Button** maps `size` onto the platform's control sizes, `xs` being the smallest it offers
+  and `xl` the largest.
+- **Switch** and **Select** ignore `size` under `native`.
+
+## Components with sizes of their own
+
+Some components have a `size` that means something else, and they keep it:
+
+- [Bottom sheet](/docs/components/bottom-sheet) and `Select`'s `sheetProps.size` take `auto`,
+  `half` or `full`: how tall the sheet opens.
+- Charts take a `size` in points.
+- [Avatar](/docs/components/avatar) and the other components not listed above accept the sizes
+  on their own pages.

@@ -1,6 +1,7 @@
 ---
 title: Textarea
 description: Text field that runs to several lines, sized in rows.
+status: updated
 ---
 
 <Preview
@@ -235,14 +236,18 @@ const insets = useSafeAreaInsets();
 
 ### `size`
 
+- `xs`
 - `sm`
 - `md` *(default)*
 - `lg`
+- `xl`
 
 ```tsx
+<Textarea size="xs" rows={3} placeholder="13px type" />
 <Textarea size="sm" rows={3} placeholder="14px type" />
 <Textarea size="md" rows={3} placeholder="16px type" />
 <Textarea size="lg" rows={3} placeholder="16px type, roomier" />
+<Textarea size="xl" rows={3} placeholder="18px type" />
 ```
 
 ## API Reference

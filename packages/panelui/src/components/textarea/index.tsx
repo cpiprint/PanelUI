@@ -53,9 +53,11 @@ const FOCUS_DURATION = 150;
  * them here as well is what lets `rows` and `size` compose.
  */
 const METRICS = {
+  xs: { fontSize: 13, lineHeight: 18, padding: 8 },
   sm: { fontSize: 14, lineHeight: 20, padding: 10 },
   md: { fontSize: 16, lineHeight: 22, padding: 12 },
   lg: { fontSize: 16, lineHeight: 24, padding: 14 },
+  xl: { fontSize: 18, lineHeight: 26, padding: 16 },
 } as const;
 
 const textareaVariants = tv({
@@ -82,10 +84,14 @@ const textareaVariants = tv({
       outline: { field: 'bg-background' },
       filled: { field: 'bg-muted' },
     },
+    // The same horizontal padding and type size as Input at each step, so a
+    // one-line field and a multi-line one stacked in a form share an edge.
     size: {
+      xs: { field: 'px-2.5 text-[13px]' },
       sm: { field: 'px-3 text-[14px]' },
       md: { field: 'px-3.5 text-[16px]' },
       lg: { field: 'px-4 text-[16px]' },
+      xl: { field: 'px-5 text-[18px]' },
     },
     disabled: {
       true: { field: 'opacity-[0.64]' },

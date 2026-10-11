@@ -19,6 +19,7 @@ import { Badge } from 'panelui-native';
 
 ### Variants
 
+- **size** — `xs`, `sm`, `md` *(default)*, `lg`, `xl`
 - **shape** — `default` *(default)*, `dot`, `count`
 - **variant** — `default` *(default)*, `secondary`, `outline`, `destructive`, `success`, `warning`, `info`
 

@@ -1,6 +1,7 @@
 ---
 title: ToggleButton
 description: A button that stays down, on its own or in a group.
+status: updated
 ---
 
 <PreviewVideo
@@ -163,9 +164,11 @@ function Count() {
 
 ### `size`
 
+- `xs`
 - `sm`
 - `md` *(default)*
 - `lg`
+- `xl`
 
 <Preview
   src="/previews/toggle-button-size.jpg"
@@ -175,9 +178,11 @@ function Count() {
 />
 
 ```tsx
+<ToggleButton size="xs">Extra small</ToggleButton>
 <ToggleButton size="sm">Small</ToggleButton>
 <ToggleButton size="md">Medium</ToggleButton>
 <ToggleButton size="lg">Large</ToggleButton>
+<ToggleButton size="xl">Extra large</ToggleButton>
 ```
 
 ## API Reference

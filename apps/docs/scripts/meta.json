@@ -60,7 +60,8 @@
     "Compact status label, dot, or notification count.",
     "react native badge",
     {
-      "category": "feedback"
+      "category": "feedback",
+      "updatedIn": "0.109.0"
     }
   ],
   "bar-chart": [
@@ -110,7 +111,7 @@
     "Pressable action with variants, sizes, loading state and icon slots.",
     "react native button",
     {
-      "updatedIn": "0.107.0",
+      "updatedIn": "0.109.0",
       "category": "actions"
     }
   ],
@@ -120,7 +121,8 @@
     "react native button group segmented control split button",
     {
       "addedIn": "0.49.0",
-      "category": "actions"
+      "category": "actions",
+      "updatedIn": "0.109.0"
     }
   ],
   "card": [
@@ -157,7 +159,7 @@
     "Animated checkbox, as a row or a selectable card.",
     "react native checkbox",
     {
-      "updatedIn": "0.103.2",
+      "updatedIn": "0.109.0",
       "category": "forms"
     }
   ],
@@ -167,7 +169,8 @@
     "react native chip",
     {
       "addedIn": "0.13.0",
-      "category": "actions"
+      "category": "actions",
+      "updatedIn": "0.109.0"
     }
   ],
   "collapsible": [
@@ -356,7 +359,7 @@
     "Text field with label, description and error message.",
     "react native text input",
     {
-      "updatedIn": "0.75.0",
+      "updatedIn": "0.109.0",
       "category": "forms"
     }
   ],
@@ -604,7 +607,7 @@
     "react native radio button",
     {
       "category": "forms",
-      "updatedIn": "0.103.2"
+      "updatedIn": "0.109.0"
     }
   ],
   "rating": [
@@ -740,7 +743,7 @@
     "Picker shown in a bottom sheet, expanded in place, or floating over the page.",
     "expo select component",
     {
-      "updatedIn": "0.106.0",
+      "updatedIn": "0.109.0",
       "category": "forms"
     }
   ],
@@ -905,7 +908,7 @@
     "Animated on/off toggle.",
     "react native switch",
     {
-      "updatedIn": "0.65.0",
+      "updatedIn": "0.109.0",
       "category": "forms"
     }
   ],
@@ -924,7 +927,7 @@
     "Segmented navigation with an animated indicator.",
     "react native tabs",
     {
-      "updatedIn": "0.60.0",
+      "updatedIn": "0.109.0",
       "category": "navigation"
     }
   ],
@@ -954,7 +957,7 @@
     {
       "addedIn": "0.30.0",
       "category": "forms",
-      "updatedIn": "0.75.0"
+      "updatedIn": "0.109.0"
     }
   ],
   "time-picker": [
@@ -991,7 +994,8 @@
     "react native toggle button",
     {
       "addedIn": "0.11.0",
-      "category": "actions"
+      "category": "actions",
+      "updatedIn": "0.109.0"
     }
   ],
   "tooltip": [

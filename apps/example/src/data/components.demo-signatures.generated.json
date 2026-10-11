@@ -31,7 +31,7 @@
     },
     {
       "slug": "badge",
-      "signature": "b814e818e87474ef9a5a021060c951c5e7b6f4830e4509276f51d89d4ce8dc21"
+      "signature": "95e038e4525d0e27038bac7ae6523d942c247a486cd60a046209fd69794d03b5"
     },
     {
       "slug": "bar-chart",
@@ -55,11 +55,11 @@
     },
     {
       "slug": "button",
-      "signature": "1e49a50280522229be74ee5269c6fc9b8e8ad9ece32fd6fb28b1a5a0fd977d8a"
+      "signature": "23816aeead890293db44c83929c3a6664ac8f351c6c6c8971071b46a40bfb916"
     },
     {
       "slug": "button-group",
-      "signature": "1986dac2715f3393d06f01b18e512e1c8165fe19a491ea62cf211ad8045dd9c4"
+      "signature": "3e44cd4c1e91d765d5b23ca103a0156f2ce5c512e4eb6d872f9c2166afc7103f"
     },
     {
       "slug": "calendar",
@@ -79,11 +79,11 @@
     },
     {
       "slug": "checkbox",
-      "signature": "8557e213b7f4cf93e7ab518780ee7676c82e1ac713fd15abff9fa31444a8706e"
+      "signature": "67195df6476d91bd050b635e36924c07f35a9e2ae318e21509b10af8312aef64"
     },
     {
       "slug": "chip",
-      "signature": "0dd1c8abd320c9f83a513d5aa723d79eedc85dffccf03a26430a477f3b454545"
+      "signature": "419aa2b82acacf98c84818e20567840caa69891ac86e29b5a2cbc7cb40c3ba48"
     },
     {
       "slug": "circular-text",
@@ -195,7 +195,7 @@
     },
     {
       "slug": "input",
-      "signature": "bb262c1f5e676e5e91c933168b7df986d20b7ba85bd867bfc6935a64d1049b5f"
+      "signature": "614d4be7a258adcfe17a909f7970ece14c17fa27248fa0391eb99cd616b278fc"
     },
     {
       "slug": "input-group",
@@ -339,7 +339,7 @@
     },
     {
       "slug": "radio-group",
-      "signature": "8959f1339a36c2e8b0421a0763078f80515f23e59891d89e67512bef0c00e4c6"
+      "signature": "10c29cbed5fb4c1b0cb105ee4d087641257b3bd44c2718354a6da12e995ada44"
     },
     {
       "slug": "rating",
@@ -399,7 +399,7 @@
     },
     {
       "slug": "select",
-      "signature": "d73081f4f0335c94707ac005cfa0ded3e6231379aa47cd0f3222b2bf2a755c91"
+      "signature": "735dc69355a7f7efcbaf552b23a453fc6d3e11813984b244092079203091d43b"
     },
     {
       "slug": "selection-mode",
@@ -479,7 +479,7 @@
     },
     {
       "slug": "switch",
-      "signature": "344dc0bb21dc2da35dc13ce4e23e678849b807a72f4a62367b8549ae7bb886cd"
+      "signature": "141231366b7141f055520173d281e26dad52eadf502baf9abfaebe157c8463f4"
     },
     {
       "slug": "table",
@@ -487,7 +487,7 @@
     },
     {
       "slug": "tabs",
-      "signature": "5c06737786b4bd7be288a8726b4bf10fa6ce129e69bd9ffafd972cbc8c5a8c14"
+      "signature": "18d13fcf6ddf4492a11c925ead1a7c562af6a5f2d458003061e9313a7056733c"
     },
     {
       "slug": "tag-input",
@@ -503,7 +503,7 @@
     },
     {
       "slug": "textarea",
-      "signature": "7c2427d0c94a4c9f4b5243d80e4a2b2a9e2e6f153d755f80bd514a8ecf86de28"
+      "signature": "8565f32d682d9ad30922bfc3efdbd359927b4fe01c49134b363bc8d5f6f60c4c"
     },
     {
       "slug": "theme-selector",
@@ -527,7 +527,7 @@
     },
     {
       "slug": "toggle-button",
-      "signature": "bcd68d548edcb8fe0541137c59f754baacc392e134609c19dd397b84f28d3036"
+      "signature": "4ac64b9865caa79e4e7db14dcebffcc652dbfe7984170888d97c0ec0874ab8f0"
     },
     {
       "slug": "tooltip",

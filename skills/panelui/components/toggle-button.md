@@ -22,7 +22,7 @@ import { ToggleButton } from 'panelui-native';
 ### Variants
 
 - **variant** — `default` *(default)*, `ghost`
-- **size** — `sm`, `md` *(default)*, `lg`
+- **size** — `xs`, `sm`, `md` *(default)*, `lg`, `xl`
 - **selected** — `true`, `false`
 - **iconOnly** — `true`
 - **disabled** — `true`

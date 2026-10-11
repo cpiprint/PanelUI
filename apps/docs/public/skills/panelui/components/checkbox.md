@@ -29,6 +29,7 @@ import { Checkbox } from 'panelui-native';
 
 ### Variants
 
+- **size** — `xs`, `sm`, `md` *(default)*, `lg`, `xl`
 - **variant** — `default` *(default)*, `card`
 - **checked** — `true`
 - **disabled** — `true`

@@ -105,9 +105,15 @@ const inputVariants = tv({
        */
       // The content boxes take the field's own horizontal padding, so an icon
       // sits at exactly the inset the text would have started at.
+      //
+      // Eight points a step, 32 to 64. `xs` is for a field inside something
+      // else that is already compact, such as a table cell or a toolbar; `xl`
+      // is for the one field a screen is about, such as a search or an amount.
+      xs: { field: 'h-8 px-2.5 text-[13px]', startContent: 'px-2.5', endContent: 'px-2.5' },
       sm: { field: 'h-10 px-3 text-[14px]', startContent: 'px-3', endContent: 'px-3' },
       md: { field: 'h-12 px-3.5 text-[16px]', startContent: 'px-3.5', endContent: 'px-3.5' },
       lg: { field: 'h-14 px-4 text-[16px]', startContent: 'px-4', endContent: 'px-4' },
+      xl: { field: 'h-16 px-5 text-[18px]', startContent: 'px-5', endContent: 'px-5' },
     },
     multiline: {
       // A multiline field grows, so a fixed height would crop it. Text starts

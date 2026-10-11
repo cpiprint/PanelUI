@@ -104,7 +104,7 @@
     },
     {
       "title": "Three sizes",
-      "description": "`size` on the group is the size of every segment in it, and it sets the height, the padding and the type together so the joined edges still meet. A segment that names its own size wins, which is how the chevron on a split action stays square while the rest of the run is not.",
+      "description": "`size` on the group is the size of every segment in it, and it sets the height, the padding and the type together so the joined edges still meet. It takes every size a button does, `xs` to `xl`; three are shown here. A segment that names its own size wins, which is how the chevron on a split action stays square while the rest of the run is not.",
       "code": "{(['sm', 'md', 'lg'] as const).map((size) => (\n  <ButtonGroup key={size} size={size} variant=\"outline\">\n    <Button>Left</Button>\n    <Button>Middle</Button>\n    <Button>Right</Button>\n  </ButtonGroup>\n))}",
       "preview": {
         "src": "/previews/button-group-three-sizes.jpg",

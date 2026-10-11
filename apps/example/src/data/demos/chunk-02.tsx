@@ -1324,11 +1324,15 @@ export const ENTRIES: ComponentEntry[] = [
         label: 'Sizes',
         render: () => (
           <View className="items-center gap-3">
+            <Button size="xs" variant="outline">
+              Extra small
+            </Button>
             <Button size="sm" variant="outline">
               Small
             </Button>
             <Button>Medium</Button>
             <Button size="lg">Large</Button>
+            <Button size="xl">Extra large</Button>
             <Button disabled>Disabled</Button>
           </View>
         ),
@@ -1557,7 +1561,7 @@ export const ENTRIES: ComponentEntry[] = [
         label: 'Sizes',
         render: () => (
           <View className="w-full items-center gap-4">
-            {(['sm', 'md', 'lg'] as const).map((size) => (
+            {(['xs', 'sm', 'md', 'lg', 'xl'] as const).map((size) => (
               <ButtonGroup key={size} size={size} variant="outline">
                 <Button>Left</Button>
                 <Button>Middle</Button>
@@ -1611,6 +1615,18 @@ export const ENTRIES: ComponentEntry[] = [
             <Checkbox checked onCheckedChange={() => {}} label="Checked" />
             <Checkbox checked={false} onCheckedChange={() => {}} label="Unchecked" />
             <Checkbox checked disabled onCheckedChange={() => {}} label="Disabled" />
+          </View>
+        ),
+      },
+      {
+        label: 'Sizes',
+        render: () => (
+          <View className="gap-1">
+            <Checkbox size="xs" checked onCheckedChange={() => {}} label="Extra small" />
+            <Checkbox size="sm" checked onCheckedChange={() => {}} label="Small" />
+            <Checkbox size="md" checked onCheckedChange={() => {}} label="Medium" />
+            <Checkbox size="lg" checked onCheckedChange={() => {}} label="Large" />
+            <Checkbox size="xl" checked onCheckedChange={() => {}} label="Extra large" />
           </View>
         ),
       },

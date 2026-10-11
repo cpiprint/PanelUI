@@ -1,6 +1,7 @@
 ---
 title: Tabs
 description: Segmented navigation with an animated indicator.
+status: updated
 ---
 
 <PreviewVideo
@@ -235,6 +236,34 @@ A swipeable tab set needs a height to lay its strip out in — `flex-1` here, or
 </Tabs>
 ```
 
+### `size`
+
+- `xs`
+- `sm`
+- `md` *(default)*
+- `lg`
+- `xl`
+
+```tsx
+{/* Inside a card or a toolbar. */}
+<Tabs size="sm" defaultValue="day">
+  <Tabs.List>
+    <Tabs.Trigger value="day">Day</Tabs.Trigger>
+    <Tabs.Trigger value="week">Week</Tabs.Trigger>
+    <Tabs.Trigger value="month">Month</Tabs.Trigger>
+  </Tabs.List>
+</Tabs>
+
+{/* The main navigation of a screen. */}
+<Tabs size="lg" defaultValue="day">
+  <Tabs.List>
+    <Tabs.Trigger value="day">Day</Tabs.Trigger>
+    <Tabs.Trigger value="week">Week</Tabs.Trigger>
+    <Tabs.Trigger value="month">Month</Tabs.Trigger>
+  </Tabs.List>
+</Tabs>
+```
+
 ## API Reference
 
 ### Tabs
@@ -246,6 +275,7 @@ A swipeable tab set needs a height to lay its strip out in — `flex-1` here, or
 | `onValueChange` | `(value: string) => void` | — |  |
 | `defaultValue` | `string` | — |  |
 | `variant` | `TabsVariant` | `'segmented'` | `segmented` is a chip travelling inside a recessed track, `underline` is a rule under the active tab, `pill` is a filled chip on the page. `expanding` is a row of icon pills where only the selected one is open: it widens to let its label out and closes again behind it. For a short row of destinations that are recognisable by their icons, where the labels would otherwise take the whole width to say things nobody rereads. Give every trigger an `icon` — a closed tab has nothing else. |
+| `size` | `TabsSize` | `'md'` | How big the triggers and their labels are. `xs` and `sm` are for a tab set inside something else, such as a card or a toolbar; `lg` and `xl` are for one that is the main navigation of a screen. Icons and badges you pass are not resized. |
 | `keepMounted` | `TabsKeepMounted` | `false` | Mount every panel up front instead of only the ones that have been reached, so a scroll position or a half-filled form is there from the start rather than from the first visit. Usually unnecessary. A panel that has been shown once stays mounted for the life of the tab set either way, and with `swipeable` the panels on each side of the active one are mounted before you get to them. What this adds is the panels you have *not* been near — the fourth tab of four — which costs their render at startup and buys nothing until somebody opens them. Turn it on when a panel has to be live while it is off screen: a form that must validate as another tab is edited, a chart that has to be ready to print, a subscription that must not miss a message. |
 | `swipeable` | `boolean` | `false` | Move between tabs by dragging sideways on the panels, as well as by pressing the triggers. Off by default, because a panel is allowed to contain something that already wants a horizontal drag — a carousel, a slider, a row that swipes open — and the two cannot both have it. Turn it on for panels of ordinary scrolling content, where it is the gesture people try first. **It changes how the panels are laid out.** They go side by side in a strip that is as wide as all of them, and the tab set shows one panel of it at a time. So the panel on each side of the active one is built and sized before you swipe to it, which is what stops a heavy panel — a virtualised list, a chart — from stalling on the frame it becomes visible. **It needs a height to fill**, the same as any pager: `flex-1` on the tab set, or a fixed height. Without one the strip has no room to lay its panels out in, and a list inside a panel of no height renders no rows. In development the tab set says so rather than rendering nothing. |
 | `animation` | `TabsAnimation` | — | Turn the tab set's animations off — the indicator, the strip, and an expanding tab's reveal. For a screen that is already animating something more important, and as a blunt instrument on a device that cannot afford them. The system's own reduce-motion setting is honoured without this. |
@@ -338,4 +368,4 @@ The system's own reduce-motion setting is honoured without it.
 
 **Values:** `Tabs`
 
-**Types:** `TabsProps`, `TabsListProps`, `TabsTriggerProps`, `TabsContentProps`, `TabsVariant`, `TabsKeepMounted`, `TabsAnimation`
+**Types:** `TabsProps`, `TabsListProps`, `TabsTriggerProps`, `TabsContentProps`, `TabsVariant`, `TabsSize`, `TabsKeepMounted`, `TabsAnimation`

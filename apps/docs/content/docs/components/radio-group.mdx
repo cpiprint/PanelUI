@@ -1,6 +1,7 @@
 ---
 title: RadioGroup
 description: Single-select list of options.
+status: updated
 ---
 
 <PreviewVideo
@@ -162,6 +163,27 @@ const [speed, setSpeed] = useState("standard");
 
 ## Variants
 
+### `size`
+
+- `xs`
+- `sm`
+- `md` *(default)*
+- `lg`
+- `xl`
+
+```tsx
+{/* Set once on the group; every option follows it. */}
+<RadioGroup size="sm" value={plan} onValueChange={setPlan}>
+  <RadioGroup.Item value="free" label="Free" />
+  <RadioGroup.Item value="pro" label="Pro" />
+</RadioGroup>
+
+<RadioGroup size="lg" value={plan} onValueChange={setPlan}>
+  <RadioGroup.Item value="free" label="Free" />
+  <RadioGroup.Item value="pro" label="Pro" />
+</RadioGroup>
+```
+
 ### `variant`
 
 - `dot` *(default)*
@@ -188,6 +210,7 @@ const [speed, setSpeed] = useState("standard");
 | `onValueChange` | `(value: string) => void` | — |  |
 | `disabled` | `boolean` | — |  |
 | `variant` | `RadioVariant` | `dot` | `dot` is the label-beside-a-disc row. `card` makes the whole surface the target and highlights the selected option — for a plan picker or a settings choice where each option carries a description. |
+| `size` | `RadioSize` | `md` | How big every option's disc and label are. Set on the group rather than per option, because options of different sizes read as though one of them matters more. The row keeps a 48-point target at every size. |
 | `orientation` | `RadioOrientation` | `'vertical'` | `horizontal` lays the options out along a row that wraps — for two or three short choices, where a stacked list wastes the width and reads as longer than it is. |
 
 ### RadioGroup.Item
@@ -219,4 +242,4 @@ Pressing the already selected option is a no-op: `onValueChange` runs only when 
 
 **Values:** `RadioGroup`
 
-**Types:** `RadioGroupProps`, `RadioGroupItemProps`
+**Types:** `RadioGroupProps`, `RadioGroupItemProps`, `RadioSize`
