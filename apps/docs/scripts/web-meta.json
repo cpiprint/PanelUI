@@ -66,5 +66,15 @@
       "category": "data",
       "title": "Stat Strip"
     }
+  ],
+  "pill-stack": [
+    "PillStack",
+    "A stack of cards with one open and the rest folded to pills that taper away from it.",
+    "react stacked cards accordion pills component",
+    {
+      "addedIn": "0.1.0",
+      "category": "layout",
+      "title": "Pill Stack"
+    }
   ]
 }

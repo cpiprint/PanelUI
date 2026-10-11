@@ -56,6 +56,23 @@
       ]
     },
     {
+      "name": "pill-stack",
+      "type": "registry:component",
+      "title": "Pill Stack",
+      "description": "A stack of cards with one open and the rest folded to pills that taper away from it.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/pill-stack.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/pill-stack.tsx"
+        }
+      ]
+    },
+    {
       "name": "planet",
       "type": "registry:component",
       "title": "Planet",
