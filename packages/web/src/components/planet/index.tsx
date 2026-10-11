@@ -54,6 +54,7 @@ import {
   useState,
   type ComponentProps,
   type KeyboardEvent,
+  type MouseEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react';
@@ -87,6 +88,11 @@ const planetVariants = tv({
     // pin holds, and initials over a field of dots cannot be read.
     pin: 'relative flex size-8 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--pu-color)] bg-card text-card-foreground shadow-md ring-2 ring-background',
     dot: 'relative size-3.5 rounded-full border-2 border-background bg-[var(--pu-color)] shadow-md',
+    // A marker that can be pressed. The button has no box of its own, so the
+    // label above it is still placed from the marker and pressing either the
+    // label or the pin counts.
+    press:
+      'group/marker flex cursor-pointer flex-col items-center rounded-full outline-none [&>[data-pin]]:transition-[scale,box-shadow] [&>[data-pin]]:duration-200 hover:[&>[data-pin]]:scale-125 focus-visible:[&>[data-pin]]:ring-2 focus-visible:[&>[data-pin]]:ring-ring active:[&>[data-pin]]:scale-110',
     // A ring that spreads from the marker and fades, for one that wants
     // looking at. Still for anyone who has asked for reduced motion.
     pulse:
@@ -106,6 +112,14 @@ const planetVariants = tv({
       success: { globe: '[--pu-glow:var(--success)]' },
       warning: { globe: '[--pu-glow:var(--warning)]' },
       destructive: { globe: '[--pu-glow:var(--destructive)]' },
+    },
+    // The marker that has been picked: larger, with a ring of its own colour.
+    selected: {
+      true: {
+        dot: 'scale-125 shadow-[0_0_0_4px_color-mix(in_oklab,var(--pu-color)_35%,transparent)]',
+        pin: 'scale-110 shadow-[0_0_0_4px_color-mix(in_oklab,var(--pu-color)_35%,transparent)]',
+        marker: 'z-10',
+      },
     },
     color: {
       primary: { marker: '[--pu-color:var(--primary)]' },
@@ -323,7 +337,9 @@ function createEngine({ canvas, rotation, autoRotate, listeners, onSettle }: Eng
     halo.addColorStop(0, glow);
     halo.addColorStop(1, 'transparent');
     context.fillStyle = halo;
-    context.globalAlpha = 0.24;
+    // Faint on purpose. Any stronger and it washes over the land near the
+    // edge, which is where the dots are already at their quietest.
+    context.globalAlpha = 0.14;
     context.beginPath();
     context.arc(centre, centre, size / 2, 0, Math.PI * 2);
     context.arc(centre, centre, radius, 0, Math.PI * 2, true);
@@ -350,14 +366,6 @@ function createEngine({ canvas, rotation, autoRotate, listeners, onSettle }: Eng
     lit.addColorStop(1, 'transparent');
     context.fillStyle = lit;
     context.globalAlpha = 0.11;
-    context.fillRect(0, 0, size, size);
-    // The same light caught just inside the edge, which is what makes the
-    // disc read as a ball with air round it.
-    const rim = context.createRadialGradient(centre, centre, radius * 0.66, centre, centre, radius);
-    rim.addColorStop(0, 'transparent');
-    rim.addColorStop(1, glow);
-    context.fillStyle = rim;
-    context.globalAlpha = 0.2;
     context.fillRect(0, 0, size, size);
     context.restore();
 
@@ -825,7 +833,8 @@ PlanetGlobe.displayName = 'Planet.Globe';
 /** Which of the theme's roles a marker's dot is drawn in. */
 export type PlanetMarkerColor = 'primary' | 'info' | 'success' | 'warning' | 'destructive';
 
-export interface PlanetMarkerProps extends Omit<ComponentProps<'div'>, 'children' | 'color'> {
+export interface PlanetMarkerProps
+  extends Omit<ComponentProps<'div'>, 'children' | 'color' | 'onClick'> {
   /** Degrees north of the equator. South is negative. */
   lat: number;
   /** Degrees east of Greenwich. West is negative. */
@@ -838,6 +847,15 @@ export interface PlanetMarkerProps extends Omit<ComponentProps<'div'>, 'children
   color?: PlanetMarkerColor;
   /** Spreads a fading ring from the marker, for one that wants looking at. */
   pulse?: boolean;
+  /**
+   * Called when the marker is pressed. Passing this makes the marker a
+   * button: it takes focus, and Enter or Space press it.
+   */
+  onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
+  /** Draws the marker as the one that has been picked. */
+  selected?: boolean;
+  /** What a screen reader calls a marker that can be pressed. Defaults to its label. */
+  name?: string;
   /** Extra classes for the label. */
   labelClassName?: string;
   /** What is drawn at the coordinate: an avatar, an icon. A dot when left out. */
@@ -855,12 +873,15 @@ function PlanetMarker({
   count,
   color = 'primary',
   pulse = false,
+  onClick,
+  selected = false,
+  name,
   className,
   labelClassName,
   children,
   ...props
 }: PlanetMarkerProps) {
-  const slots = planetVariants({ color });
+  const slots = planetVariants({ color, selected });
   const planet = usePlanetContext('Planet.Marker');
   const element = useRef<HTMLDivElement>(null);
   const { subscribe } = planet;
@@ -877,14 +898,16 @@ function PlanetMarker({
         node.style.translate = `${x.toFixed(2)}px ${y.toFixed(2)}px`;
         node.style.opacity = shown.toFixed(3);
         node.style.pointerEvents = shown > 0.5 ? '' : 'none';
+        // A marker on the far side cannot be seen, so it cannot be tabbed to.
+        node.toggleAttribute('inert', shown <= 0.5);
         // Nearer the viewer is on top, as it would be on a real globe.
         node.style.zIndex = String(Math.round(depth * 100));
       }),
     [subscribe, lat, lng]
   );
 
-  return (
-    <div ref={element} data-planet-marker="" className={slots.marker({ className })} {...props}>
+  const body = (
+    <>
       {label !== undefined && label !== null ? (
         <span className={slots.label({ className: labelClassName })}>
           {label}
@@ -895,9 +918,33 @@ function PlanetMarker({
       ) : null}
       {pulse ? <span aria-hidden="true" className={slots.pulse()} /> : null}
       {children !== undefined && children !== null ? (
-        <span className={slots.pin()}>{children}</span>
+        <span data-pin="" className={slots.pin()}>
+          {children}
+        </span>
       ) : (
-        <span className={slots.dot()} />
+        <span data-pin="" className={slots.dot()} />
+      )}
+    </>
+  );
+
+  return (
+    <div ref={element} data-planet-marker="" className={slots.marker({ className })} {...props}>
+      {onClick ? (
+        <button
+          type="button"
+          aria-label={name ?? (typeof label === 'string' ? label : undefined)}
+          aria-pressed={selected}
+          className={slots.press()}
+          onClick={onClick}
+          // Kept from the globe, which would otherwise take the press as the
+          // start of a drag and the click would never arrive.
+          onPointerDown={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
+        >
+          {body}
+        </button>
+      ) : (
+        body
       )}
     </div>
   );
