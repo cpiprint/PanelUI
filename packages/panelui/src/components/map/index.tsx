@@ -18,6 +18,19 @@
  * </Map>
  * ```
  *
+ * Anything else drawn over the map goes in a `Map.Overlay`. It is pinned to an
+ * edge or a corner and tells the map how much room it takes, so a control
+ * stack in the same corner sits past it rather than underneath:
+ *
+ * ```tsx
+ * <Map center={[-0.12, 51.5]} zoom={11}>
+ *   <Map.Overlay position="bottom" safeArea>
+ *     <Card>…</Card>
+ *   </Map.Overlay>
+ *   <Map.Controls position="bottom-right" />
+ * </Map>
+ * ```
+ *
  * The renderer is native and optional, so `Map` has a state no other component
  * here does: it may be unable to draw at all. It says so in place rather than
  * throwing, because the usual way to reach that state is running in a client
@@ -37,13 +50,22 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useImperativeHandle,
   useMemo,
   useRef,
   useState,
   type ReactNode,
 } from 'react';
-import { Pressable, StyleSheet, View, type PressableProps, type ViewProps } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  type LayoutChangeEvent,
+  type PressableProps,
+  type ViewProps,
+} from 'react-native';
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { useCSSVariable } from 'uniwind';
 import { tv } from 'tailwind-variants';
 import {
@@ -80,6 +102,16 @@ import {
   type MapFeatureAccessibilityDescription,
 } from './map-accessibility';
 import { asMapLayer, partitionMapChildren } from './map-children';
+import {
+  controlsOffsets,
+  overlayOffsets,
+  overlayReservation,
+  reservedAt,
+  resolveMapInsets,
+  type MapOffsets,
+  type MapOverlayPosition,
+  type MapReservation,
+} from './map-insets';
 import { useNativeStyle } from './native-style';
 
 export { hasMapLibre, CARTO_SOURCE };
@@ -93,11 +125,16 @@ export type {
   ViewState,
 };
 export type { MapFeatureAccessibility } from './map-accessibility';
+export type { MapOverlayPosition } from './map-insets';
+
+/** The room `Map.Controls` and `Map.Overlay` leave between themselves and an edge. */
+const EDGE_GAP = 12;
 
 const mapVariants = tv({
   slots: {
     root: 'flex-1 overflow-hidden',
     controls: 'absolute gap-2',
+    overlay: 'absolute',
     // A control group is one surface split by hairlines rather than separate
     // buttons: at 36pt a gap between them reads as damage, not as spacing.
     group: 'overflow-hidden rounded-xl border border-border bg-card shadow-sm',
@@ -210,6 +247,33 @@ interface InternalMapContextValue extends MapContextValue {
 }
 
 const MapContext = createContext<InternalMapContextValue | null>(null);
+
+/**
+ * What the overlays have claimed, and how one claims it.
+ *
+ * Two contexts rather than a field on `MapContext`, because they change at
+ * different times. A claim changes whenever an overlay is laid out, and only
+ * the controls care; everything that reads `useMap()` for the camera would
+ * otherwise re-render each time a card above the map changed height.
+ */
+const MapReservationsContext = createContext<readonly MapReservation[]>([]);
+const MapReserveContext = createContext<
+  ((id: string, reservation: MapReservation | null) => void) | null
+>(null);
+
+const NO_SAFE_AREA = { top: 0, right: 0, bottom: 0, left: 0 };
+
+/**
+ * The device's safe-area insets, or zeros when nothing provides them.
+ *
+ * Read from the context rather than through the package's hook, which throws
+ * outside a provider. A map does not need one to draw, so asking for one would
+ * turn a prop most maps never set into a requirement for all of them.
+ */
+function useSafeArea(enabled: boolean) {
+  const insets = useContext(SafeAreaInsetsContext);
+  return enabled && insets ? insets : NO_SAFE_AREA;
+}
 
 /**
  * The map's camera and view state, from inside it.
@@ -386,6 +450,32 @@ const MapRoot = forwardRef<MapHandle, MapProps>(function MapRoot(
     []
   );
 
+  const [reservations, setReservations] = useState<
+    ReadonlyMap<string, MapReservation>
+  >(() => new globalThis.Map());
+
+  const reserve = useCallback((id: string, reservation: MapReservation | null) => {
+    setReservations((current) => {
+      const held = current.get(id);
+      // An overlay reports again whenever its insets are recomputed, usually
+      // with the figure it already gave. Keeping the old map when nothing
+      // moved is what stops that from re-rendering the controls.
+      if (
+        reservation
+          ? held?.position === reservation.position && held.extent === reservation.extent
+          : held === undefined
+      ) {
+        return current;
+      }
+      const next = new globalThis.Map(current);
+      if (reservation) next.set(id, reservation);
+      else next.delete(id);
+      return next;
+    });
+  }, []);
+
+  const reserved = useMemo(() => [...reservations.values()], [reservations]);
+
   // Every colour the style needs, resolved from the active theme. Hooks run
   // unconditionally, so they sit above the renderer check rather than inside it.
   const tokens: BasemapTokens = {
@@ -548,9 +638,13 @@ const MapRoot = forwardRef<MapHandle, MapProps>(function MapRoot(
           </MapLibreMap>
         ) : null}
         {overlay.length > 0 ? (
-          <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-            {textChildren(overlay)}
-          </View>
+          <MapReserveContext.Provider value={reserve}>
+            <MapReservationsContext.Provider value={reserved}>
+              <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+                {textChildren(overlay)}
+              </View>
+            </MapReservationsContext.Provider>
+          </MapReserveContext.Provider>
         ) : null}
         <View
           accessibilityRole="list"
@@ -814,6 +908,19 @@ asMapLayer(MapPopup);
 export interface MapControlsProps {
   /** Which corner the stack sits in. */
   position?: MapControlsPosition;
+  /**
+   * How far the stack sits from the map's edges, in points: one number for
+   * every side, or only the sides that need one. Defaults to 12. For chrome
+   * that floats over the map without being inside it, such as a translucent
+   * tab bar or a header.
+   */
+  inset?: number | ViewPadding;
+  /**
+   * Keep clear of the status bar and the home indicator, for a map that runs
+   * underneath them. Reads the insets from the nearest `SafeAreaProvider` and
+   * does nothing without one.
+   */
+  safeArea?: boolean;
   /** Zoom in and out. On by default — it is the one control a map always needs. */
   zoom?: boolean;
   /** Recentre on the device's location. Needs a location permission. */
@@ -862,6 +969,8 @@ function ControlButton({
  */
 function MapControls({
   position = 'bottom-right',
+  inset,
+  safeArea = false,
   zoom = true,
   locate = false,
   compass = false,
@@ -871,6 +980,24 @@ function MapControls({
 }: MapControlsProps) {
   const slots = mapVariants({ position });
   const { mapRef, cameraRef, recenter: returnToStart } = useMap();
+  const safeAreaInsets = useSafeArea(safeArea);
+  const reservations = useContext(MapReservationsContext);
+  const offsets = controlsOffsets(position, {
+    gap: EDGE_GAP,
+    inset: resolveMapInsets(inset, EDGE_GAP, safeAreaInsets),
+    reserved: reservedAt(position, reservations),
+  });
+  /*
+   * Only the sides that have actually moved are set here. The corner itself
+   * comes from the classes, so a stack that nothing has pushed is styled
+   * exactly as it was before any of this existed, and a `className` that
+   * repositions it still wins.
+   */
+  const moved: MapOffsets = {};
+  for (const side of ['top', 'right', 'bottom', 'left'] as const) {
+    const value = offsets[side];
+    if (value !== undefined && value !== EDGE_GAP) moved[side] = value;
+  }
   // Every glyph takes the theme's icon colour from here rather than from its
   // own default, which was chosen for wherever that icon first appeared — the
   // minus sign's is white, for a checked checkbox, and vanished on the card.
@@ -925,7 +1052,7 @@ function MapControls({
 
   return (
     <IconColorProvider color={iconTint}>
-      <View className={slots.controls({ className })}>
+      <View className={slots.controls({ className })} style={moved}>
         {zoom ? (
           <View className={slots.group()}>
             <ControlButton label="Zoom in" onPress={() => nudgeZoom(1)}>
@@ -963,6 +1090,88 @@ function MapControls({
   );
 }
 MapControls.displayName = 'Map.Controls';
+
+export interface MapOverlayProps extends Omit<ViewProps, 'children'> {
+  children?: ReactNode;
+  /**
+   * Where it is pinned: `top` or `bottom` for a band across the map between
+   * its insets, or a corner (`top-left`, `top-right`, `bottom-left`,
+   * `bottom-right`), which is as wide as what is inside it.
+   */
+  position?: MapOverlayPosition;
+  /**
+   * How far it sits from the map's edges, in points: one number for every
+   * side, or only the sides that need one. Defaults to 12. Pass `0` for a card
+   * that runs edge to edge.
+   */
+  inset?: number | ViewPadding;
+  /**
+   * Keep clear of the status bar and the home indicator, for a map that runs
+   * underneath them. Reads the insets from the nearest `SafeAreaProvider` and
+   * does nothing without one.
+   */
+  safeArea?: boolean;
+  className?: string;
+}
+
+/**
+ * A place for your own views over the map.
+ *
+ * Any view can already be a child of `Map` and positioned by hand. What this
+ * adds is that the map knows about it: it is measured, and a `Map.Controls`
+ * in the same corner moves past it. Without that each is positioned without
+ * knowing where the other is, and the card lands on the zoom buttons.
+ *
+ * The container itself takes no touches, so the map underneath still pans in
+ * the gaps around whatever is inside it.
+ */
+function MapOverlay({
+  position = 'bottom',
+  inset,
+  safeArea = false,
+  className,
+  style,
+  onLayout,
+  children,
+  ...props
+}: MapOverlayProps) {
+  const slots = mapVariants();
+  const id = useId();
+  const reserve = useContext(MapReserveContext);
+  const safeAreaInsets = useSafeArea(safeArea);
+  const insets = resolveMapInsets(inset, EDGE_GAP, safeAreaInsets);
+  const { top, right, bottom, left } = insets;
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    reserve?.(id, overlayReservation(position, { top, right, bottom, left }, height));
+  }, [reserve, id, position, top, right, bottom, left, height]);
+
+  // Its own effect, so the claim is given up once on unmount rather than
+  // dropped and re-made every time the card changes height.
+  useEffect(() => () => reserve?.(id, null), [reserve, id]);
+
+  const handleLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      setHeight(event.nativeEvent.layout.height);
+      onLayout?.(event);
+    },
+    [onLayout]
+  );
+
+  return (
+    <View
+      pointerEvents="box-none"
+      className={slots.overlay({ className })}
+      style={[overlayOffsets(position, insets), style]}
+      onLayout={handleLayout}
+      {...props}
+    >
+      {textChildren(children)}
+    </View>
+  );
+}
+MapOverlay.displayName = 'Map.Overlay';
 
 /** Turns a token into a colour a style layer can use. */
 function useLineColor(color?: string) {
@@ -1547,6 +1756,7 @@ export const Map = Object.assign(MapRoot, {
   Label: MapLabel,
   Popup: MapPopup,
   Controls: MapControls,
+  Overlay: MapOverlay,
   Route: MapRoute,
   Arc: MapArc,
   GeoJSON: MapGeoJSON,

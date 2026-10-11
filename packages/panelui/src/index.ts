@@ -346,6 +346,8 @@ export {
   type MapPopupProps,
   type MapControlsProps,
   type MapControlsPosition,
+  type MapOverlayProps,
+  type MapOverlayPosition,
   type MapRouteProps,
   type MapArcProps,
   type MapGeoJSONProps,

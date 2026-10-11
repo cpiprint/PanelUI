@@ -1,9 +1,9 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1419,
+    "exports": 1421,
     "values": 356,
-    "types": 1063,
+    "types": 1065,
     "modules": 165,
     "components": 138,
     "hooks": 13
@@ -2408,6 +2408,14 @@
           },
           {
             "name": "MapControlsPosition",
+            "kind": "type"
+          },
+          {
+            "name": "MapOverlayProps",
+            "kind": "type"
+          },
+          {
+            "name": "MapOverlayPosition",
             "kind": "type"
           },
           {

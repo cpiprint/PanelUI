@@ -5,7 +5,7 @@ import { Pressable, ScrollView, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { Avatar, Badge, BookmarkIcon, Button, Card, CheckIcon, Chip, CrosshairIcon, DownloadIcon, EllipsisIcon, Frame, InfoIcon, Input, Item, Kpi, Label, LineChart, Loader, LockIcon, MarkdownEditor, Marker, Marquee, Menu, Message, MessageCircleIcon, PackageIcon, PencilIcon, PlusSquareIcon, Post, Progress, RadarChart, RadioGroup, SearchIcon, Separator, ShareNodesIcon, ShieldCheckIcon, Surface, Switch, Tabs, Text, Tooltip, TrashIcon, type LineChartHandle, type LoaderVariant, type RadarChartDatum, useToast } from "panelui-native";
 import { useCSSVariable } from "uniwind";
-import { ChoroplethBlock, DeliveryTrackerBlock, HeatmapBlock, LogisticsNetworkBlock, PlacesBlock, StoreLocatorBlock, UptimeMonitorBlock } from "../../components/map-blocks";
+import { ChoroplethBlock, DeliveryTrackerBlock, HeatmapBlock, LogisticsNetworkBlock, PlacesBlock, RunSummaryBlock, StoreLocatorBlock, UptimeMonitorBlock } from "../../components/map-blocks";
 import type { ComponentEntry } from '../component-types';
 
 /* -------------------------------------------------------------------------- */
@@ -1664,6 +1664,14 @@ export const ENTRIES: ComponentEntry[] = [
         fullPage: true,
         description: 'Edge nodes coloured by state, spread across the world.',
         render: () => <UptimeMonitorBlock />,
+      },
+      {
+        label: 'Cards over the map',
+        id: 'overlays',
+        fullPage: true,
+        fullBleed: true,
+        description: 'Cards along the top and bottom, and controls that move past them.',
+        render: () => <RunSummaryBlock />,
       },
     ],
   },

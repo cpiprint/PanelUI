@@ -1,5 +1,5 @@
 /**
- * The Map blocks — seven worked screens, one per full-page demo.
+ * The Map blocks — eight worked screens, one per full-page demo.
  *
  * Each is a whole screen rather than a snippet, because that is the only
  * honest way to show a map: squeezed into a section between two dividers it
@@ -851,5 +851,142 @@ export function UptimeMonitorBlock() {
         </Frame.Panel>
       </Frame>
     </View>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* 8. Cards over the map                                                      */
+/* -------------------------------------------------------------------------- */
+
+/** The Thames Path along the south bank, Westminster Bridge to Tower Bridge. */
+const RUN: LngLat[] = [
+  [-0.1219, 51.5008], [-0.1196, 51.5033], [-0.1145, 51.5074], [-0.1085, 51.5083],
+  [-0.1042, 51.5082], [-0.0994, 51.5081], [-0.0943, 51.5079], [-0.088, 51.5069],
+  [-0.0813, 51.5066], [-0.0754, 51.5044],
+];
+const RUN_START = RUN[0]!;
+const RUN_END = RUN[RUN.length - 1]!;
+
+const RUN_FIGURES = [
+  { label: 'Distance', value: '3.6 km' },
+  { label: 'Time', value: '19:42' },
+  { label: 'Pace', value: '5:28 /km' },
+];
+
+/** Each row's `elapsed` is the running total, so the last one is the time above. */
+const RUN_SPLITS = [
+  { id: '1', stretch: 'Kilometre 1', pace: '5:41', elapsed: '5:41' },
+  { id: '2', stretch: 'Kilometre 2', pace: '5:30', elapsed: '11:11' },
+  { id: '3', stretch: 'Kilometre 3', pace: '5:22', elapsed: '16:33' },
+  { id: '4', stretch: 'Last 600 m', pace: '5:15', elapsed: '19:42' },
+];
+
+/**
+ * A map that is the whole screen, with a card along the top and another along
+ * the bottom, and a control stack in a corner each of them covers.
+ *
+ * Neither stack is positioned by hand. The cards are `Map.Overlay`s, so the map
+ * knows how much of each edge they take, and the controls sit past them.
+ * Opening the splits makes the bottom card taller and the zoom buttons move up
+ * with it, which is the part a fixed margin cannot do.
+ *
+ * `safeArea` is on both overlays because this demo is full-bleed: the map runs
+ * under the status bar and the home indicator, and the cards should not.
+ */
+export function RunSummaryBlock() {
+  const [splits, setSplits] = useState(false);
+
+  return (
+    <Map center={[-0.0986, 51.5052]} zoom={13.3}>
+      <Map.Route coordinates={RUN} width={5} />
+      <Map.Marker lngLat={RUN_START}>
+        <View className="h-4 w-4 rounded-full border-2 border-background bg-muted-foreground" />
+      </Map.Marker>
+      <Map.Marker lngLat={RUN_END}>
+        <View className="h-6 w-6 rounded-full border-[3px] border-background bg-primary shadow-md" />
+        <Map.Label side="top" size="sm" tone="primary">
+          Tower Bridge
+        </Map.Label>
+      </Map.Marker>
+
+      <Map.Overlay position="top" safeArea>
+        <Card>
+          <Card.Content className="gap-3 p-3">
+            <View className="flex-row items-center gap-2">
+              <Button
+                size="icon"
+                variant="ghost"
+                accessibilityLabel="Back"
+                onPress={() => router.back()}
+              >
+                <ChevronLeftIcon size={18} />
+              </Button>
+              <View className="min-w-0 flex-1">
+                <Text weight="semibold" numberOfLines={1}>
+                  Thames Path
+                </Text>
+                <Text size="xs" muted numberOfLines={1}>
+                  Tuesday 07:12 · Westminster to Tower Bridge
+                </Text>
+              </View>
+            </View>
+            <View className="flex-row px-2 pb-1">
+              {RUN_FIGURES.map((figure) => (
+                <View key={figure.label} className="flex-1 gap-0.5">
+                  <Text size="xs" muted>
+                    {figure.label}
+                  </Text>
+                  <Text weight="semibold">{figure.value}</Text>
+                </View>
+              ))}
+            </View>
+          </Card.Content>
+        </Card>
+      </Map.Overlay>
+
+      <Map.Overlay position="bottom" safeArea>
+        <Card>
+          <Card.Content className="gap-3 p-4">
+            <View className="flex-row items-center gap-3">
+              <View className="min-w-0 flex-1 gap-0.5">
+                <Text weight="medium">Splits</Text>
+                <Text size="xs" muted numberOfLines={1}>
+                  Fastest full kilometre 5:22
+                </Text>
+              </View>
+              <Button
+                size="sm"
+                variant="outline"
+                onPress={() => setSplits((current) => !current)}
+              >
+                {splits ? 'Hide' : 'Show'}
+              </Button>
+            </View>
+
+            {splits ? (
+              <View className="gap-2">
+                <Separator />
+                {RUN_SPLITS.map((split) => (
+                  <View key={split.id} className="flex-row items-center gap-3">
+                    <Text size="sm" className="min-w-0 flex-1" numberOfLines={1}>
+                      {split.stretch}
+                    </Text>
+                    <Text size="sm" weight="medium">
+                      {split.pace}
+                    </Text>
+                    <Text size="xs" muted className="w-12 text-right">
+                      {split.elapsed}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+          </Card.Content>
+        </Card>
+      </Map.Overlay>
+
+      <Map.Controls position="top-right" zoom={false} locate />
+      <Map.Controls position="bottom-right" recenter />
+    </Map>
   );
 }

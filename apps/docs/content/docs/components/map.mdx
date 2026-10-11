@@ -39,7 +39,7 @@ Without it `Map` renders a message saying so rather than throwing, so a screen t
 Map ships with the library — no separate install.
 
 ```tsx
-import { Map, Text, type LngLat, hasMapLibre, type MapHandle, Button } from 'panelui-native';
+import { Map, Text, type LngLat, hasMapLibre, type MapHandle, Button, Card } from 'panelui-native';
 ```
 
 Or copy the source into your project, to own and edit it:
@@ -75,6 +75,7 @@ npx panelui-cli@latest add map
   <Map.Cluster data={…} />
   <Map.Heatmap data={…} />
   <Map.UserLocation />
+  <Map.Overlay>…</Map.Overlay>
   <Map.Controls />
 </Map>
 ```
@@ -82,7 +83,8 @@ npx panelui-cli@latest add map
 - **`Map.Marker`** — A point drawn as React views, so it can hold anything the rest of the library can draw.
 - **`Map.Label`** — A caption pinned to a marker and always visible, unlike a popup. `size` and `tone` are for maps carrying a lot of them at once.
 - **`Map.Popup`** — A card anchored to a point — to the marker it sits inside, or to a coordinate of its own.
-- **`Map.Controls`** — Zoom, compass and locate, as themed views rather than the renderer's own ornaments.
+- **`Map.Controls`** — Zoom, compass and locate, as themed views rather than the renderer's own ornaments. `inset` and `safeArea` move the stack in from the map's edges.
+- **`Map.Overlay`** — A container for your own views over the map, pinned to the top, the bottom or a corner. The map measures it, and a `Map.Controls` in the same corner sits past it.
 - **`Map.Route`** — A path across the map, drawn as a style layer so its cost does not grow with its length.
 - **`Map.Arc`** — A curved connection between two points, bowed so arcs sharing an endpoint stay tellable apart.
 - **`Map.GeoJSON`** — Arbitrary geography as a themed layer. `fill` takes a style expression, which is what makes a choropleth one layer instead of one per bucket.
@@ -161,6 +163,46 @@ A route follows the ground; an arc does not pretend to. The bow on an arc is not
   {links.map((link) => (
     <Map.Arc key={link.id} id={link.id} from={link.from} to={link.to} />
   ))}
+</Map>
+```
+
+### Cards over a full-screen map
+
+Put a card over the map in a `Map.Overlay`. `top` and `bottom` span the map; a corner is as wide as its content. The overlay is measured, so a `Map.Controls` in a corner it covers sits 12 points past it and follows when the card changes height.
+
+`safeArea` keeps the card clear of the status bar and the home indicator on a map that runs under them. It needs a `SafeAreaProvider` above the map, which Expo Router supplies.
+
+`inset` is the distance from the map's edges, 12 by default. Pass `0` for a card that runs edge to edge, or one side to clear chrome that floats over the map from outside it, such as a tab bar.
+
+```tsx
+<Map center={[-0.0986, 51.5052]} zoom={13}>
+  <Map.Route coordinates={route} />
+
+  <Map.Overlay position="top" safeArea>
+    <Card>
+      <Card.Content>
+        <Text weight="semibold">Thames Path</Text>
+        <Text size="sm" muted>3.6 km · 19:42</Text>
+      </Card.Content>
+    </Card>
+  </Map.Overlay>
+
+  <Map.Overlay position="bottom" safeArea>
+    <Card>
+      <Card.Content>
+        <Text weight="medium">Splits</Text>
+      </Card.Content>
+    </Card>
+  </Map.Overlay>
+
+  {/* Each stack sits past the card on its corner. */}
+  <Map.Controls position="top-right" zoom={false} locate />
+  <Map.Controls position="bottom-right" recenter />
+</Map>
+
+{/* Clear a floating tab bar that is not a child of the map. */}
+<Map>
+  <Map.Controls inset={{ bottom: 96 }} />
 </Map>
 ```
 
@@ -402,6 +444,34 @@ Edge nodes coloured by state, spread across the world. A marker is a React view,
 </Map>
 ```
 
+### Cards over the map
+
+A card along the top and another along the bottom, each in a `Map.Overlay`. Opening the splits makes the bottom card taller, and the zoom buttons move up with it.
+
+```tsx
+<Map center={[-0.0986, 51.5052]} zoom={13.3}>
+  <Map.Route coordinates={run} width={5} />
+
+  <Map.Overlay position="top" safeArea>
+    <Card>…</Card>
+  </Map.Overlay>
+
+  <Map.Overlay position="bottom" safeArea>
+    <Card>
+      <Card.Content>
+        <Button size="sm" variant="outline" onPress={() => setSplits((open) => !open)}>
+          {splits ? 'Hide' : 'Show'}
+        </Button>
+        {splits ? <Splits /> : null}
+      </Card.Content>
+    </Card>
+  </Map.Overlay>
+
+  <Map.Controls position="top-right" zoom={false} locate />
+  <Map.Controls position="bottom-right" recenter />
+</Map>
+```
+
 ## API Reference
 
 ### Map
@@ -454,12 +524,23 @@ Edge nodes coloured by state, spread across the world. A marker is a React view,
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `position` | `MapControlsPosition` | `'bottom-right'` | Which corner the stack sits in. |
+| `inset` | `number \| ViewPadding` | — | How far the stack sits from the map's edges, in points: one number for every side, or only the sides that need one. Defaults to 12. For chrome that floats over the map without being inside it, such as a translucent tab bar or a header. |
+| `safeArea` | `boolean` | `false` | Keep clear of the status bar and the home indicator, for a map that runs underneath them. Reads the insets from the nearest `SafeAreaProvider` and does nothing without one. |
 | `zoom` | `boolean` | `true` | Zoom in and out. On by default — it is the one control a map always needs. |
 | `locate` | `boolean` | `false` | Recentre on the device's location. Needs a location permission. |
 | `compass` | `boolean` | `false` | Reset bearing and pitch to north and flat. |
 | `recenter` | `boolean` | `false` | Return to the view the map opened on — its `bounds`, or its `center` and `zoom`. The same move as `MapHandle.recenter()`. |
 | `className` | `string` | — |  |
 | `onLocate` | `(lngLat: LngLat) => void` | — | Called with the located coordinate, so a caller can react to it. |
+
+### Map.Overlay
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `position` | `MapOverlayPosition` | `'bottom'` | Where it is pinned: `top` or `bottom` for a band across the map between its insets, or a corner (`top-left`, `top-right`, `bottom-left`, `bottom-right`), which is as wide as what is inside it. |
+| `inset` | `number \| ViewPadding` | — | How far it sits from the map's edges, in points: one number for every side, or only the sides that need one. Defaults to 12. Pass `0` for a card that runs edge to edge. |
+| `safeArea` | `boolean` | `false` | Keep clear of the status bar and the home indicator, for a map that runs underneath them. Reads the insets from the nearest `SafeAreaProvider` and does nothing without one. |
+| `className` | `string` | — |  |
 
 ### Map.Route
 
@@ -550,9 +631,21 @@ Pass `mapStyle` to skip all of it and use a style wholesale, for a map that has 
 
 ### Controls and anything else you draw over the map
 
-`Map.Controls` — and any view of your own written as a child of `Map` — is drawn above the map rather than inside the renderer. The renderer's own view lays its children out itself, so a view handed to it arrives stretched to the full size of the map and covering it. Splitting them means `position` lands where it says it does, and a control group written to sit in a corner sits in that corner.
+`Map.Controls`, `Map.Overlay` and any view of your own written as a child of `Map` are drawn above the map rather than inside the renderer. The renderer's own view lays its children out itself, so a view handed to it arrives stretched to the full size of the map and covering it.
 
-What that leaves for you: put layers — `Map.Marker`, `Map.Route`, `Map.Arc`, `Map.GeoJSON`, `Map.Cluster`, `Map.Heatmap`, `Map.UserLocation` — inside `Map` and they reach the renderer. Everything else inside `Map` floats over it, positioned by your own classes, with touches passing through wherever it is not drawing.
+Put layers inside `Map` and they reach the renderer: `Map.Marker`, `Map.Route`, `Map.Arc`, `Map.GeoJSON`, `Map.Cluster`, `Map.Heatmap` and `Map.UserLocation`. Everything else inside `Map` floats over it, with touches passing through wherever it is not drawing.
+
+A view you position with your own classes is invisible to the controls, and a card placed in a corner covers the stack that was there. Wrap it in `Map.Overlay` instead. The controls then sit past it:
+
+| Prop | On | What it does |
+| --- | --- | --- |
+| `position` | `Map.Overlay` | `top` or `bottom` for a band across the map, or one of the four corners. |
+| `inset` | both | Distance from the map's edges, in points. One number, or `{ top, right, bottom, left }`. 12 by default. |
+| `safeArea` | both | Adds the device's safe-area insets, for a map under the status bar or the home indicator. |
+
+An overlay only moves controls in a corner it covers. A card at `top-left` leaves a stack at `top-right` where it is.
+
+`inset` and `safeArea` leave the camera alone. The centre of the map is still the centre of the view, so a point you fly to can land under a card. Pass per-side `padding` to `fitBounds` to frame a box clear of them.
 
 ### Moving the map from code
 
@@ -583,4 +676,4 @@ What that does not solve is a map with a dozen of them. `size="sm"` tightens the
 
 **Values:** `Map`, `useMap`, `hasMapLibre`, `CARTO_SOURCE`
 
-**Types:** `MapProps`, `MapHandle`, `MapFitBoundsOptions`, `MapMarkerProps`, `MapLabelProps`, `MapPopupProps`, `MapControlsProps`, `MapControlsPosition`, `MapRouteProps`, `MapArcProps`, `MapGeoJSONProps`, `MapClusterProps`, `MapFeatureAccessibility`, `MapHeatmapProps`, `MapUserLocationProps`, `BasemapSource`, `BasemapTokens`, `LngLat`, `LngLatBounds`, `ViewPadding`, `ViewState`
+**Types:** `MapProps`, `MapHandle`, `MapFitBoundsOptions`, `MapMarkerProps`, `MapLabelProps`, `MapPopupProps`, `MapControlsProps`, `MapControlsPosition`, `MapOverlayProps`, `MapOverlayPosition`, `MapRouteProps`, `MapArcProps`, `MapGeoJSONProps`, `MapClusterProps`, `MapFeatureAccessibility`, `MapHeatmapProps`, `MapUserLocationProps`, `BasemapSource`, `BasemapTokens`, `LngLat`, `LngLatBounds`, `ViewPadding`, `ViewState`
