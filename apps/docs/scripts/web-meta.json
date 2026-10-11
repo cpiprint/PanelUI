@@ -46,5 +46,15 @@
       "category": "data",
       "title": "Range Meter"
     }
+  ],
+  "forecast-bars": [
+    "ForecastBars",
+    "A short run of values as capsule bars, one of them picked.",
+    "react bar chart week selector capsule bars component",
+    {
+      "addedIn": "0.1.0",
+      "category": "data",
+      "title": "Forecast Bars"
+    }
   ]
 }

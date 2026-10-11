@@ -43,3 +43,4 @@ export {
   type ActivityLevel,
 } from './components/activity-grid';
 export { RangeMeter, type RangeMeterProps } from './components/range-meter';
+export { ForecastBars, type ForecastBarsProps, type ForecastBar } from './components/forecast-bars';

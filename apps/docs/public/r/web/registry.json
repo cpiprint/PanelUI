@@ -39,6 +39,23 @@
       ]
     },
     {
+      "name": "forecast-bars",
+      "type": "registry:component",
+      "title": "Forecast Bars",
+      "description": "A short run of values as capsule bars, one of them picked.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/forecast-bars.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/forecast-bars.tsx"
+        }
+      ]
+    },
+    {
       "name": "planet",
       "type": "registry:component",
       "title": "Planet",

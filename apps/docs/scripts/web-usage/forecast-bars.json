@@ -1,0 +1,21 @@
+{
+  "slug": "forecast-bars",
+  "demo": "energy",
+  "demoOptions": {
+    "height": 400
+  },
+  "extraImports": [
+    "type ForecastBar"
+  ],
+  "intro": "Use it for a handful of values where one is in focus: a week of forecasts with today picked, six months with the current one picked. Pressing a bar picks it, and you show that bar's figure beside the row.\n\nIt behaves as a row of radio buttons, so exactly one bar is always picked.\n\nSeven bars this size cannot be compared to the percent. For values someone has to read precisely, or for more than about twelve of them, use a chart with an axis.",
+  "usage": "const week: ForecastBar[] = [\n  { label: 'S', name: 'Sunday', value: 22 },\n  { label: 'M', name: 'Monday', value: 41 },\n  { label: 'T', name: 'Tuesday', value: 14 },\n]\n\n<ForecastBars data={week} max={100} value={day} onValueChange={setDay} />",
+  "examples": [
+    {
+      "title": "Its own scale",
+      "description": "Without `max` the tallest bar fills its track and the rest are drawn against it. `defaultValue` picks a bar to begin with and lets the component hold the choice.",
+      "demo": "months",
+      "height": 300
+    }
+  ],
+  "notes": "### Scale\n\nA bar's height is its value divided by `max`, measured from the bottom of its track. Set `max` when the values share a known ceiling, such as 100 for a percentage. Leave it out to scale to the largest value in `data`.\n\nThe scale always starts at zero. A value above `max` fills the track and goes no further.\n\n### Labels\n\n`label` is drawn under the bar and should be short. `name` is the long form a screen reader is given, with the value: \"Thursday: 78 percent\". Use `formatValue` to say the unit.\n\n### Keyboard\n\nThe row is one Tab stop. Left and right move the pick and wrap at the ends, Home and End go to the first and last bar.\n\n### Motion\n\nThe bars grow from empty when the component mounts, and a bar changes height smoothly when its value changes. With reduced motion on, both happen at once.\n\n### Colour\n\nThe picked bar is the accent at full strength and the others are the same gradient, dimmed. Set `--panelui-accent` to change it."
+}
