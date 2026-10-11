@@ -1,0 +1,12 @@
+{
+  "rolling-number": [
+    "RollingNumber",
+    "A number whose digits roll to their new values.",
+    "react rolling number animated counter",
+    {
+      "addedIn": "0.1.0",
+      "category": "data",
+      "title": "Rolling Number"
+    }
+  ]
+}

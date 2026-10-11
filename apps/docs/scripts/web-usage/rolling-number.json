@@ -1,0 +1,30 @@
+{
+  "slug": "rolling-number",
+  "demo": "counter",
+  "demoOptions": {
+    "height": 260
+  },
+  "intro": "Use it for a figure that changes while someone is looking at it: a live count, a balance, a score. Each digit rolls to its new value on its own, so going from 124 to 121 moves one column and leaves the other two where they were.\n\nThe number is written by `Intl.NumberFormat`. Currency, percent and compact notation are options you pass, not strings you build.\n\nFor a number that is shown once and never changes, plain text does the same job.",
+  "usage": "<RollingNumber value={events} />",
+  "examples": [
+    {
+      "title": "Currency",
+      "description": "`format` takes what `Intl.NumberFormat` takes. The currency sign and the separators stay where they are while the digits roll.",
+      "demo": "currency",
+      "height": 280
+    },
+    {
+      "title": "Percent and compact",
+      "description": "Three figures in three notations, changed together. Compact notation keeps a large number short: 46,200 is written `$46.2K`.",
+      "demo": "formats",
+      "height": 280
+    },
+    {
+      "title": "A slower roll",
+      "description": "`duration` is how long one digit takes to arrive, in milliseconds. It is 600 unless you set it.",
+      "demo": "slow",
+      "height": 280
+    }
+  ],
+  "notes": "### Width\n\nThe digits are set in tabular figures, so a 1 is as wide as an 8 and the number keeps its width while it rolls. It does get wider when it gains a digit, as 99 does on its way to 100. Give it room, or a fixed width, where something sits beside it.\n\n### Server rendering\n\n`locales` defaults to `en-US`, not to the browser's locale. A page rendered on a server would otherwise write the number one way and the browser another, and React reports that as a hydration mismatch. Pass the locale you want written.\n\n### Reduced motion\n\nWith the system's reduce-motion setting on, a digit changes without rolling.\n\n### Screen readers\n\nA screen reader is given the formatted number once, as text. The rolling columns are hidden from it, so it does not read ten digits per column."
+}

@@ -1,0 +1,12 @@
+{
+  "title": "Web",
+  "description": "Components for React, built on shadcn",
+  "root": true,
+  "pages": [
+    "---Get started---",
+    "index",
+    "installation",
+    "---Components---",
+    "...components"
+  ]
+}

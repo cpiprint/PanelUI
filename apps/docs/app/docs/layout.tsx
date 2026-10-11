@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
+import { DocsPlatformTabs } from '@/components/docs-platform-tabs';
 import { PLATFORM_SCRIPT } from '@/components/platform-toggle';
 import { baseOptions } from '@/app/layout.config';
 import { source } from '@/lib/source';
@@ -28,7 +29,15 @@ export default function Layout({ children }: { children: ReactNode }) {
        * fetched again for each context it renders in. It was two thirds of
        * the site's request volume.
        */
-      sidebar={{ collapsible: false, prefetch: false }}
+      sidebar={{ collapsible: false, prefetch: false, banner: <DocsPlatformTabs /> }}
+      /*
+       * The web collection is a root folder, which Fumadocs would otherwise
+       * offer as a tab of its own in the navbar. The switch in the sidebar is
+       * that control here, and it lists both sides, where the generated tabs
+       * would list only the folder: the app's pages are the rest of the tree,
+       * not a folder anything could point at.
+       */
+      tabs={false}
       tabMode="navbar"
     >
       {/*

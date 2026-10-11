@@ -1,0 +1,72 @@
+---
+title: Astro
+description: Add PanelUI web components to an Astro site with React.
+---
+
+For an Astro site with the React integration. The components are React, so they run as islands.
+
+## A new project
+
+<Steps>
+
+<Step>
+
+### Create the project
+
+The shadcn CLI creates the app, sets up Tailwind CSS and writes the theme tokens in one go:
+
+<InstallTabs kind="dlx" packages="shadcn@latest init -t astro" />
+
+</Step>
+
+<Step>
+
+### Add a component
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/rolling-number.json" />
+
+The source is written to `components/panelui/rolling-number.tsx`, and the packages it uses are
+installed for you.
+
+</Step>
+
+<Step>
+
+### Use it
+
+```astro title="src/pages/index.astro"
+---
+import Layout from "@/layouts/main.astro"
+import { RollingNumber } from "@/components/panelui/rolling-number"
+---
+
+<Layout>
+  <main class="flex min-h-svh items-center justify-center">
+    <RollingNumber client:load value={121} className="text-6xl font-semibold" />
+  </main>
+</Layout>
+```
+
+</Step>
+
+</Steps>
+
+## An existing project
+
+The project needs the React integration and Tailwind CSS. Add React with `npx astro add react` if it is missing. Then:
+
+<InstallTabs kind="dlx" packages="shadcn@latest init" />
+
+Then add a component as in the steps above.
+
+## Islands
+
+Astro renders a React component to HTML and sends no JavaScript for it unless told to. A
+component that animates or responds to the pointer needs a `client:` directive: `client:load`
+to start at once, or `client:visible` to wait until it is scrolled into view. Without one it is
+drawn once and never moves.
+
+## From npm
+
+To install the package instead of copying source, follow
+[From npm](/docs/web/installation#from-npm) once the project has its shadcn theme.

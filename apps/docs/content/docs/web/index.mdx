@@ -1,0 +1,47 @@
+---
+title: Introduction
+description: PanelUI for the web is a collection of animated, data-rich React components built on shadcn. Copy one into your project or install the package.
+---
+
+The web collection is a set of React components for dashboards and product pages: a globe that
+turns under the pointer, numbers that roll to their new value, cards that react to the cursor.
+
+They are styled with Tailwind CSS on the theme tokens a shadcn project already defines, so a
+component takes your colours and your radius without any configuration of its own.
+
+<Callout title="This is not the app library">
+  `panelui-native` is for Expo and React Native, and has its own components and its own
+  installation. These are for React in a browser. Use the **App** tab at the top of the sidebar
+  for the app library.
+</Callout>
+
+## What you need
+
+- **React 18** or newer.
+- **Tailwind CSS 4**.
+- **A project set up with shadcn**, which gives you the theme tokens and a `components.json`.
+  [Installation](/docs/web/installation) covers this for each framework.
+
+## Two ways to add a component
+
+**Copy it into your project** with the shadcn CLI. The source lands in `components/panelui/`,
+and from then on it is your file:
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/rolling-number.json" />
+
+**Or install the package** and import from it:
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Both come from the same source, so a component looks and behaves the same either way. Copy a
+component when you expect to change it. Install the package when you would rather get fixes by
+upgrading.
+
+<Cards>
+  <Card title="Installation" href="/docs/web/installation">
+    Set up a new or existing project, by framework.
+  </Card>
+  <Card title="Components" href="/docs/web/components">
+    Every component, running, with its source.
+  </Card>
+</Cards>

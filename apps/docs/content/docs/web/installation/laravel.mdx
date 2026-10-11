@@ -1,0 +1,68 @@
+---
+title: Laravel
+description: Add PanelUI web components to a Laravel app with the React starter kit.
+---
+
+For Laravel with Inertia and React.
+
+## A new project
+
+<Steps>
+
+<Step>
+
+### Create the project
+
+Create the app with the React starter kit, then run the shadcn CLI inside it:
+
+```bash
+laravel new my-app
+```
+
+<InstallTabs kind="dlx" packages="shadcn@latest init" />
+
+</Step>
+
+<Step>
+
+### Add a component
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/rolling-number.json" />
+
+The source is written to `components/panelui/rolling-number.tsx`, and the packages it uses are
+installed for you.
+
+</Step>
+
+<Step>
+
+### Use it
+
+```tsx title="resources/js/pages/index.tsx"
+import { RollingNumber } from "@/components/panelui/rolling-number"
+
+export default function Index() {
+  return (
+    <main className="flex min-h-svh items-center justify-center">
+      <RollingNumber value={121} className="text-6xl font-semibold" />
+    </main>
+  )
+}
+```
+
+</Step>
+
+</Steps>
+
+## An existing project
+
+Run the CLI in the project. It adds the theme tokens to your CSS and writes `components.json`:
+
+<InstallTabs kind="dlx" packages="shadcn@latest init" />
+
+Then add a component as in the steps above.
+
+## From npm
+
+To install the package instead of copying source, follow
+[From npm](/docs/web/installation#from-npm) once the project has its shadcn theme.

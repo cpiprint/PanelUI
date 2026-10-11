@@ -1,0 +1,74 @@
+---
+title: Installation
+description: Add PanelUI's web components to a React project, from the registry with one command or as an npm package.
+---
+
+The web collection is built on shadcn. A project needs **Tailwind CSS 4** and the **shadcn theme
+tokens**. After that, a component is one command.
+
+## Choose your framework
+
+Each guide starts from nothing and ends with a component on the page. If your project already
+uses shadcn, skip to [Add a component](#add-a-component).
+
+<FrameworkGrid />
+
+## Add a component
+
+In a project that already has a `components.json`, copy any component in with the shadcn CLI:
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/rolling-number.json" />
+
+The CLI writes the source to `components/panelui/`, installs the packages it uses, and adds any
+other PanelUI component it is built on. Import it from there:
+
+```tsx
+import { RollingNumber } from "@/components/panelui/rolling-number"
+```
+
+The address of every component is on its own page, under **Installation**.
+
+### A shorter address
+
+Register the collection once in `components.json` and the CLI takes a name instead of a URL:
+
+```json title="components.json"
+{
+  "registries": {
+    "@panelui": "https://panelui.dev/r/web/{name}.json"
+  }
+}
+```
+
+<InstallTabs kind="dlx" packages="shadcn@latest add @panelui/rolling-number" />
+
+## From npm
+
+Install the package instead of copying source, and upgrade it like any other dependency:
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Tailwind only compiles the classes it can see, and it does not look inside `node_modules`. Point
+it at the package once, in the CSS file that imports Tailwind:
+
+```css title="app/globals.css"
+@import "tailwindcss";
+@source "../node_modules/panelui-web/dist";
+```
+
+The path is relative to the CSS file. Then import each component from its own entry:
+
+```tsx
+import { RollingNumber } from "panelui-web/rolling-number"
+```
+
+The package still needs the shadcn theme tokens, so run `shadcn init` in the project first. If a
+component renders unstyled, the `@source` line is missing or points at the wrong folder.
+
+## Without shadcn
+
+The components need these CSS variables and nothing else from shadcn: `--background`,
+`--foreground`, `--card`, `--popover`, `--primary`, `--secondary`, `--muted`, `--accent`,
+`--border`, `--input` and `--ring`, with the `-foreground` partner of each surface. Define them
+yourself and map them into Tailwind's theme, and the components work in a project that has never
+run the CLI. [Manual installation](/docs/web/installation/manual) shows the whole block.

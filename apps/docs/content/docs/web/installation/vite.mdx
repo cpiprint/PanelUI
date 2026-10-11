@@ -1,0 +1,64 @@
+---
+title: Vite
+description: Add PanelUI web components to a Vite and React app.
+---
+
+For a single-page React app built with Vite.
+
+## A new project
+
+<Steps>
+
+<Step>
+
+### Create the project
+
+The shadcn CLI creates the app, sets up Tailwind CSS and writes the theme tokens in one go:
+
+<InstallTabs kind="dlx" packages="shadcn@latest init -t vite" />
+
+</Step>
+
+<Step>
+
+### Add a component
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/rolling-number.json" />
+
+The source is written to `components/panelui/rolling-number.tsx`, and the packages it uses are
+installed for you.
+
+</Step>
+
+<Step>
+
+### Use it
+
+```tsx title="src/App.tsx"
+import { RollingNumber } from "@/components/panelui/rolling-number"
+
+export default function App() {
+  return (
+    <main className="flex min-h-svh items-center justify-center">
+      <RollingNumber value={121} className="text-6xl font-semibold" />
+    </main>
+  )
+}
+```
+
+</Step>
+
+</Steps>
+
+## An existing project
+
+A Vite project needs Tailwind CSS and the `@` import alias before the CLI can run. If yours has neither, start from the template above, or set them up as the Tailwind and Vite documentation describe. Then:
+
+<InstallTabs kind="dlx" packages="shadcn@latest init" />
+
+Then add a component as in the steps above.
+
+## From npm
+
+To install the package instead of copying source, follow
+[From npm](/docs/web/installation#from-npm) once the project has its shadcn theme.

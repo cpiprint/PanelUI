@@ -1,0 +1,440 @@
+---
+title: Rolling Number
+description: A number whose digits roll to their new values.
+status: new
+---
+
+<ComponentPreview name="rolling-number/counter" height={260}>
+
+```tsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import { RollingNumber } from '@/components/panelui/rolling-number';
+
+/** What a live count does over a minute: it wanders. */
+const READINGS = [124, 121, 133, 129, 140, 136];
+
+export default function RollingNumberCounter() {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setStep((current) => (current + 1) % READINGS.length);
+    }, 2200);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-sm text-muted-foreground">Events</span>
+      <RollingNumber
+        value={READINGS[step]}
+        className="text-6xl font-semibold tracking-tight"
+      />
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it for a figure that changes while someone is looking at it: a live count, a balance, a score. Each digit rolls to its new value on its own, so going from 124 to 121 moves one column and leaves the other two where they were.
+
+The number is written by `Intl.NumberFormat`. Currency, percent and compact notation are options you pass, not strings you build.
+
+For a number that is shown once and never changes, plain text does the same job.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/rolling-number.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/rolling-number` instead of `@/components/panelui/rolling-number`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy this into `components/panelui/rolling-number.tsx`:
+
+```tsx title="components/panelui/rolling-number.tsx"
+'use client';
+
+/**
+ * RollingNumber — a number whose digits roll to their new values.
+ *
+ * ```tsx
+ * <RollingNumber value={events} />
+ * <RollingNumber value={balance} format={{ style: 'currency', currency: 'USD' }} />
+ * ```
+ *
+ * Every digit is a column of ten, and the column is moved by a share of its
+ * own height. Nothing is measured: one hidden `0` in flow gives the column the
+ * width and the line box the font really has, and the ten digits stacked over
+ * it are each exactly that tall, so `translateY(-30%)` is the 3 whatever the
+ * type size turns out to be.
+ *
+ * That hidden `0` is also why the number sits on the text's baseline. A box
+ * that clips its overflow takes its bottom edge as its baseline, which would
+ * lift every digit above the words beside it. Here the clipping is done by an
+ * absolutely positioned window inside the column, and the column's baseline
+ * is still the `0`'s.
+ *
+ * The columns are keyed from the decimal point outwards. Going from 99 to 100
+ * adds a hundreds column rather than re-labelling the two that were there, so
+ * the nines roll to zeroes instead of being replaced by them.
+ */
+import { useMemo, type ComponentProps } from 'react';
+import { tv } from 'tailwind-variants';
+
+const rollingNumberVariants = tv({
+  slots: {
+    // `tabular-nums` so a 1 is as wide as an 8 and the number does not change
+    // width, and shove whatever is beside it, while it rolls.
+    root: 'inline-flex items-baseline tabular-nums',
+    column: 'relative inline-block',
+    window: 'absolute inset-0 overflow-hidden',
+    strip:
+      'absolute inset-x-0 top-0 block h-[1000%] transition-transform ease-[cubic-bezier(0.2,0,0,1)] will-change-transform motion-reduce:transition-none',
+    digit: 'block h-[10%] text-center',
+  },
+});
+
+const DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] as const;
+
+export interface RollingNumberProps extends Omit<ComponentProps<'span'>, 'children'> {
+  /** The number to show. Each digit rolls to its new value on its own. */
+  value: number;
+  /**
+   * How the number is written: currency, percent, compact notation, how many
+   * decimals. Passed to `Intl.NumberFormat`.
+   */
+  format?: Intl.NumberFormatOptions;
+  /**
+   * The locale the number is written in. Defaults to `en-US` rather than the
+   * browser's, so a page rendered on a server writes the same thing the
+   * browser then does.
+   */
+  locales?: Intl.LocalesArgument;
+  /** How long a digit takes to roll, in milliseconds. */
+  duration?: number;
+}
+
+interface Piece {
+  key: string;
+  /** A digit to roll to, or `null` for a character that is just written. */
+  digit: number | null;
+  text: string;
+}
+
+/** Splits a formatted number into rolling digits and the characters around them. */
+function piecesOf(parts: Intl.NumberFormatPart[]): Piece[] {
+  // Whole digits are counted from the decimal point, so the units column is
+  // the same column whatever is in front of it.
+  let whole = parts.reduce(
+    (count, part) => (part.type === 'integer' ? count + part.value.length : count),
+    0
+  );
+  let fraction = 0;
+  const pieces: Piece[] = [];
+
+  parts.forEach((part, index) => {
+    if (part.type === 'integer' || part.type === 'fraction') {
+      for (const character of part.value) {
+        const digit = character >= '0' && character <= '9' ? Number(character) : null;
+        const key = part.type === 'integer' ? `i${(whole -= 1)}` : `f${(fraction += 1)}`;
+        pieces.push({ key, digit, text: character });
+      }
+      return;
+    }
+    // A separator belongs to the digits on its right; anything else is keyed
+    // by what it is, so a currency sign survives the number growing a digit.
+    const key = part.type === 'group' ? `g${whole}` : `${part.type}${index}`;
+    pieces.push({ key, digit: null, text: part.value });
+  });
+
+  return pieces;
+}
+
+export function RollingNumber({
+  value,
+  format,
+  locales = 'en-US',
+  duration = 600,
+  className,
+  ...props
+}: RollingNumberProps) {
+  const slots = rollingNumberVariants();
+
+  // The options object is usually written inline, so it is new on every
+  // render. Its contents are what the formatter depends on.
+  const formatKey = JSON.stringify(format ?? null);
+  const formatter = useMemo(
+    () => new Intl.NumberFormat(locales, format),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locales, formatKey]
+  );
+
+  const { label, pieces } = useMemo(() => {
+    const parts = formatter.formatToParts(value);
+    return { label: parts.map((part) => part.value).join(''), pieces: piecesOf(parts) };
+  }, [formatter, value]);
+
+  return (
+    <span className={slots.root({ className })} {...props}>
+      {/* What a screen reader gets: the number, once, as it is written. */}
+      <span className="sr-only">{label}</span>
+      {pieces.map((piece) =>
+        piece.digit === null ? (
+          <span key={piece.key} aria-hidden="true">
+            {piece.text}
+          </span>
+        ) : (
+          <span key={piece.key} aria-hidden="true" className={slots.column()}>
+            <span className="invisible">0</span>
+            <span className={slots.window()}>
+              <span
+                className={slots.strip()}
+                style={{
+                  transform: `translateY(${-piece.digit * 10}%)`,
+                  transitionDuration: `${duration}ms`,
+                }}
+              >
+                {DIGITS.map((digit) => (
+                  <span key={digit} className={slots.digit()}>
+                    {digit}
+                  </span>
+                ))}
+              </span>
+            </span>
+          </span>
+        )
+      )}
+    </span>
+  );
+}
+RollingNumber.displayName = 'RollingNumber';
+```
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { RollingNumber } from "@/components/panelui/rolling-number"
+```
+
+```tsx
+<RollingNumber value={events} />
+```
+
+## Examples
+
+### Currency
+
+`format` takes what `Intl.NumberFormat` takes. The currency sign and the separators stay where they are while the digits roll.
+
+<ComponentPreview name="rolling-number/currency" height={280}>
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { RollingNumber } from '@/components/panelui/rolling-number';
+
+export default function RollingNumberCurrency() {
+  const [balance, setBalance] = useState(12582210.27);
+
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <div className="flex flex-col items-center gap-1">
+        <span className="text-sm text-muted-foreground">Balance</span>
+        <RollingNumber
+          value={balance}
+          format={{ style: 'currency', currency: 'USD' }}
+          className="text-4xl font-semibold tracking-tight"
+        />
+      </div>
+      <div className="flex flex-wrap justify-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setBalance((value) => value - 1840.5)}
+        >
+          Pay an invoice
+        </Button>
+        <Button size="sm" onClick={() => setBalance((value) => value + 25000)}>
+          Add a deposit
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Percent and compact
+
+Three figures in three notations, changed together. Compact notation keeps a large number short: 46,200 is written `$46.2K`.
+
+<ComponentPreview name="rolling-number/formats" height={280}>
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { RollingNumber } from '@/components/panelui/rolling-number';
+
+const WEEKS = [
+  { visitors: 18420, conversion: 0.031, revenue: 46200 },
+  { visitors: 21960, conversion: 0.038, revenue: 61850 },
+  { visitors: 19310, conversion: 0.027, revenue: 39400 },
+];
+
+export default function RollingNumberFormats() {
+  const [week, setWeek] = useState(0);
+  const { visitors, conversion, revenue } = WEEKS[week];
+
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <dl className="grid grid-cols-3 gap-8 text-center">
+        <div className="flex flex-col gap-1">
+          <dt className="text-sm text-muted-foreground">Visitors</dt>
+          <dd className="text-2xl font-semibold">
+            <RollingNumber value={visitors} />
+          </dd>
+        </div>
+        <div className="flex flex-col gap-1">
+          <dt className="text-sm text-muted-foreground">Conversion</dt>
+          <dd className="text-2xl font-semibold">
+            <RollingNumber
+              value={conversion}
+              format={{ style: 'percent', minimumFractionDigits: 1 }}
+            />
+          </dd>
+        </div>
+        <div className="flex flex-col gap-1">
+          <dt className="text-sm text-muted-foreground">Revenue</dt>
+          <dd className="text-2xl font-semibold">
+            <RollingNumber
+              value={revenue}
+              format={{
+                style: 'currency',
+                currency: 'USD',
+                notation: 'compact',
+                maximumFractionDigits: 1,
+              }}
+            />
+          </dd>
+        </div>
+      </dl>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setWeek((current) => (current + 1) % WEEKS.length)}
+      >
+        Next week
+      </Button>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A slower roll
+
+`duration` is how long one digit takes to arrive, in milliseconds. It is 600 unless you set it.
+
+<ComponentPreview name="rolling-number/slow" height={280}>
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { RollingNumber } from '@/components/panelui/rolling-number';
+
+export default function RollingNumberSlow() {
+  const [score, setScore] = useState(2048);
+
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <RollingNumber
+        value={score}
+        duration={1400}
+        className="text-5xl font-semibold tracking-tight"
+      />
+      <Button variant="outline" size="sm" onClick={() => setScore((value) => value * 2)}>
+        Double it
+      </Button>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### RollingNumber
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `number` | — | The number to show. Each digit rolls to its new value on its own. |
+| `format` | `Intl.NumberFormatOptions` | — | How the number is written: currency, percent, compact notation, how many decimals. Passed to `Intl.NumberFormat`. |
+| `locales` | `Intl.LocalesArgument` | `'en-US'` | The locale the number is written in. Defaults to `en-US` rather than the browser's, so a page rendered on a server writes the same thing the browser then does. |
+| `duration` | `number` | `600` | How long a digit takes to roll, in milliseconds. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Width
+
+The digits are set in tabular figures, so a 1 is as wide as an 8 and the number keeps its width while it rolls. It does get wider when it gains a digit, as 99 does on its way to 100. Give it room, or a fixed width, where something sits beside it.
+
+### Server rendering
+
+`locales` defaults to `en-US`, not to the browser's locale. A page rendered on a server would otherwise write the number one way and the browser another, and React reports that as a hydration mismatch. Pass the locale you want written.
+
+### Reduced motion
+
+With the system's reduce-motion setting on, a digit changes without rolling.
+
+### Screen readers
+
+A screen reader is given the formatted number once, as text. The rolling columns are hidden from it, so it does not read ten digits per column.

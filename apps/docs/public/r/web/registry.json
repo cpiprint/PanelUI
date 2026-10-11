@@ -1,0 +1,24 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "panelui",
+  "homepage": "https://panelui.dev/docs/web",
+  "items": [
+    {
+      "name": "rolling-number",
+      "type": "registry:component",
+      "title": "Rolling Number",
+      "description": "A number whose digits roll to their new values.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/rolling-number.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/rolling-number.tsx"
+        }
+      ]
+    }
+  ]
+}

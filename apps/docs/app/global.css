@@ -18,6 +18,11 @@
 @source '../app';
 @source '../content';
 @source '../components';
+/*
+ * The web collection is rendered live on its own docs pages, from source, so
+ * its classes have to be compiled here like any other file in the site.
+ */
+@source '../../../packages/web/src';
 
 /*
  * The design tokens, in their web form.
