@@ -33,7 +33,7 @@ export default function DayGridWriting() {
 
   return (
     // A frame: a band that names what is inside, round a panel that holds it.
-    <div className="w-full max-w-xs rounded-3xl bg-muted p-1.5">
+    <div className="w-full max-w-sm rounded-3xl bg-muted p-1.5">
       <div className="flex items-center justify-between gap-3 px-3.5 py-2.5">
         <h3 className="text-sm font-medium">Words written</h3>
         <p className="text-sm text-muted-foreground">Last 6 weeks</p>

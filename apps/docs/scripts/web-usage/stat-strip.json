@@ -2,7 +2,7 @@
   "slug": "stat-strip",
   "demo": "repository",
   "demoOptions": {
-    "height": 280
+    "height": 320
   },
   "intro": "Use it for two to four figures that belong together and need no chart: the state of a repository, the totals under a run. Each figure has its label over it and, where there is one, the change under it.\n\nThe figures share the width equally, with a rule between each and the next.\n\nIt has no room for a sparkline or an icon. With more than four figures, or with long values, the columns get too narrow to read. Stack them with `orientation=\"vertical\"`, or use a grid of cards.",
   "usage": "<StatStrip>\n  <StatStrip.Item label=\"Issues\">\n    48\n    <StatStrip.Trend value={-11} goodDirection=\"down\" />\n  </StatStrip.Item>\n  <StatStrip.Item label=\"Review\">\n    3.2 <StatStrip.Unit>h</StatStrip.Unit>\n  </StatStrip.Item>\n</StatStrip>",
