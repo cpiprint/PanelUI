@@ -4,19 +4,60 @@
   "homepage": "https://panelui.dev/docs/web",
   "items": [
     {
-      "name": "activity-grid",
+      "name": "bar-picker",
       "type": "registry:component",
-      "title": "Activity Grid",
-      "description": "A period as a grid of pills: each day met, partly met or missed.",
+      "title": "Bar Picker",
+      "description": "A short run of values as columns of lights, one column picked.",
       "dependencies": [
         "tailwind-variants"
       ],
       "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
       "files": [
         {
-          "path": "components/panelui/activity-grid.tsx",
+          "path": "components/panelui/bar-picker.tsx",
           "type": "registry:component",
-          "target": "@components/panelui/activity-grid.tsx"
+          "target": "@components/panelui/bar-picker.tsx"
+        }
+      ]
+    },
+    {
+      "name": "day-grid",
+      "type": "registry:component",
+      "title": "Day Grid",
+      "description": "A run of days as a field of dots, each sized by how much happened on it.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/day-grid.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/day-grid.tsx"
         }
       ]
     },
@@ -39,36 +80,31 @@
       ]
     },
     {
-      "name": "forecast-bars",
+      "name": "fold-stack",
       "type": "registry:component",
-      "title": "Forecast Bars",
-      "description": "A short run of values as capsule bars, one of them picked.",
+      "title": "Fold Stack",
+      "description": "A deck of cards with one in front, the rest folded in behind it, and tabs to bring any forward.",
       "dependencies": [
         "tailwind-variants"
       ],
       "registryDependencies": [],
-      "files": [
-        {
-          "path": "components/panelui/forecast-bars.tsx",
-          "type": "registry:component",
-          "target": "@components/panelui/forecast-bars.tsx"
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
         }
-      ]
-    },
-    {
-      "name": "pill-stack",
-      "type": "registry:component",
-      "title": "Pill Stack",
-      "description": "A stack of cards with one open and the rest folded to pills that taper away from it.",
-      "dependencies": [
-        "tailwind-variants"
-      ],
-      "registryDependencies": [],
+      },
       "files": [
         {
-          "path": "components/panelui/pill-stack.tsx",
+          "path": "components/panelui/fold-stack.tsx",
           "type": "registry:component",
-          "target": "@components/panelui/pill-stack.tsx"
+          "target": "@components/panelui/fold-stack.tsx"
         }
       ]
     },
@@ -81,6 +117,18 @@
         "tailwind-variants"
       ],
       "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
       "files": [
         {
           "path": "components/panelui/planet/index.tsx",
@@ -98,11 +146,23 @@
       "name": "range-meter",
       "type": "registry:component",
       "title": "Range Meter",
-      "description": "A reading on a track between its lowest and highest, with the number on the thumb.",
+      "description": "A reading on a ruler of ticks that rises where the value is, with the number above it.",
       "dependencies": [
         "tailwind-variants"
       ],
       "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
       "files": [
         {
           "path": "components/panelui/range-meter.tsx",
@@ -132,11 +192,19 @@
       "name": "stat-strip",
       "type": "registry:component",
       "title": "Stat Strip",
-      "description": "A row of figures, each over the words that say what it is.",
+      "description": "A few figures as one panel, each under its label and split by rules.",
       "dependencies": [
         "tailwind-variants"
       ],
       "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)"
+        }
+      },
       "files": [
         {
           "path": "components/panelui/stat-strip.tsx",

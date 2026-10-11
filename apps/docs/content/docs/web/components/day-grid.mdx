@@ -1,0 +1,299 @@
+---
+title: Day Grid
+description: A run of days as a field of dots, each sized by how much happened on it.
+status: new
+---
+
+<ComponentPreview name="day-grid/writing" height={540}>
+
+```tsx
+'use client';
+
+import { DayGrid, type DayCell, type DayLevel } from '@/components/panelui/day-grid';
+
+/** Words written on each of the last 42 days, oldest first. */
+const WORDS = [
+  0, 420, 1310, 880, 0, 0, 240, 1650, 1920, 760, 0, 310, 0, 0, 980, 1440, 2210, 1180, 640, 0, 0,
+  1890, 2460, 1730, 920, 0, 150, 0, 2050, 1380, 0, 1120, 1960, 0, 0, 870, 2320, 1610, 1240, 2580,
+  430, 0,
+];
+
+/** A day's count as one of the five strengths. */
+const levelOf = (words: number): DayLevel =>
+  words === 0 ? 0 : words < 600 ? 1 : words < 1300 ? 2 : words < 2000 ? 3 : 4;
+
+const START = new Date(2026, 7, 31);
+
+const CELLS: DayCell[] = WORDS.map((words, index) => {
+  const day = new Date(START);
+  day.setDate(START.getDate() + index);
+  const date = day.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  return {
+    level: levelOf(words),
+    label: words === 0 ? `${date}, nothing written` : `${date}, ${words.toLocaleString('en-GB')} words`,
+  };
+});
+
+const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+export default function DayGridWriting() {
+  const total = WORDS.reduce((sum, words) => sum + words, 0);
+
+  return (
+    <div className="flex w-full max-w-72 flex-col gap-4 rounded-2xl border bg-card p-5 text-card-foreground">
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 className="text-sm font-medium text-muted-foreground">Words written</h3>
+        <p className="text-sm text-muted-foreground">6 weeks</p>
+      </div>
+      <p className="text-2xl font-bold tracking-tight">{total.toLocaleString('en-GB')}</p>
+
+      <div className="flex flex-col gap-1.5">
+        <div aria-hidden="true" className="grid grid-cols-7 gap-1 text-center text-xs text-muted-foreground">
+          {WEEKDAYS.map((day, index) => (
+            <span key={index}>{day}</span>
+          ))}
+        </div>
+        <DayGrid cells={CELLS} columns={7} color="success" label="Words written" />
+      </div>
+
+      <DayGrid.Legend color="success" className="self-end" />
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it to show how much happened on each day of a period: words written, commits pushed, minutes practised. Each day is a dot that grows with the amount, from a speck for an empty day to a full disc for the busiest, and seven columns make each row a week.
+
+It shows a pattern, not a figure. Nobody can read a count off the size of a dot, so put the number that matters beside the grid, and give each day a `label`: it is shown in a tag when the pointer is over that day.
+
+For values over two dimensions that are not days, such as hour against weekday, use a table or a chart with axes.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/day-grid.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/day-grid` instead of `@/components/panelui/day-grid`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/day-grid.tsx`:
+
+<RegistrySource name="day-grid" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { DayGrid, type DayCell } from "@/components/panelui/day-grid"
+```
+
+```tsx
+const days: DayCell[] = [
+  { level: 0, label: '1 Sep, nothing written' },
+  { level: 2, label: '2 Sep, 880 words' },
+  { level: 4, label: '3 Sep, 2,210 words' },
+]
+
+<DayGrid cells={days} columns={7} />
+<DayGrid.Legend />
+```
+
+## Composition
+
+```tsx
+<DayGrid cells={…} />
+<DayGrid.Legend />
+```
+
+- **`DayGrid.Legend`** — The five sizes in a row, quietest to busiest, with a word at each end. It is a sibling of the grid, so place it wherever the layout wants it and give it the same `color`.
+
+## Examples
+
+### Days you can press
+
+With `onValueChange` every day is a button and `value` marks the selected one. The grid is a single Tab stop, and the arrow keys move between days.
+
+<ComponentPreview name="day-grid/pick-a-day" height={400}>
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { DayGrid, type DayCell, type DayLevel } from '@/components/panelui/day-grid';
+
+/** Pull requests merged on each day of a four-week sprint. */
+const MERGED = [3, 5, 2, 7, 4, 0, 0, 6, 9, 4, 5, 8, 1, 0, 2, 4, 11, 6, 3, 0, 0, 7, 5, 8, 10, 6, 0, 1];
+
+const levelOf = (count: number): DayLevel =>
+  count === 0 ? 0 : count < 3 ? 1 : count < 6 ? 2 : count < 9 ? 3 : 4;
+
+const START = new Date(2026, 8, 7);
+
+const dateOf = (index: number) => {
+  const day = new Date(START);
+  day.setDate(START.getDate() + index);
+  return day.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+};
+
+const CELLS: DayCell[] = MERGED.map((count, index) => ({
+  level: levelOf(count),
+  label: `${dateOf(index)}, ${count} merged`,
+}));
+
+export default function DayGridPickADay() {
+  const [day, setDay] = useState<number | null>(16);
+
+  return (
+    <div className="flex w-full max-w-64 flex-col gap-4">
+      <DayGrid
+        cells={CELLS}
+        columns={7}
+        color="info"
+        value={day}
+        onValueChange={setDay}
+        label="Pull requests merged"
+      />
+      <div className="flex flex-col gap-0.5" aria-live="polite">
+        <p className="text-sm font-medium">
+          {day === null ? 'Pick a day' : `${MERGED[day]} merged`}
+        </p>
+        <p className="text-sm text-muted-foreground">{day === null ? '\u00a0' : dateOf(day)}</p>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Colours
+
+`color` names one of the theme's roles. Use a status colour when the amount means something, such as `success` for progress towards a goal, and leave it as `primary` otherwise.
+
+<ComponentPreview name="day-grid/colours" height={320}>
+
+```tsx
+'use client';
+
+import { DayGrid, type DayCell, type DayGridColor, type DayLevel } from '@/components/panelui/day-grid';
+
+/** The same fortnight in every colour, so the colour is the only difference. */
+const LEVELS: DayLevel[] = [1, 3, 4, 2, 0, 0, 2, 4, 4, 3, 1, 0, 2, 3];
+const CELLS: DayCell[] = LEVELS.map((level) => ({ level }));
+
+const COLOURS: DayGridColor[] = ['primary', 'info', 'success', 'warning', 'destructive'];
+
+export default function DayGridColours() {
+  return (
+    <div className="grid w-full max-w-md grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3">
+      {COLOURS.map((color) => (
+        <div key={color} className="contents">
+          <code className="text-xs text-muted-foreground">{color}</code>
+          <DayGrid cells={CELLS} columns={14} color={color} label={color} />
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### DayGrid
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `cells` | `DayCell[]` | — | The days, in order. They fill the grid row by row. |
+| `columns` | `number` | `7` | Cells per row. Seven makes each row a week. |
+| `color` | `DayGridColor` | `'primary'` | Which of the theme's roles the dots are drawn in. |
+| `value` | `number \| null` | `null` | The index of the selected day, when the caller holds it. |
+| `onValueChange` | `(index: number) => void` | — | Called with the index of a day when it is pressed. Passing this makes the days buttons; without it the grid is a picture. |
+| `lens` | `boolean` | `true` | Set to `false` for dots that hold still under the pointer. |
+| `label` | `string` | `'Activity'` | What a screen reader calls the grid. |
+
+### DayGrid.Legend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `color` | `DayGridColor` | `'primary'` | The same role the grid is drawn in. |
+| `less` | `ReactNode` | `'Less'` | The word at the quiet end of the scale. |
+| `more` | `ReactNode` | `'More'` | The word at the busy end of the scale. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Levels
+
+A day's `level` is a whole number from 0 to 4. Level 0 is a small grey speck and means the day was measured and nothing happened. Levels 1 to 4 are dots of growing size and strength in the chosen colour, and a level 4 dot has a faint glow.
+
+The component does not turn counts into levels, because where the steps fall depends on the data. Decide the four thresholds once and map your counts through them.
+
+### The lens
+
+Dots within about two cells of the pointer grow, the nearest most. It follows a mouse or a pen and does nothing for touch, where a finger would cover it. Pass `lens={false}` to turn it off. It is also off for anyone who has asked their system for reduced motion.
+
+### Arriving
+
+The dots grow in from nothing when the grid mounts, one diagonal after the next. With reduced motion on they are simply there.
+
+### Layout
+
+Days fill the grid row by row and stay round at any width. `columns` defaults to 7. For a strip that runs along one line, set `columns` to the number of days.
+
+The grid takes the width of its container. Set a `max-w-*` class on it or on its parent to stop the dots growing too large.
+
+### Labels
+
+`label` on a day is its tag and what a screen reader says for it, so write the date and the figure: "14 May, 6 commits". A day without a label has no tag, and a pressable one is announced by its position and level.
+
+The grid as a whole is announced with its `label` and how many of the days have something on them.
+
+### Keyboard
+
+When the days are buttons, Tab moves to the selected day, or the first. Left and right move a day, up and down move a row, and Home and End go to the first and last day.
+
+### Server Components
+
+`DayGrid` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `DayGrid.Legend` off the import, so each part is also exported by name: `DayGridLegend` is `DayGrid.Legend`.
+
+```tsx
+import { DayGrid, DayGridLegend } from "@/components/panelui/day-grid"
+```

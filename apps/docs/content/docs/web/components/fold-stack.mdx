@@ -1,0 +1,315 @@
+---
+title: Fold Stack
+description: A deck of cards with one in front, the rest folded in behind it, and tabs to bring any forward.
+status: new
+---
+
+<ComponentPreview name="fold-stack/pipeline" height={480}>
+
+```tsx
+'use client';
+
+import { FoldStack, type FoldStackColor } from '@/components/panelui/fold-stack';
+
+interface Stage {
+  id: string;
+  name: string;
+  state: string;
+  color: FoldStackColor;
+  /** Three short facts about the stage. */
+  facts: [string, string][];
+  detail: string;
+}
+
+const STAGES: Stage[] = [
+  {
+    id: 'build',
+    name: 'Build',
+    state: 'Passed',
+    color: 'success',
+    facts: [
+      ['Time', '2 min 14 s'],
+      ['Modules', '1,284'],
+      ['Bundle', '\u22124 kB'],
+    ],
+    detail: 'Built with a warm cache. The bundle is smaller than the last one.',
+  },
+  {
+    id: 'test',
+    name: 'Test',
+    state: '2 failing',
+    color: 'destructive',
+    facts: [
+      ['Passed', '316'],
+      ['Failed', '2'],
+      ['Time', '4 min 02 s'],
+    ],
+    detail: 'Both failures are in the date picker, and both expect a week that starts on Sunday.',
+  },
+  {
+    id: 'review',
+    name: 'Review',
+    state: 'Waiting',
+    color: 'warning',
+    facts: [
+      ['Approved', '1 of 2'],
+      ['Comments', '5'],
+      ['Open for', '3 h'],
+    ],
+    detail: 'The design owner has approved. The platform owner has not answered yet.',
+  },
+  {
+    id: 'ship',
+    name: 'Ship',
+    state: 'Queued',
+    color: 'info',
+    facts: [
+      ['First', '5% of users'],
+      ['Then', 'Everyone'],
+      ['After', '1 h'],
+    ],
+    detail: 'Goes out in two steps, and the second waits for errors to stay flat.',
+  },
+];
+
+export default function FoldStackPipeline() {
+  return (
+    <FoldStack defaultValue="test" label="Pipeline stages" className="max-w-sm">
+      {STAGES.map((stage) => (
+        <FoldStack.Item key={stage.id} value={stage.id} label={stage.name} color={stage.color}>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-baseline justify-between gap-3">
+              <h3 className="text-lg font-semibold tracking-tight">{stage.name}</h3>
+              <p className="text-sm text-muted-foreground">{stage.state}</p>
+            </div>
+            <dl className="grid grid-cols-3 gap-2">
+              {stage.facts.map(([term, fact]) => (
+                <div key={term} className="rounded-xl bg-muted px-3 py-2">
+                  <dt className="text-xs text-muted-foreground">{term}</dt>
+                  <dd className="text-sm font-semibold">{fact}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="text-sm text-muted-foreground">{stage.detail}</p>
+          </div>
+        </FoldStack.Item>
+      ))}
+    </FoldStack>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it for a few things of the same kind where one is looked at at a time and it helps to see that there are more: the stages of a pipeline, the steps of a setup, a handful of plans. It is a deck of cards. One is in front, the next two show as edges under it, and a row of tabs brings any card forward.
+
+The deck is as tall as its tallest card and stays that height, so nothing under it moves when the card changes.
+
+Every card has to fit that one size. For sections of very different lengths use an accordion, and past about six cards the row of tabs wraps and a list is the better shape.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/fold-stack.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/fold-stack` instead of `@/components/panelui/fold-stack`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/fold-stack.tsx`:
+
+<RegistrySource name="fold-stack" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { FoldStack } from "@/components/panelui/fold-stack"
+```
+
+```tsx
+<FoldStack defaultValue="test">
+  <FoldStack.Item value="build" label="Build" color="success">
+    Passed in 2 min 14 s.
+  </FoldStack.Item>
+  <FoldStack.Item value="test" label="Test" color="destructive">
+    2 of 318 failing.
+  </FoldStack.Item>
+</FoldStack>
+```
+
+## Composition
+
+```tsx
+<FoldStack>
+  <FoldStack.Item value="…" label="…">…</FoldStack.Item>
+</FoldStack>
+```
+
+- **`FoldStack.Item`** — One card, and its tab. `value` identifies it, `label` is what the tab says, and `color` is the light on the tab. Its children are the card's contents. Items have to be direct children of the stack.
+
+## Examples
+
+### Holding the front card yourself
+
+`value` and `onValueChange` put the front card in your own state, so a button inside one card can bring the next forward.
+
+<ComponentPreview name="fold-stack/one-at-a-time" height={400}>
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { FoldStack } from '@/components/panelui/fold-stack';
+
+const STEPS = [
+  {
+    id: 'invite',
+    tab: 'Invite',
+    title: 'Invite your team',
+    body: 'Anyone with an address at your domain can join without being asked twice.',
+  },
+  {
+    id: 'connect',
+    tab: 'Connect',
+    title: 'Connect a repository',
+    body: 'Read access is enough to start. Write access is only needed for automatic fixes.',
+  },
+  {
+    id: 'notify',
+    tab: 'Notify',
+    title: 'Choose where alerts go',
+    body: 'One channel for failures is usually plenty. You can split them up later.',
+  },
+];
+
+export default function FoldStackOneAtATime() {
+  const [step, setStep] = useState(STEPS[0].id);
+
+  return (
+    <FoldStack value={step} onValueChange={setStep} label="Setup steps" className="max-w-sm">
+      {STEPS.map((entry, index) => (
+        <FoldStack.Item key={entry.id} value={entry.id} label={entry.tab}>
+          <div className="flex h-full flex-col items-start gap-2">
+            <p className="text-xs font-medium text-muted-foreground">
+              Step {index + 1} of {STEPS.length}
+            </p>
+            <h3 className="text-lg font-semibold tracking-tight">{entry.title}</h3>
+            <p className="text-sm text-muted-foreground">{entry.body}</p>
+            {index < STEPS.length - 1 ? (
+              <Button size="sm" className="mt-2" onClick={() => setStep(STEPS[index + 1].id)}>
+                Continue
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                className="mt-2"
+                onClick={() => setStep(STEPS[0].id)}
+              >
+                Start again
+              </Button>
+            )}
+          </div>
+        </FoldStack.Item>
+      ))}
+    </FoldStack>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### FoldStack
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — | The `value` of the card in front, when the caller holds it. |
+| `defaultValue` | `string` | — | The card in front to begin with, when the caller does not hold it. Defaults to the first. |
+| `onValueChange` | `(value: string) => void` | — | Called with a card's `value` when it is brought to the front. |
+| `label` | `string` | `'Cards'` | What a screen reader calls the row of tabs. |
+
+### FoldStack.Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — | What identifies this card to `value` and `onValueChange`. |
+| `label` | `ReactNode` | — | What its tab says. Defaults to the `value`. |
+| `color` | `FoldStackColor` | — | One of the theme's roles for the light on its tab. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Which card is in front
+
+`defaultValue` names the card in front to begin with. Without it, or if it names no card, the first one is.
+
+### The pile
+
+The two cards after the front one show under it, each 6 percent smaller and 12px lower than the card before, and a shade further back. The order goes round: behind the last card is the first. Any further cards are hidden until they come within two of the front.
+
+Pressing the edge of a card behind brings that card forward, which is a quick way to the next one.
+
+### Height
+
+All the cards share one size, the height of the tallest. A short card is stretched to it, so give a card's contents `h-full` if something in it should sit at the bottom.
+
+### Colour
+
+`color` on an item is the small light on its tab, in one of the theme's roles. It defaults to `primary`. Use the status colours when the colour says something, such as the state of a stage.
+
+### Contents stay mounted
+
+The cards behind stay in the page, so a field somebody filled in is still filled when its card comes back. They are made inert and hidden from screen readers while they are behind.
+
+### Keyboard
+
+The row of tabs is one Tab stop. Left and right move to the next tab and bring its card forward, wrapping at the ends, and Home and End go to the first and last.
+
+### Motion
+
+Changing the card moves each one to its new place in the pile over half a second. With reduced motion on, it happens at once.
+
+### Server Components
+
+`FoldStack` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `FoldStack.Item` off the import, so each part is also exported by name: `FoldStackItem` is `FoldStack.Item`.
+
+```tsx
+import { FoldStack, FoldStackItem } from "@/components/panelui/fold-stack"
+```

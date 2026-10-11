@@ -1,0 +1,391 @@
+'use client';
+
+/**
+ * DayGrid — a run of days as a field of dots, each sized by how much happened
+ * on it.
+ *
+ * ```tsx
+ * <DayGrid cells={days} columns={7} />
+ * <DayGrid.Legend />
+ * ```
+ *
+ * ## Size carries the amount, not only shade
+ *
+ * A day is level 0 to 4, and its dot grows with the level: a speck for a day
+ * with nothing on it, a full disc for the busiest. The period reads the way a
+ * halftone print does, heavy where a lot happened and thin where little did,
+ * and it still reads for someone who cannot tell two shades of one colour
+ * apart.
+ *
+ * ## The pointer is a lens
+ *
+ * Dots swell as the pointer comes near and settle as it leaves, so the day
+ * under the pointer is the largest thing on the grid and its neighbours lean
+ * towards it. The day's `label` is shown in a tag above it. The lens changes
+ * nothing about what the grid says; it is there to make one day easy to
+ * single out among forty.
+ *
+ * ## Days you can ask about
+ *
+ * Pass `onValueChange` and each day becomes a button. The grid then behaves as
+ * one control to the keyboard: a single Tab stop, with the arrow keys moving
+ * between days, so forty days are not forty presses of Tab.
+ */
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentProps,
+  type CSSProperties,
+  type KeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from 'react';
+import { tv } from 'tailwind-variants';
+
+/** How much happened on a day: 0 is nothing, 4 is the most. */
+export type DayLevel = 0 | 1 | 2 | 3 | 4;
+
+/** Which of the theme's roles the dots are drawn in. */
+export type DayGridColor = 'primary' | 'info' | 'success' | 'warning' | 'destructive';
+
+export interface DayCell {
+  level: DayLevel;
+  /** What the day is, for the tag and a screen reader: "14 May, 6 commits". */
+  label?: string;
+}
+
+const dayGridVariants = tv({
+  slots: {
+    root: 'relative grid w-full gap-1',
+    // The cell is the target and keeps its size. Only the dot inside it grows.
+    cell: 'relative flex aspect-square w-full items-center justify-center rounded-full outline-none',
+    /*
+     * One scale made of three parts: how big the level is, how near the
+     * pointer is, and whether the grid has arrived yet. Kept as variables so
+     * each can change without a class changing.
+     */
+    dot: 'block size-full rounded-full [scale:calc(var(--pu-size)*(1+var(--pu-lens,0)*0.5)*var(--pu-in,1))] transition-[scale,box-shadow] duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:transition-none',
+    tag: 'pointer-events-none absolute z-20 whitespace-nowrap rounded-lg bg-foreground px-2 py-1 text-xs font-medium text-background shadow-lg',
+    legend: 'flex items-center gap-1.5 text-xs text-muted-foreground',
+    swatch: 'flex size-4 items-center justify-center',
+  },
+  variants: {
+    /*
+     * The colour is written to one variable and every dot reads it. The legend
+     * is a sibling of the grid, not a child, so it takes the same variant.
+     */
+    color: {
+      primary: { root: '[--pu-color:var(--primary)]', legend: '[--pu-color:var(--primary)]' },
+      info: { root: '[--pu-color:var(--info)]', legend: '[--pu-color:var(--info)]' },
+      success: { root: '[--pu-color:var(--success)]', legend: '[--pu-color:var(--success)]' },
+      warning: { root: '[--pu-color:var(--warning)]', legend: '[--pu-color:var(--warning)]' },
+      destructive: {
+        root: '[--pu-color:var(--destructive)]',
+        legend: '[--pu-color:var(--destructive)]',
+      },
+    },
+    level: {
+      0: { dot: 'bg-muted-foreground/30 [--pu-size:0.2]' },
+      1: { dot: 'bg-[color-mix(in_oklab,var(--pu-color)_45%,transparent)] [--pu-size:0.42]' },
+      2: { dot: 'bg-[color-mix(in_oklab,var(--pu-color)_65%,transparent)] [--pu-size:0.6]' },
+      3: { dot: 'bg-[color-mix(in_oklab,var(--pu-color)_85%,transparent)] [--pu-size:0.8]' },
+      // The busiest days carry a little light of their own.
+      4: {
+        dot: 'bg-[var(--pu-color)] shadow-[0_0_14px_color-mix(in_oklab,var(--pu-color)_45%,transparent)] [--pu-size:1]',
+      },
+    },
+    interactive: {
+      true: {
+        cell: 'cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+      },
+    },
+    selected: {
+      true: { cell: 'ring-2 ring-foreground ring-offset-2 ring-offset-background' },
+    },
+  },
+});
+
+const LEVELS = [0, 1, 2, 3, 4] as const;
+
+/** How far the lens reaches, in cells. */
+const LENS_REACH = 2.4;
+/** Milliseconds between one diagonal of dots arriving and the next. */
+const STAGGER = 22;
+
+export interface DayGridProps
+  extends Omit<ComponentProps<'div'>, 'children' | 'onChange' | 'color'> {
+  /** The days, in order. They fill the grid row by row. */
+  cells: DayCell[];
+  /** Cells per row. Seven makes each row a week. */
+  columns?: number;
+  /** Which of the theme's roles the dots are drawn in. */
+  color?: DayGridColor;
+  /** The index of the selected day, when the caller holds it. */
+  value?: number | null;
+  /**
+   * Called with the index of a day when it is pressed. Passing this makes the
+   * days buttons; without it the grid is a picture.
+   */
+  onValueChange?: (index: number) => void;
+  /** Set to `false` for dots that hold still under the pointer. */
+  lens?: boolean;
+  /** What a screen reader calls the grid. */
+  label?: string;
+}
+
+function DayGridRoot({
+  cells,
+  columns = 7,
+  color = 'primary',
+  value = null,
+  onValueChange,
+  lens = true,
+  label = 'Activity',
+  className,
+  style,
+  onPointerMove,
+  onPointerLeave,
+  ...props
+}: DayGridProps) {
+  const slots = dayGridVariants({ color });
+  const root = useRef<HTMLDivElement>(null);
+  const nodes = useRef<(HTMLElement | null)[]>([]);
+  const frame = useRef(0);
+  const interactive = onValueChange !== undefined;
+  // The day whose tag is showing: the one under the pointer, or with focus.
+  const [pointed, setPointed] = useState<number | null>(null);
+  // The dots start at nothing and arrive along the diagonals.
+  const [arrived, setArrived] = useState<'no' | 'arriving' | 'yes'>('no');
+
+  const rows = Math.ceil(cells.length / columns);
+
+  useEffect(() => {
+    const start = requestAnimationFrame(() => setArrived('arriving'));
+    // Once the last diagonal is in, the delays come off. Left on, they would
+    // hold every dot back from the lens by its own share of the stagger.
+    const settle = setTimeout(() => setArrived('yes'), (rows + columns) * STAGGER + 450);
+    return () => {
+      cancelAnimationFrame(start);
+      clearTimeout(settle);
+    };
+  }, [rows, columns]);
+
+  useEffect(() => () => cancelAnimationFrame(frame.current), []);
+
+  const summary = useMemo(() => {
+    const active = cells.filter((cell) => cell.level > 0).length;
+    return `${label}: something on ${active} of ${cells.length} days.`;
+  }, [cells, label]);
+
+  const moveLens = (event: ReactPointerEvent<HTMLDivElement>) => {
+    onPointerMove?.(event);
+    // A finger covers what a lens would show, and has no hover to end it.
+    if (event.pointerType === 'touch') return;
+    const still = !lens || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const { clientX, clientY } = event;
+    cancelAnimationFrame(frame.current);
+    frame.current = requestAnimationFrame(() => {
+      let nearest: number | null = null;
+      let best = Infinity;
+      nodes.current.forEach((node, index) => {
+        if (!node) return;
+        const box = node.getBoundingClientRect();
+        const distance = Math.hypot(
+          clientX - (box.left + box.width / 2),
+          clientY - (box.top + box.height / 2)
+        );
+        if (!still) {
+          const near = Math.max(0, 1 - distance / (box.width * LENS_REACH));
+          // Eased, so the swell has a soft edge and a round top.
+          node.style.setProperty('--pu-lens', (near * near * (3 - 2 * near)).toFixed(3));
+        }
+        if (distance < best && distance < box.width * 0.75) {
+          best = distance;
+          nearest = index;
+        }
+      });
+      setPointed(nearest);
+    });
+  };
+
+  const leave = (event: ReactPointerEvent<HTMLDivElement>) => {
+    onPointerLeave?.(event);
+    cancelAnimationFrame(frame.current);
+    for (const node of nodes.current) node?.style.removeProperty('--pu-lens');
+    setPointed(null);
+  };
+
+  const layout = { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, ...style };
+
+  /** Where a dot is in its entrance, as the styles that put it there. */
+  const dotStyle = (index: number): CSSProperties | undefined => {
+    if (arrived === 'yes') return undefined;
+    const diagonal = Math.floor(index / columns) + (index % columns);
+    return {
+      ['--pu-in' as string]: arrived === 'no' ? 0 : 1,
+      transitionDelay: `${diagonal * STAGGER}ms`,
+      transitionDuration: '420ms',
+    };
+  };
+
+  const tag = (() => {
+    if (pointed === null) return null;
+    const text = cells[pointed]?.label;
+    const node = nodes.current[pointed];
+    const box = root.current;
+    if (!text || !node || !box) return null;
+    const centre = node.offsetLeft + node.offsetWidth / 2;
+    // Hung from whichever side keeps it inside the grid.
+    const share = centre / box.offsetWidth;
+    const shift = share < 0.25 ? '-12%' : share > 0.75 ? '-88%' : '-50%';
+    return (
+      <span
+        aria-hidden="true"
+        className={slots.tag()}
+        style={{ left: centre, top: node.offsetTop - 6, translate: `${shift} -100%` }}
+      >
+        {text}
+      </span>
+    );
+  })();
+
+  if (!interactive) {
+    return (
+      <div
+        ref={root}
+        role="img"
+        aria-label={summary}
+        className={slots.root({ className })}
+        style={layout}
+        onPointerMove={moveLens}
+        onPointerLeave={leave}
+        {...props}
+      >
+        {cells.map((cell, index) => {
+          const part = dayGridVariants({ level: cell.level });
+          return (
+            <span
+              key={index}
+              ref={(node) => {
+                nodes.current[index] = node;
+              }}
+              className={part.cell()}
+            >
+              <span className={part.dot()} style={dotStyle(index)} />
+            </span>
+          );
+        })}
+        {tag}
+      </div>
+    );
+  }
+
+  // One Tab stop for the grid: the selected day, or the first.
+  const focusable = value !== null && value >= 0 && value < cells.length ? value : 0;
+
+  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
+    const moves: Record<string, number> = {
+      ArrowLeft: rtl ? 1 : -1,
+      ArrowRight: rtl ? -1 : 1,
+      ArrowUp: -columns,
+      ArrowDown: columns,
+    };
+    let next: number | undefined;
+    if (event.key in moves) next = index + (moves[event.key] ?? 0);
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = cells.length - 1;
+    if (next === undefined || next < 0 || next >= cells.length) return;
+    event.preventDefault();
+    nodes.current[next]?.focus();
+    onValueChange(next);
+  };
+
+  return (
+    <div
+      ref={root}
+      role="group"
+      aria-label={summary}
+      className={slots.root({ className })}
+      style={layout}
+      onPointerMove={moveLens}
+      onPointerLeave={leave}
+      {...props}
+    >
+      {cells.map((cell, index) => {
+        const part = dayGridVariants({
+          level: cell.level,
+          interactive: true,
+          selected: value === index,
+        });
+        return (
+          <button
+            key={index}
+            ref={(node) => {
+              nodes.current[index] = node;
+            }}
+            type="button"
+            aria-label={cell.label ?? `Day ${index + 1}, level ${cell.level} of 4`}
+            aria-pressed={value === index}
+            tabIndex={index === focusable ? 0 : -1}
+            onClick={() => onValueChange(index)}
+            onKeyDown={(event) => onKeyDown(event, index)}
+            onFocus={(event) => {
+              // Only for focus that came from the keyboard: a click focuses
+              // too, and the pointer is already showing that day's tag.
+              if (event.currentTarget.matches(':focus-visible')) setPointed(index);
+            }}
+            onBlur={() => setPointed((current) => (current === index ? null : current))}
+            className={part.cell()}
+          >
+            <span className={part.dot()} style={dotStyle(index)} />
+          </button>
+        );
+      })}
+      {tag}
+    </div>
+  );
+}
+DayGridRoot.displayName = 'DayGrid';
+
+export interface DayGridLegendProps extends Omit<ComponentProps<'div'>, 'children' | 'color'> {
+  /** The same role the grid is drawn in. */
+  color?: DayGridColor;
+  /** The word at the quiet end of the scale. */
+  less?: ReactNode;
+  /** The word at the busy end of the scale. */
+  more?: ReactNode;
+}
+
+/** The five sizes, quietest to busiest, with a word at each end. */
+function DayGridLegend({
+  color = 'primary',
+  less = 'Less',
+  more = 'More',
+  className,
+  ...props
+}: DayGridLegendProps) {
+  const slots = dayGridVariants({ color });
+  return (
+    <div className={slots.legend({ className })} {...props}>
+      <span>{less}</span>
+      {LEVELS.map((level) => (
+        <span key={level} aria-hidden="true" className={slots.swatch()}>
+          <span className={dayGridVariants({ level }).dot({ className: 'shadow-none' })} />
+        </span>
+      ))}
+      <span>{more}</span>
+    </div>
+  );
+}
+DayGridLegend.displayName = 'DayGrid.Legend';
+
+export const DayGrid = Object.assign(DayGridRoot, {
+  Legend: DayGridLegend,
+});
+
+/* By name as well, for a Server Component, which cannot dot into a client
+   module. */
+export { DayGridLegend };

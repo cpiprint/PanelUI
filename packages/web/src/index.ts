@@ -10,6 +10,7 @@ export {
   type PlanetRotation,
   type PlanetGlobeProps,
   type PlanetMarkerProps,
+  type PlanetMarkerColor,
   type PlanetControlsProps,
 } from './components/planet';
 export {
@@ -35,30 +36,39 @@ export {
   type FeedbackSubmitProps,
 } from './components/feedback';
 export {
-  ActivityGrid,
-  ActivityGridLegend,
-  type ActivityGridProps,
-  type ActivityGridLegendProps,
-  type ActivityCell,
-  type ActivityLevel,
-} from './components/activity-grid';
-export { RangeMeter, type RangeMeterProps } from './components/range-meter';
-export { ForecastBars, type ForecastBarsProps, type ForecastBar } from './components/forecast-bars';
+  DayGrid,
+  DayGridLegend,
+  type DayGridProps,
+  type DayGridLegendProps,
+  type DayGridColor,
+  type DayCell,
+  type DayLevel,
+} from './components/day-grid';
+export {
+  RangeMeter,
+  type RangeMeterProps,
+  type RangeMeterColor,
+} from './components/range-meter';
+export {
+  BarPicker,
+  type BarPickerProps,
+  type BarPickerBar,
+  type BarPickerColor,
+} from './components/bar-picker';
 export {
   StatStrip,
   StatStripItem,
   StatStripUnit,
+  StatStripTrend,
   type StatStripProps,
   type StatStripItemProps,
   type StatStripUnitProps,
+  type StatStripTrendProps,
 } from './components/stat-strip';
 export {
-  PillStack,
-  PillStackItem,
-  PillStackPill,
-  PillStackPanel,
-  type PillStackProps,
-  type PillStackItemProps,
-  type PillStackPillProps,
-  type PillStackPanelProps,
-} from './components/pill-stack';
+  FoldStack,
+  FoldStackItem,
+  type FoldStackProps,
+  type FoldStackItemProps,
+  type FoldStackColor,
+} from './components/fold-stack';

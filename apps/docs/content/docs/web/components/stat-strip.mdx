@@ -1,22 +1,29 @@
 ---
 title: Stat Strip
-description: A row of figures, each over the words that say what it is.
+description: A few figures as one panel, each under its label and split by rules.
 status: new
 ---
 
-<ComponentPreview name="stat-strip/session" height={260}>
+<ComponentPreview name="stat-strip/repository" height={280}>
 
 ```tsx
 import { StatStrip } from '@/components/panelui/stat-strip';
 
-export default function StatStripSession() {
+export default function StatStripRepository() {
   return (
-    <div className="dark w-full max-w-xl rounded-[36px] bg-card px-7 py-6 text-card-foreground">
+    <div className="w-full max-w-md rounded-2xl border bg-card p-5 text-card-foreground">
       <StatStrip>
-        <StatStrip.Item label="Average session">9 minutes</StatStrip.Item>
-        <StatStrip.Item label="Current mood">Calm</StatStrip.Item>
-        <StatStrip.Item label="Meditation time" accent>
-          8:30 <StatStrip.Unit>PM</StatStrip.Unit>
+        <StatStrip.Item label="Issues">
+          48
+          <StatStrip.Trend value={-11} goodDirection="down" />
+        </StatStrip.Item>
+        <StatStrip.Item label="Review">
+          3.2 <StatStrip.Unit>h</StatStrip.Unit>
+          <StatStrip.Trend value={18} goodDirection="down" />
+        </StatStrip.Item>
+        <StatStrip.Item label="Coverage">
+          81<StatStrip.Unit>%</StatStrip.Unit>
+          <StatStrip.Trend value={7} />
         </StatStrip.Item>
       </StatStrip>
     </div>
@@ -26,11 +33,11 @@ export default function StatStripSession() {
 
 </ComponentPreview>
 
-Use it for two to four figures that belong together and need no chart: the totals under a workout, the summary under a card. Each figure is large with its label under it.
+Use it for two to four figures that belong together and need no chart: the state of a repository, the totals under a run. Each figure has its label over it and, where there is one, the change under it.
 
-The first figure lines up with the left edge and the last with the right, so the strip shares the margins of whatever it sits in.
+The figures share the width equally, with a rule between each and the next.
 
-It has no room for a trend, a comparison or an icon. For a single figure with those, use a card of its own.
+It has no room for a sparkline or an icon. With more than four figures, or with long values, the columns get too narrow to read. Stack them with `orientation="vertical"`, or use a grid of cards.
 
 ## Installation
 
@@ -86,10 +93,12 @@ import { StatStrip } from "@/components/panelui/stat-strip"
 
 ```tsx
 <StatStrip>
-  <StatStrip.Item label="Average session">9 minutes</StatStrip.Item>
-  <StatStrip.Item label="Current mood">Calm</StatStrip.Item>
-  <StatStrip.Item label="Meditation time" accent>
-    8:30 <StatStrip.Unit>PM</StatStrip.Unit>
+  <StatStrip.Item label="Issues">
+    48
+    <StatStrip.Trend value={-11} goodDirection="down" />
+  </StatStrip.Item>
+  <StatStrip.Item label="Review">
+    3.2 <StatStrip.Unit>h</StatStrip.Unit>
   </StatStrip.Item>
 </StatStrip>
 ```
@@ -100,37 +109,43 @@ import { StatStrip } from "@/components/panelui/stat-strip"
 <StatStrip>
   <StatStrip.Item label="…">
     … <StatStrip.Unit>…</StatStrip.Unit>
+    <StatStrip.Trend value={…} />
   </StatStrip.Item>
 </StatStrip>
 ```
 
 - **`StatStrip.Item`** — One figure. Its children are the value and `label` is what it measures.
 - **`StatStrip.Unit`** — The unit after a figure, drawn smaller and quieter than the number.
+- **`StatStrip.Trend`** — How the figure has moved. It takes the change as a number, writes the sign and picks the colour.
 
 ## Examples
 
-### Four figures with units
+### Stacked
 
-`StatStrip.Unit` keeps a unit attached to its number without giving it the number's weight. `accent` marks the one figure that matters most.
+`orientation="vertical"` puts the figures one over the other with a level rule between them, which fits a narrow column. Children of `StatStrip.Trend` are a caption after the change, and `format` writes the change in a unit other than percent.
 
-<ComponentPreview name="stat-strip/four" height={240}>
+<ComponentPreview name="stat-strip/stacked" height={320}>
 
 ```tsx
 import { StatStrip } from '@/components/panelui/stat-strip';
 
-export default function StatStripFour() {
+export default function StatStripStacked() {
   return (
-    <div className="w-full max-w-2xl rounded-2xl border bg-card px-6 py-5 text-card-foreground">
-      <StatStrip className="gap-6">
-        <StatStrip.Item label="Distance">
-          12.4 <StatStrip.Unit>km</StatStrip.Unit>
+    <div className="w-full max-w-xs rounded-2xl border bg-card p-5 text-card-foreground">
+      <StatStrip orientation="vertical">
+        <StatStrip.Item label="Build queue">
+          4 <StatStrip.Unit>jobs</StatStrip.Unit>
+          <StatStrip.Trend value={0}>since this morning</StatStrip.Trend>
         </StatStrip.Item>
-        <StatStrip.Item label="Moving time">48:12</StatStrip.Item>
-        <StatStrip.Item label="Elevation">
-          186 <StatStrip.Unit>m</StatStrip.Unit>
-        </StatStrip.Item>
-        <StatStrip.Item label="Average pace" accent>
-          3:53 <StatStrip.Unit>/km</StatStrip.Unit>
+        <StatStrip.Item label="Longest wait">
+          6 <StatStrip.Unit>min</StatStrip.Unit>
+          <StatStrip.Trend
+            value={-2}
+            goodDirection="down"
+            format={(minutes) => `${minutes} min`}
+          >
+            than yesterday
+          </StatStrip.Trend>
         </StatStrip.Item>
       </StatStrip>
     </div>
@@ -140,33 +155,86 @@ export default function StatStripFour() {
 
 </ComponentPreview>
 
+### Figures alone
+
+Without a card round it and without trends, the strip is a plain row. The first figure starts at the left edge and the last ends at the right.
+
+<ComponentPreview name="stat-strip/plain" height={200}>
+
+```tsx
+import { StatStrip } from '@/components/panelui/stat-strip';
+
+export default function StatStripPlain() {
+  return (
+    <StatStrip className="max-w-md">
+      <StatStrip.Item label="Distance">
+        42.2 <StatStrip.Unit>km</StatStrip.Unit>
+      </StatStrip.Item>
+      <StatStrip.Item label="Climb">
+        310 <StatStrip.Unit>m</StatStrip.Unit>
+      </StatStrip.Item>
+      <StatStrip.Item label="Finished">11:48</StatStrip.Item>
+    </StatStrip>
+  );
+}
+```
+
+</ComponentPreview>
+
 ## API Reference
+
+### StatStrip
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `orientation` | `'horizontal' \| 'vertical'` | `horizontal` | Side by side with upright rules, or stacked with level ones. |
 
 ### StatStrip.Item
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `label` | `ReactNode` | — | What the figure is. Drawn under it. |
-| `accent` | `boolean` | `false` | Draw the figure in the accent colour. For the one that matters now. |
+| `label` | `ReactNode` | — | What the figure is. Drawn over it. |
 | `valueClassName` | `string` | — | Extra classes for the figure. |
 | `labelClassName` | `string` | — | Extra classes for the label. |
+
+### StatStrip.Trend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `number` | — | The change. Its sign decides the direction; zero is drawn as no change. |
+| `format` | `(magnitude: number) => string` | `(magnitude) => ${magnitude}%` | Writes the change. Defaults to a signed percentage: "+7.8%". The number it is given is already positive, and the sign is added for you. |
+| `goodDirection` | `'up' \| 'down'` | `'up'` | Which direction is the good news. `down` for latency, cost, open issues. |
 
 Every part also takes the props of the element it renders, and a `className`.
 
 ## Notes
 
-### How many
+### Trend colours
 
-The items share the width equally. Four fit on a phone if the values are short. Past four, or with long values, the columns get too narrow to read and the figures should be a grid or a list.
+`StatStrip.Trend` is drawn in the success colour when the figure moved the good way, in the destructive colour when it moved the bad way, and in the muted colour when `value` is zero.
+
+Up is good unless you say otherwise. For a figure where less is better, such as review time, cost or open issues, pass `goodDirection="down"`.
+
+### Writing the change
+
+`format` is given the size of the change without its sign and returns the text, which defaults to a percentage. The sign is added for you, with a true minus so a column of changes lines up.
+
+### Labels
+
+Keep a label to a word or two. A label too long for its column wraps to a second line, which pushes its figure down out of line with the others.
+
+### Narrow strips
+
+The strip measures itself, not the screen. Under 24rem wide the figures are set one size smaller and the padding is tighter, so three figures still fit across a phone. The strip has to be given a width for that to work: it fills its container, and inside something that shrinks to fit its contents it has nothing to fill.
+
+### Spacing
+
+Each item is padded on the sides that face a rule. To change it, set `--pu-gap-x` on a horizontal strip or `--pu-gap-y` on a vertical one, with a class such as `[--pu-gap-x:1.5rem]`.
 
 ### Order in the markup
 
-It is a description list. Each item's label comes before its value in the markup, so a screen reader says "Average session, 9 minutes", and the value is drawn above the label with CSS.
+It is a description list. Each label is the term and its figure the description, so a screen reader says "Issues, 48".
 
 ### Server Components
 
 Stat Strip holds no state, so it is not a client module. It can be rendered from a Server Component as written, and it adds no JavaScript to the page.
-
-### Colour
-
-`accent` draws a value in the accent colour. Set `--panelui-accent` on the strip or an ancestor to change it.

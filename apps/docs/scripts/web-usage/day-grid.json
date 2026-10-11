@@ -1,0 +1,31 @@
+{
+  "slug": "day-grid",
+  "demo": "writing",
+  "demoOptions": {
+    "height": 540
+  },
+  "extraImports": [
+    "type DayCell"
+  ],
+  "intro": "Use it to show how much happened on each day of a period: words written, commits pushed, minutes practised. Each day is a dot that grows with the amount, from a speck for an empty day to a full disc for the busiest, and seven columns make each row a week.\n\nIt shows a pattern, not a figure. Nobody can read a count off the size of a dot, so put the number that matters beside the grid, and give each day a `label`: it is shown in a tag when the pointer is over that day.\n\nFor values over two dimensions that are not days, such as hour against weekday, use a table or a chart with axes.",
+  "usage": "const days: DayCell[] = [\n  { level: 0, label: '1 Sep, nothing written' },\n  { level: 2, label: '2 Sep, 880 words' },\n  { level: 4, label: '3 Sep, 2,210 words' },\n]\n\n<DayGrid cells={days} columns={7} />\n<DayGrid.Legend />",
+  "anatomy": "<DayGrid cells={…} />\n<DayGrid.Legend />",
+  "parts": {
+    "Legend": "The five sizes in a row, quietest to busiest, with a word at each end. It is a sibling of the grid, so place it wherever the layout wants it and give it the same `color`."
+  },
+  "examples": [
+    {
+      "title": "Days you can press",
+      "description": "With `onValueChange` every day is a button and `value` marks the selected one. The grid is a single Tab stop, and the arrow keys move between days.",
+      "demo": "pick-a-day",
+      "height": 400
+    },
+    {
+      "title": "Colours",
+      "description": "`color` names one of the theme's roles. Use a status colour when the amount means something, such as `success` for progress towards a goal, and leave it as `primary` otherwise.",
+      "demo": "colours",
+      "height": 320
+    }
+  ],
+  "notes": "### Levels\n\nA day's `level` is a whole number from 0 to 4. Level 0 is a small grey speck and means the day was measured and nothing happened. Levels 1 to 4 are dots of growing size and strength in the chosen colour, and a level 4 dot has a faint glow.\n\nThe component does not turn counts into levels, because where the steps fall depends on the data. Decide the four thresholds once and map your counts through them.\n\n### The lens\n\nDots within about two cells of the pointer grow, the nearest most. It follows a mouse or a pen and does nothing for touch, where a finger would cover it. Pass `lens={false}` to turn it off. It is also off for anyone who has asked their system for reduced motion.\n\n### Arriving\n\nThe dots grow in from nothing when the grid mounts, one diagonal after the next. With reduced motion on they are simply there.\n\n### Layout\n\nDays fill the grid row by row and stay round at any width. `columns` defaults to 7. For a strip that runs along one line, set `columns` to the number of days.\n\nThe grid takes the width of its container. Set a `max-w-*` class on it or on its parent to stop the dots growing too large.\n\n### Labels\n\n`label` on a day is its tag and what a screen reader says for it, so write the date and the figure: \"14 May, 6 commits\". A day without a label has no tag, and a pressable one is announced by its position and level.\n\nThe grid as a whole is announced with its `label` and how many of the days have something on them.\n\n### Keyboard\n\nWhen the days are buttons, Tab moves to the selected day, or the first. Left and right move a day, up and down move a row, and Home and End go to the first and last day."
+}

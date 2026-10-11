@@ -67,21 +67,55 @@ const planetVariants = tv({
     // the scroll it sits in is worse than one that only turns sideways.
     globe:
       'relative aspect-square w-full max-w-md cursor-grab touch-pan-y select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background active:cursor-grabbing',
-    canvas: 'absolute inset-0 size-full',
+    // The glow's colour is put in a real colour property, so the browser
+    // resolves it and the drawing code can read back a colour it can use.
+    canvas: 'absolute inset-0 size-full [outline-color:var(--pu-glow)]',
     markers: 'pointer-events-none absolute inset-0',
     // Opacity 0 until the first frame has placed it, so a marker is never
     // seen stacked in the corner it starts in.
     marker:
       'pointer-events-auto absolute left-0 top-0 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center opacity-0 will-change-transform',
+    // The same label and pin the app library's Map draws: opaque enough to
+    // read over the land, with an edge and a shadow so it sits on the globe
+    // and not in it.
+    // The stem under the label ties it to its pin, so two labels close
+    // together can still be told apart.
     label:
-      'absolute bottom-full mb-1.5 flex items-center gap-1.5 whitespace-nowrap rounded-full border bg-card/90 px-2.5 py-1 text-xs font-medium text-card-foreground shadow-sm backdrop-blur-sm',
+      'absolute bottom-full mb-2.5 flex items-center gap-1.5 whitespace-nowrap rounded-md border bg-background/95 px-1.5 py-0.5 text-xs font-medium text-foreground shadow-sm after:absolute after:left-1/2 after:top-full after:h-2 after:w-px after:-translate-x-1/2 after:bg-foreground/40',
     count: 'tabular-nums text-muted-foreground',
-    pin: 'flex size-7 items-center justify-center overflow-hidden rounded-full border-2 border-background bg-muted shadow-sm',
-    dot: 'size-2.5 rounded-full bg-primary ring-4 ring-primary/20',
-    controls: 'flex items-center justify-center gap-6 text-sm font-medium',
+    // An opaque surface. A tint would let the land show through whatever the
+    // pin holds, and initials over a field of dots cannot be read.
+    pin: 'relative flex size-8 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--pu-color)] bg-card text-card-foreground shadow-md ring-2 ring-background',
+    dot: 'relative size-3.5 rounded-full border-2 border-background bg-[var(--pu-color)] shadow-md',
+    // A ring that spreads from the marker and fades, for one that wants
+    // looking at. Still for anyone who has asked for reduced motion.
+    pulse:
+      'pointer-events-none absolute left-1/2 top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full bg-[var(--pu-color)] opacity-70 motion-reduce:hidden',
+    // One surface split by a hairline, not two buttons with a gap between.
+    controls:
+      'inline-flex items-stretch divide-x divide-border overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm',
     control:
-      'inline-flex size-8 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+      'inline-flex size-9 cursor-pointer items-center justify-center text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground active:bg-muted',
+    caption: 'flex items-center px-3 text-sm font-medium',
   },
+  variants: {
+    /** The colour of the light at the globe's edge. */
+    glow: {
+      primary: { globe: '[--pu-glow:var(--primary)]' },
+      info: { globe: '[--pu-glow:var(--info)]' },
+      success: { globe: '[--pu-glow:var(--success)]' },
+      warning: { globe: '[--pu-glow:var(--warning)]' },
+      destructive: { globe: '[--pu-glow:var(--destructive)]' },
+    },
+    color: {
+      primary: { marker: '[--pu-color:var(--primary)]' },
+      info: { marker: '[--pu-color:var(--info)]' },
+      success: { marker: '[--pu-color:var(--success)]' },
+      warning: { marker: '[--pu-color:var(--warning)]' },
+      destructive: { marker: '[--pu-color:var(--destructive)]' },
+    },
+  },
+  defaultVariants: { color: 'primary', glow: 'primary' },
 });
 
 /* -------------------------------------------------------------------------- */
@@ -89,6 +123,9 @@ const planetVariants = tv({
 /* -------------------------------------------------------------------------- */
 
 const RADIANS = Math.PI / 180;
+
+/** The globe's radius as a share of half its box. The rest is the glow. */
+const SPHERE = 0.9;
 
 /** The points of a dot grid that fall on land, as unit vectors. */
 interface Dots {
@@ -268,11 +305,30 @@ function createEngine({ canvas, rotation, autoRotate, listeners, onSettle }: Eng
     if (!context || size === 0) return;
     const ratio = window.devicePixelRatio || 1;
     const centre = size / 2;
-    const radius = size / 2 - 1;
-    const color = getComputedStyle(canvas).color;
+    // Smaller than the canvas, which leaves a margin for the light round it.
+    const radius = (size / 2) * SPHERE;
+    const style = getComputedStyle(canvas);
+    const color = style.color;
+    const glow = style.outlineColor || color;
 
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     context.clearRect(0, 0, size, size);
+
+    /*
+     * The light round the globe: a ring that starts at the edge and fades
+     * outwards. Drawn as a ring and not a disc, because a gradient paints its
+     * first colour all the way in to the middle.
+     */
+    const halo = context.createRadialGradient(centre, centre, radius * 0.98, centre, centre, size / 2);
+    halo.addColorStop(0, glow);
+    halo.addColorStop(1, 'transparent');
+    context.fillStyle = halo;
+    context.globalAlpha = 0.24;
+    context.beginPath();
+    context.arc(centre, centre, size / 2, 0, Math.PI * 2);
+    context.arc(centre, centre, radius, 0, Math.PI * 2, true);
+    context.fill('evenodd');
+    context.globalAlpha = 1;
 
     /* The sphere itself: a faint disc, lit from the upper left. */
     context.save();
@@ -294,6 +350,14 @@ function createEngine({ canvas, rotation, autoRotate, listeners, onSettle }: Eng
     lit.addColorStop(1, 'transparent');
     context.fillStyle = lit;
     context.globalAlpha = 0.11;
+    context.fillRect(0, 0, size, size);
+    // The same light caught just inside the edge, which is what makes the
+    // disc read as a ball with air round it.
+    const rim = context.createRadialGradient(centre, centre, radius * 0.66, centre, centre, radius);
+    rim.addColorStop(0, 'transparent');
+    rim.addColorStop(1, glow);
+    context.fillStyle = rim;
+    context.globalAlpha = 0.2;
     context.fillRect(0, 0, size, size);
     context.restore();
 
@@ -334,8 +398,11 @@ function createEngine({ canvas, rotation, autoRotate, listeners, onSettle }: Eng
       if (!path) continue;
       const px = centre + x * radius;
       const py = centre - y * radius;
-      path.moveTo(px + dotRadius, py);
-      path.arc(px, py, dotRadius, 0, Math.PI * 2);
+      // Dots facing the viewer are drawn a little larger than those turned
+      // away, as they would be seen.
+      const r = dotRadius * (0.72 + 0.42 * depth);
+      path.moveTo(px + r, py);
+      path.arc(px, py, r, 0, Math.PI * 2);
     }
     context.fillStyle = color;
     paths.forEach((path, level) => {
@@ -606,9 +673,11 @@ PlanetRoot.displayName = 'Planet';
 /* Globe                                                                      */
 /* -------------------------------------------------------------------------- */
 
-export interface PlanetGlobeProps extends Omit<ComponentProps<'div'>, 'children'> {
+export interface PlanetGlobeProps extends Omit<ComponentProps<'div'>, 'children' | 'color'> {
   /** The markers. Anything else placed here is laid over the globe unmoved. */
   children?: ReactNode;
+  /** Which of the theme's roles the light round the globe is drawn in. */
+  color?: PlanetMarkerColor;
   /** What a screen reader calls the globe. */
   label?: string;
 }
@@ -616,8 +685,14 @@ export interface PlanetGlobeProps extends Omit<ComponentProps<'div'>, 'children'
 /** Degrees one press of an arrow key turns the globe. */
 const KEY_STEP = 15;
 
-function PlanetGlobe({ children, className, label = 'Globe', ...props }: PlanetGlobeProps) {
-  const slots = planetVariants();
+function PlanetGlobe({
+  children,
+  className,
+  color = 'primary',
+  label = 'Globe',
+  ...props
+}: PlanetGlobeProps) {
+  const slots = planetVariants({ glow: color });
   const planet = usePlanetContext('Planet.Globe');
   const canvas = useRef<HTMLCanvasElement>(null);
   const pointer = useRef<{ id: number; x: number; y: number; vertical: boolean } | null>(null);
@@ -631,6 +706,12 @@ function PlanetGlobe({ children, className, label = 'Globe', ...props }: PlanetG
   onRotationChange.current = planet.onRotationChange;
 
   const { engine, defaultRotation, listeners } = planet;
+  // The glow is read off the canvas when it draws, so a new colour needs a
+  // new drawing to be seen.
+  useEffect(() => {
+    engine.current?.invalidate();
+  }, [engine, color]);
+
   useEffect(() => {
     if (!canvas.current) return;
     const created = createEngine({
@@ -741,16 +822,23 @@ PlanetGlobe.displayName = 'Planet.Globe';
 /* Marker                                                                     */
 /* -------------------------------------------------------------------------- */
 
-export interface PlanetMarkerProps extends Omit<ComponentProps<'div'>, 'children'> {
+/** Which of the theme's roles a marker's dot is drawn in. */
+export type PlanetMarkerColor = 'primary' | 'info' | 'success' | 'warning' | 'destructive';
+
+export interface PlanetMarkerProps extends Omit<ComponentProps<'div'>, 'children' | 'color'> {
   /** Degrees north of the equator. South is negative. */
   lat: number;
   /** Degrees east of Greenwich. West is negative. */
   lng: number;
-  /** A caption in a pill above the pin. */
+  /** A caption in a tag above the pin. */
   label?: ReactNode;
   /** A figure after the label, in a quieter colour. */
   count?: ReactNode;
-  /** Extra classes for the label pill. */
+  /** Which of the theme's roles the dot, or the ring of a pin with children, is drawn in. */
+  color?: PlanetMarkerColor;
+  /** Spreads a fading ring from the marker, for one that wants looking at. */
+  pulse?: boolean;
+  /** Extra classes for the label. */
   labelClassName?: string;
   /** What is drawn at the coordinate: an avatar, an icon. A dot when left out. */
   children?: ReactNode;
@@ -765,12 +853,14 @@ function PlanetMarker({
   lng,
   label,
   count,
+  color = 'primary',
+  pulse = false,
   className,
   labelClassName,
   children,
   ...props
 }: PlanetMarkerProps) {
-  const slots = planetVariants();
+  const slots = planetVariants({ color });
   const planet = usePlanetContext('Planet.Marker');
   const element = useRef<HTMLDivElement>(null);
   const { subscribe } = planet;
@@ -803,6 +893,7 @@ function PlanetMarker({
           ) : null}
         </span>
       ) : null}
+      {pulse ? <span aria-hidden="true" className={slots.pulse()} /> : null}
       {children !== undefined && children !== null ? (
         <span className={slots.pin()}>{children}</span>
       ) : (
@@ -820,7 +911,7 @@ PlanetMarker.displayName = 'Planet.Marker';
 export interface PlanetControlsProps extends Omit<ComponentProps<'div'>, 'children'> {
   /** Degrees of longitude one press turns the globe. */
   step?: number;
-  /** The words between the arrows. */
+  /** Words to show between the two arrows. Without them it is the arrows alone. */
   children?: ReactNode;
 }
 
@@ -839,24 +930,26 @@ const Arrow = ({ flipped }: { flipped?: boolean }) => (
   </svg>
 );
 
-function PlanetControls({ step = 60, className, children = 'Rotate globe', ...props }: PlanetControlsProps) {
+function PlanetControls({ step = 60, className, children, ...props }: PlanetControlsProps) {
   const slots = planetVariants();
   const planet = usePlanetContext('Planet.Controls');
 
   return (
-    <div className={slots.controls({ className })} {...props}>
+    <div role="group" aria-label="Turn the globe" className={slots.controls({ className })} {...props}>
       <button
         type="button"
-        aria-label="Rotate west"
+        aria-label="Turn west"
         className={slots.control()}
         onClick={() => planet.rotateBy(-step)}
       >
         <Arrow flipped />
       </button>
-      <span>{children}</span>
+      {children !== undefined && children !== null ? (
+        <span className={slots.caption()}>{children}</span>
+      ) : null}
       <button
         type="button"
-        aria-label="Rotate east"
+        aria-label="Turn east"
         className={slots.control()}
         onClick={() => planet.rotateBy(step)}
       >

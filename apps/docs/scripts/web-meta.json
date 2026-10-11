@@ -27,54 +27,54 @@
       "category": "feedback"
     }
   ],
-  "activity-grid": [
-    "ActivityGrid",
-    "A period as a grid of pills: each day met, partly met or missed.",
-    "react activity grid habit tracker heatmap component",
+  "day-grid": [
+    "DayGrid",
+    "A run of days as a field of dots, each sized by how much happened on it.",
+    "react activity grid contribution heatmap component",
     {
       "addedIn": "0.1.0",
       "category": "data",
-      "title": "Activity Grid"
+      "title": "Day Grid"
     }
   ],
   "range-meter": [
     "RangeMeter",
-    "A reading on a track between its lowest and highest, with the number on the thumb.",
-    "react range slider meter gradient thumb component",
+    "A reading on a ruler of ticks that rises where the value is, with the number above it.",
+    "react range slider meter value thumb component",
     {
       "addedIn": "0.1.0",
       "category": "data",
       "title": "Range Meter"
     }
   ],
-  "forecast-bars": [
-    "ForecastBars",
-    "A short run of values as capsule bars, one of them picked.",
-    "react bar chart week selector capsule bars component",
+  "bar-picker": [
+    "BarPicker",
+    "A short run of values as columns of lights, one column picked.",
+    "react bar chart selector radio group component",
     {
       "addedIn": "0.1.0",
       "category": "data",
-      "title": "Forecast Bars"
+      "title": "Bar Picker"
     }
   ],
   "stat-strip": [
     "StatStrip",
-    "A row of figures, each over the words that say what it is.",
-    "react stat row kpi strip component",
+    "A few figures as one panel, each under its label and split by rules.",
+    "react stat row kpi panel component",
     {
       "addedIn": "0.1.0",
       "category": "data",
       "title": "Stat Strip"
     }
   ],
-  "pill-stack": [
-    "PillStack",
-    "A stack of cards with one open and the rest folded to pills that taper away from it.",
-    "react stacked cards accordion pills component",
+  "fold-stack": [
+    "FoldStack",
+    "A deck of cards with one in front, the rest folded in behind it, and tabs to bring any forward.",
+    "react card stack deck tabs component",
     {
       "addedIn": "0.1.0",
       "category": "layout",
-      "title": "Pill Stack"
+      "title": "Fold Stack"
     }
   ]
 }

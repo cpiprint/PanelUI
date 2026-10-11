@@ -4,39 +4,40 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { RollingNumber } from 'panelui-web/rolling-number';
 
+/** Three weeks after a launch. */
 const WEEKS = [
-  { visitors: 18420, conversion: 0.031, revenue: 46200 },
-  { visitors: 21960, conversion: 0.038, revenue: 61850 },
-  { visitors: 19310, conversion: 0.027, revenue: 39400 },
+  { downloads: 18420, paid: 0.031, sales: 46200 },
+  { downloads: 21960, paid: 0.038, sales: 61850 },
+  { downloads: 19310, paid: 0.027, sales: 39400 },
 ];
 
 export default function RollingNumberFormats() {
   const [week, setWeek] = useState(0);
-  const { visitors, conversion, revenue } = WEEKS[week];
+  const { downloads, paid, sales } = WEEKS[week];
 
   return (
     <div className="flex flex-col items-center gap-6">
       <dl className="grid grid-cols-3 gap-8 text-center">
         <div className="flex flex-col gap-1">
-          <dt className="text-sm text-muted-foreground">Visitors</dt>
-          <dd className="text-2xl font-semibold">
-            <RollingNumber value={visitors} />
+          <dt className="text-sm font-medium text-muted-foreground">Downloads</dt>
+          <dd className="text-2xl font-bold">
+            <RollingNumber value={downloads} />
           </dd>
         </div>
         <div className="flex flex-col gap-1">
-          <dt className="text-sm text-muted-foreground">Conversion</dt>
-          <dd className="text-2xl font-semibold">
+          <dt className="text-sm font-medium text-muted-foreground">Trial to paid</dt>
+          <dd className="text-2xl font-bold">
             <RollingNumber
-              value={conversion}
+              value={paid}
               format={{ style: 'percent', minimumFractionDigits: 1 }}
             />
           </dd>
         </div>
         <div className="flex flex-col gap-1">
-          <dt className="text-sm text-muted-foreground">Revenue</dt>
-          <dd className="text-2xl font-semibold">
+          <dt className="text-sm font-medium text-muted-foreground">Sales</dt>
+          <dd className="text-2xl font-bold">
             <RollingNumber
-              value={revenue}
+              value={sales}
               format={{
                 style: 'currency',
                 currency: 'USD',

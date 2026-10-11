@@ -1,0 +1,22 @@
+{
+  "slug": "fold-stack",
+  "demo": "pipeline",
+  "demoOptions": {
+    "height": 480
+  },
+  "intro": "Use it for a few things of the same kind where one is looked at at a time and it helps to see that there are more: the stages of a pipeline, the steps of a setup, a handful of plans. It is a deck of cards. One is in front, the next two show as edges under it, and a row of tabs brings any card forward.\n\nThe deck is as tall as its tallest card and stays that height, so nothing under it moves when the card changes.\n\nEvery card has to fit that one size. For sections of very different lengths use an accordion, and past about six cards the row of tabs wraps and a list is the better shape.",
+  "usage": "<FoldStack defaultValue=\"test\">\n  <FoldStack.Item value=\"build\" label=\"Build\" color=\"success\">\n    Passed in 2 min 14 s.\n  </FoldStack.Item>\n  <FoldStack.Item value=\"test\" label=\"Test\" color=\"destructive\">\n    2 of 318 failing.\n  </FoldStack.Item>\n</FoldStack>",
+  "anatomy": "<FoldStack>\n  <FoldStack.Item value=\"…\" label=\"…\">…</FoldStack.Item>\n</FoldStack>",
+  "parts": {
+    "Item": "One card, and its tab. `value` identifies it, `label` is what the tab says, and `color` is the light on the tab. Its children are the card's contents. Items have to be direct children of the stack."
+  },
+  "examples": [
+    {
+      "title": "Holding the front card yourself",
+      "description": "`value` and `onValueChange` put the front card in your own state, so a button inside one card can bring the next forward.",
+      "demo": "one-at-a-time",
+      "height": 400
+    }
+  ],
+  "notes": "### Which card is in front\n\n`defaultValue` names the card in front to begin with. Without it, or if it names no card, the first one is.\n\n### The pile\n\nThe two cards after the front one show under it, each 6 percent smaller and 12px lower than the card before, and a shade further back. The order goes round: behind the last card is the first. Any further cards are hidden until they come within two of the front.\n\nPressing the edge of a card behind brings that card forward, which is a quick way to the next one.\n\n### Height\n\nAll the cards share one size, the height of the tallest. A short card is stretched to it, so give a card's contents `h-full` if something in it should sit at the bottom.\n\n### Colour\n\n`color` on an item is the small light on its tab, in one of the theme's roles. It defaults to `primary`. Use the status colours when the colour says something, such as the state of a stage.\n\n### Contents stay mounted\n\nThe cards behind stay in the page, so a field somebody filled in is still filled when its card comes back. They are made inert and hidden from screen readers while they are behind.\n\n### Keyboard\n\nThe row of tabs is one Tab stop. Left and right move to the next tab and bring its card forward, wrapping at the ends, and Home and End go to the first and last.\n\n### Motion\n\nChanging the card moves each one to its new place in the pile over half a second. With reduced motion on, it happens at once."
+}

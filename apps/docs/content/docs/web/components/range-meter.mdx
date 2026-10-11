@@ -1,63 +1,60 @@
 ---
 title: Range Meter
-description: A reading on a track between its lowest and highest, with the number on the thumb.
+description: A reading on a ruler of ticks that rises where the value is, with the number above it.
 status: new
 ---
 
-<ComponentPreview name="range-meter/heart-rate" height={380}>
+<ComponentPreview name="range-meter/response-time" height={380}>
 
 ```tsx
 'use client';
 
-import { ArrowDownIcon, ArrowUpIcon, HeartIcon } from 'lucide-react';
 import { useState } from 'react';
-import { RangeMeter } from '@/components/panelui/range-meter';
+import { RangeMeter, type RangeMeterColor } from '@/components/panelui/range-meter';
 
-const LOWEST = 54;
-const PEAK = 98;
-const AVERAGE = 76;
+const FASTEST = 80;
+const SLOWEST = 600;
+/** What the team has agreed a page may take. */
+const BUDGET = 300;
 
-export default function RangeMeterHeartRate() {
-  const [reading, setReading] = useState(89);
+/** Fine under the budget, a warning up to half as much again, a problem past that. */
+const colorOf = (time: number): RangeMeterColor =>
+  time <= BUDGET ? 'success' : time <= BUDGET * 1.5 ? 'warning' : 'destructive';
+
+const verdictOf = (time: number) =>
+  time <= BUDGET ? `${BUDGET - time} ms inside the budget` : `${time - BUDGET} ms over the budget`;
+
+export default function RangeMeterResponseTime() {
+  const [time, setTime] = useState(240);
 
   return (
-    <div className="dark flex w-full max-w-xl flex-col gap-7 rounded-[36px] bg-card p-6 text-card-foreground">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-muted-foreground">Daily Average</p>
-          <p className="text-3xl">
-            {AVERAGE} <span className="text-[oklch(0.7_0.19_42)]">BPM</span>
-          </p>
-        </div>
-        <div className="flex flex-col items-end gap-1">
-          <p className="text-muted-foreground">Last reading</p>
-          <p className="text-xl">2 min ago</p>
-        </div>
+    <div className="flex w-full max-w-sm flex-col gap-4 rounded-2xl border bg-card p-5 text-card-foreground">
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 className="text-sm font-medium">Checkout page</h3>
+        <p className="text-sm text-muted-foreground">Budget {BUDGET} ms</p>
       </div>
 
       <div className="flex flex-col gap-2">
         <RangeMeter
-          min={LOWEST}
-          max={PEAK}
-          value={reading}
-          onValueChange={setReading}
-          marker={AVERAGE}
-          label="Last reading"
-          valueText={`${reading} beats per minute`}
-        >
-          <HeartIcon fill="currentColor" />
-        </RangeMeter>
-        <div className="flex justify-between text-muted-foreground">
-          <p className="flex items-center gap-2">
-            Lowest <span className="text-foreground">{LOWEST}</span>
-            <ArrowDownIcon className="size-4" aria-hidden="true" />
-          </p>
-          <p className="flex items-center gap-2">
-            Peak <span className="text-foreground">{PEAK}</span>
-            <ArrowUpIcon className="size-4" aria-hidden="true" />
-          </p>
+          min={FASTEST}
+          max={SLOWEST}
+          step={10}
+          value={time}
+          onValueChange={setTime}
+          marker={BUDGET}
+          color={colorOf(time)}
+          label="Response time"
+          valueText={`${time} milliseconds`}
+        />
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>{FASTEST} ms</span>
+          <span>{SLOWEST} ms</span>
         </div>
       </div>
+
+      <p className="text-sm text-muted-foreground" aria-live="polite">
+        {verdictOf(time)}
+      </p>
     </div>
   );
 }
@@ -65,11 +62,11 @@ export default function RangeMeterHeartRate() {
 
 </ComponentPreview>
 
-Use it for one reading that only means something next to its range: a heart rate between the day's lowest and its peak, a goal between a floor and a ceiling. The value is written on the thumb, so where it is and what it is are read together.
+Use it for one reading on a known scale where the position matters as much as the number: a response time between the fastest and the slowest, a level between empty and full. The scale is a ruler of ticks that rises where the reading is, with the number in a tag above the rise.
 
-With `onValueChange` it is a slider you can drag. Without it, it is a meter that shows a value.
+With `onValueChange` it is a slider that can be dragged. Without it, the same drawing is a meter that only shows a value.
 
-It holds one value. For two ends of a range, or a control in a form where the number matters less than the label, use a slider.
+It needs about 12rem of width for the rise to read as one. In a tighter space, or for a reading that needs no number, use a progress bar.
 
 ## Installation
 
@@ -124,46 +121,51 @@ import { RangeMeter } from "@/components/panelui/range-meter"
 ```
 
 ```tsx
-<RangeMeter min={54} max={98} value={bpm} onValueChange={setBpm} marker={76}>
-  <HeartIcon />
-</RangeMeter>
+<RangeMeter
+  min={80}
+  max={600}
+  step={10}
+  value={time}
+  onValueChange={setTime}
+  marker={300}
+/>
 ```
 
 ## Examples
 
-### A meter
+### A reading that cannot be changed
 
-Leave out `onValueChange` and it cannot be moved. `formatValue` writes the number on the thumb, here with its unit. The accent is the `--panelui-accent` variable, set on the meter in this example.
+Leave out `onValueChange` and it is announced as a meter, takes no focus and ignores the pointer. `formatValue` writes the number in the tag.
 
-<ComponentPreview name="range-meter/reading" height={280}>
+<ComponentPreview name="range-meter/readings" height={420}>
 
 ```tsx
 'use client';
 
-import { DropletIcon } from 'lucide-react';
 import { RangeMeter } from '@/components/panelui/range-meter';
 
-/** No `onValueChange`, so it shows a value and cannot be moved. */
-export default function RangeMeterReading() {
+/** Three readings nobody can change: without `onValueChange` it is a meter. */
+const READINGS = [
+  { name: 'Build cache', used: 71, color: 'primary' },
+  { name: 'Artifact storage', used: 88, color: 'warning' },
+  { name: 'Log retention', used: 34, color: 'info' },
+] as const;
+
+export default function RangeMeterReadings() {
   return (
-    <div className="dark flex w-full max-w-md flex-col gap-4 rounded-[28px] bg-card p-6 text-card-foreground">
-      <div className="flex items-baseline justify-between">
-        <p className="text-muted-foreground">Water today</p>
-        <p className="text-sm text-muted-foreground">Goal 2.5 L</p>
-      </div>
-      <RangeMeter
-        min={0}
-        max={2.5}
-        value={1.8}
-        marker={2}
-        label="Water today"
-        valueText="1.8 of 2.5 litres"
-        formatValue={(litres) => `${litres} L`}
-        // Any colour works as the accent. It is one variable.
-        className="[--panelui-accent:oklch(0.72_0.14_230)]"
-      >
-        <DropletIcon fill="currentColor" />
-      </RangeMeter>
+    <div className="flex w-full max-w-sm flex-col gap-5">
+      {READINGS.map((reading) => (
+        <div key={reading.name} className="flex flex-col">
+          <span className="text-sm font-medium">{reading.name}</span>
+          <RangeMeter
+            value={reading.used}
+            color={reading.color}
+            formatValue={(value) => `${value}%`}
+            label={reading.name}
+            valueText={`${reading.used} percent used`}
+          />
+        </div>
+      ))}
     </div>
   );
 }
@@ -171,45 +173,39 @@ export default function RangeMeterReading() {
 
 </ComponentPreview>
 
-### Steps and a format
+### Fewer ticks and an icon
 
-`step` is what a drag snaps to and what one arrow key press moves by. A long number is shortened on the thumb with `formatValue`, and `valueText` gives a screen reader the whole figure.
+`ticks` sets how many the ruler is drawn with. Here there are 21, one for each step of 5. Children are drawn in the tag before the number, which is the place for an icon.
 
-<ComponentPreview name="range-meter/steps" height={300}>
+<ComponentPreview name="range-meter/brightness" height={280}>
 
 ```tsx
 'use client';
 
-import { FootprintsIcon } from 'lucide-react';
+import { SunIcon } from 'lucide-react';
 import { useState } from 'react';
 import { RangeMeter } from '@/components/panelui/range-meter';
 
-const compact = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 });
-
-export default function RangeMeterSteps() {
-  const [goal, setGoal] = useState(8000);
+export default function RangeMeterBrightness() {
+  const [brightness, setBrightness] = useState(65);
 
   return (
-    <div className="dark flex w-full max-w-md flex-col gap-4 rounded-[28px] bg-card p-6 text-card-foreground">
-      <div className="flex items-baseline justify-between">
-        <p className="text-muted-foreground">Daily step goal</p>
-        <p className="text-sm text-muted-foreground">About {Math.round(goal / 1300)} km</p>
-      </div>
+    <div className="flex w-full max-w-xs flex-col gap-2">
       <RangeMeter
-        min={2000}
-        max={14000}
-        step={500}
-        value={goal}
-        onValueChange={setGoal}
-        label="Daily step goal"
-        valueText={`${goal.toLocaleString('en-US')} steps`}
-        formatValue={(steps) => compact.format(steps)}
+        step={5}
+        ticks={21}
+        value={brightness}
+        onValueChange={setBrightness}
+        color="warning"
+        formatValue={(value) => `${value}%`}
+        label="Brightness"
+        valueText={`${brightness} percent`}
       >
-        <FootprintsIcon />
+        <SunIcon />
       </RangeMeter>
-      <div className="flex justify-between text-sm text-muted-foreground">
-        <span>2k</span>
-        <span>14k</span>
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>Dim</span>
+        <span>Bright</span>
       </div>
     </div>
   );
@@ -224,36 +220,50 @@ export default function RangeMeterSteps() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `min` | `number` | `0` | The low end of the track. |
-| `max` | `number` | `100` | The high end of the track. |
-| `value` | `number` | — | The reading: where the thumb sits and the number written on it. |
-| `onValueChange` | `(value: number) => void` | — | Called with the new value as the thumb is dragged or moved with the keyboard. Passing this makes it a slider; without it, it is a meter. |
+| `min` | `number` | `0` | The low end of the ruler. |
+| `max` | `number` | `100` | The high end of the ruler. |
+| `value` | `number` | — | The reading: where the ruler rises and the number written above it. |
+| `onValueChange` | `(value: number) => void` | — | Called with the new value as the ruler is dragged or moved with the keyboard. Passing this makes it a slider; without it, it is a meter. |
 | `step` | `number` | `1` | How much one arrow key press moves the value, and what a drag snaps to. |
-| `marker` | `number` | — | A value to mark on the track with a dashed line, such as an average. |
-| `formatValue` | `(value: number) => ReactNode` | — | Writes the number on the thumb. Defaults to the value as it is. |
+| `marker` | `number` | — | A value to mark under the ruler, such as a target. |
+| `ticks` | `number` | `41` | How many ticks the ruler is drawn with. |
+| `color` | `RangeMeterColor` | `'primary'` | Which of the theme's roles the lit ticks and the tag are drawn in. |
+| `formatValue` | `(value: number) => ReactNode` | — | Writes the number in the tag. Defaults to the value as it is. |
 | `label` | `string` | `'Reading'` | What a screen reader calls it. |
-| `valueText` | `string` | — | What a screen reader says for the value: "89 beats per minute". |
+| `valueText` | `string` | — | What a screen reader says for the value: "240 milliseconds". |
 
 Every part also takes the props of the element it renders, and a `className`.
 
 ## Notes
 
-### The marker
+### Scale
 
-`marker` draws a dashed line at a value on the track: an average, a goal, yesterday's reading. It is decoration and is not announced, so say what it marks in the text around the meter.
+`min` and `max` are the ends of the ruler and default to 0 and 100. A `value` outside them is drawn at the nearest end and still announced as given.
 
-### Keyboard
+`step` is what one arrow key press moves the value by, and what a drag snaps to.
 
-As a slider it takes focus. Left and right move by `step`, Page Up and Page Down by a tenth of the range, Home and End go to the ends.
+### Ticks
 
-### Screen readers
+The ruler has 41 ticks unless `ticks` says otherwise. They are decoration and not graduations: the reading is placed by its value, between two ticks if that is where it falls. Set `ticks` so one tick is a round amount if you want them to line up with the steps.
 
-It is announced as a slider or a meter with its value, minimum and maximum. Pass `valueText` when the bare number is not enough: "89 beats per minute" in place of "89".
+### The tag stays inside
 
-### The thumb near the ends
+The tag sits over the reading and is hung from it in proportion to the reading's place on the ruler: by its left edge at the lowest value, its middle half way and its right edge at the highest. Nothing hangs outside the control, so it can be placed against the edge of a card.
 
-The thumb is held in from each end of the track by half its own width, so at the lowest and highest values it stays inside the meter. The gradient still deepens at the true position.
+The control is taller than the ruler by the height of the tag, which is drawn inside its box.
+
+### Marker
+
+`marker` draws a small diamond under the ruler at a value, such as a target or a budget. It is hidden from screen readers, so say what it marks in text beside the meter.
 
 ### Colour
 
-The track and thumb use the accent, deepened towards red under the thumb. Set `--panelui-accent` on the meter or on any ancestor to change it. The number on the thumb is white, so pick an accent dark enough to read it against.
+`color` names one of the theme's roles and colours the lit ticks and the tag. To show that a reading has crossed a threshold, work out the role from the value and pass it, as the first example does.
+
+### Keyboard
+
+Left and down lower the value by one step, right and up raise it. Page Up and Page Down move a tenth of the range, and Home and End go to the ends.
+
+### Screen readers
+
+Pass `label` to name the reading and `valueText` to say the value with its unit, such as "240 milliseconds".

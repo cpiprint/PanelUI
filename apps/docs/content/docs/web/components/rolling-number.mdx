@@ -4,7 +4,7 @@ description: A number whose digits roll to their new values.
 status: new
 ---
 
-<ComponentPreview name="rolling-number/counter" height={260}>
+<ComponentPreview name="rolling-number/queue" height={260}>
 
 ```tsx
 'use client';
@@ -12,26 +12,23 @@ status: new
 import { useEffect, useState } from 'react';
 import { RollingNumber } from '@/components/panelui/rolling-number';
 
-/** What a live count does over a minute: it wanders. */
-const READINGS = [124, 121, 133, 129, 140, 136];
+/** Jobs waiting in a queue, read every couple of seconds. */
+const WAITING = [312, 298, 305, 341, 327, 289];
 
-export default function RollingNumberCounter() {
-  const [step, setStep] = useState(0);
+export default function RollingNumberQueue() {
+  const [reading, setReading] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setStep((current) => (current + 1) % READINGS.length);
+      setReading((current) => (current + 1) % WAITING.length);
     }, 2200);
     return () => clearInterval(timer);
   }, []);
 
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-sm text-muted-foreground">Events</span>
-      <RollingNumber
-        value={READINGS[step]}
-        className="text-6xl font-semibold tracking-tight"
-      />
+      <span className="text-sm font-medium text-muted-foreground">Jobs waiting</span>
+      <RollingNumber value={WAITING[reading]} className="text-6xl font-bold tracking-tight" />
     </div>
   );
 }
@@ -39,7 +36,7 @@ export default function RollingNumberCounter() {
 
 </ComponentPreview>
 
-Use it for a figure that changes while someone is looking at it: a live count, a balance, a score. Each digit rolls to its new value on its own, so going from 124 to 121 moves one column and leaves the other two where they were.
+Use it for a figure that changes while someone is looking at it: a live count, a balance, a score. Each digit rolls to its new value on its own, so going from 312 to 318 moves one column and leaves the other two where they were.
 
 The number is written by `Intl.NumberFormat`. Currency, percent and compact notation are options you pass, not strings you build.
 
@@ -98,7 +95,7 @@ import { RollingNumber } from "@/components/panelui/rolling-number"
 ```
 
 ```tsx
-<RollingNumber value={events} />
+<RollingNumber value={waiting} />
 ```
 
 ## Examples
@@ -117,28 +114,24 @@ import { Button } from '@/components/ui/button';
 import { RollingNumber } from '@/components/panelui/rolling-number';
 
 export default function RollingNumberCurrency() {
-  const [balance, setBalance] = useState(12582210.27);
+  const [total, setTotal] = useState(1864.5);
 
   return (
     <div className="flex flex-col items-center gap-6">
       <div className="flex flex-col items-center gap-1">
-        <span className="text-sm text-muted-foreground">Balance</span>
+        <span className="text-sm font-medium text-muted-foreground">Trip budget left</span>
         <RollingNumber
-          value={balance}
-          format={{ style: 'currency', currency: 'USD' }}
-          className="text-4xl font-semibold tracking-tight"
+          value={total}
+          format={{ style: 'currency', currency: 'EUR' }}
+          className="text-4xl font-bold tracking-tight"
         />
       </div>
       <div className="flex flex-wrap justify-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setBalance((value) => value - 1840.5)}
-        >
-          Pay an invoice
+        <Button variant="outline" size="sm" onClick={() => setTotal((value) => value - 72.4)}>
+          Book a train
         </Button>
-        <Button size="sm" onClick={() => setBalance((value) => value + 25000)}>
-          Add a deposit
+        <Button size="sm" onClick={() => setTotal((value) => value + 350)}>
+          Add a refund
         </Button>
       </div>
     </div>
@@ -161,39 +154,40 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { RollingNumber } from '@/components/panelui/rolling-number';
 
+/** Three weeks after a launch. */
 const WEEKS = [
-  { visitors: 18420, conversion: 0.031, revenue: 46200 },
-  { visitors: 21960, conversion: 0.038, revenue: 61850 },
-  { visitors: 19310, conversion: 0.027, revenue: 39400 },
+  { downloads: 18420, paid: 0.031, sales: 46200 },
+  { downloads: 21960, paid: 0.038, sales: 61850 },
+  { downloads: 19310, paid: 0.027, sales: 39400 },
 ];
 
 export default function RollingNumberFormats() {
   const [week, setWeek] = useState(0);
-  const { visitors, conversion, revenue } = WEEKS[week];
+  const { downloads, paid, sales } = WEEKS[week];
 
   return (
     <div className="flex flex-col items-center gap-6">
       <dl className="grid grid-cols-3 gap-8 text-center">
         <div className="flex flex-col gap-1">
-          <dt className="text-sm text-muted-foreground">Visitors</dt>
-          <dd className="text-2xl font-semibold">
-            <RollingNumber value={visitors} />
+          <dt className="text-sm font-medium text-muted-foreground">Downloads</dt>
+          <dd className="text-2xl font-bold">
+            <RollingNumber value={downloads} />
           </dd>
         </div>
         <div className="flex flex-col gap-1">
-          <dt className="text-sm text-muted-foreground">Conversion</dt>
-          <dd className="text-2xl font-semibold">
+          <dt className="text-sm font-medium text-muted-foreground">Trial to paid</dt>
+          <dd className="text-2xl font-bold">
             <RollingNumber
-              value={conversion}
+              value={paid}
               format={{ style: 'percent', minimumFractionDigits: 1 }}
             />
           </dd>
         </div>
         <div className="flex flex-col gap-1">
-          <dt className="text-sm text-muted-foreground">Revenue</dt>
-          <dd className="text-2xl font-semibold">
+          <dt className="text-sm font-medium text-muted-foreground">Sales</dt>
+          <dd className="text-2xl font-bold">
             <RollingNumber
-              value={revenue}
+              value={sales}
               format={{
                 style: 'currency',
                 currency: 'USD',

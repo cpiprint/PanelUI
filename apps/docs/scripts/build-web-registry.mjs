@@ -39,6 +39,21 @@ function packageOf(specifier) {
 
 const IMPORT = /(\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(['"])([^'"]+)\2/g;
 
+/**
+ * The roles the collection draws in that a stock shadcn theme does not define.
+ *
+ * `primary`, `destructive`, `muted` and the rest are in every theme the CLI
+ * writes. These three are not, and a component that reads one of them from a
+ * theme without it draws nothing where the colour should be. So an item that
+ * uses one carries it, and the CLI adds it to the project's stylesheet. They
+ * are the same in light and dark, as they are in PanelUI's own theme.
+ */
+const STATUS_TOKENS = {
+  success: 'oklch(0.696 0.17 162.48)',
+  warning: 'oklch(0.769 0.188 70.08)',
+  info: 'oklch(0.623 0.214 259.815)',
+};
+
 /** The files of one component, entry first, as the project will receive them. */
 export function buildItem(slug) {
   const directory = path.join(SRC, slug);
@@ -96,6 +111,12 @@ export function buildItem(slug) {
     };
   });
 
+  const tokens = Object.fromEntries(
+    Object.entries(STATUS_TOKENS).filter(([token]) =>
+      files.some((file) => file.content.includes(`var(--${token})`))
+    )
+  );
+
   return {
     $schema: 'https://ui.shadcn.com/schema/registry-item.json',
     name: slug,
@@ -104,6 +125,7 @@ export function buildItem(slug) {
     description: summary,
     dependencies: [...dependencies].sort(),
     registryDependencies: [...registryDependencies].sort(),
+    ...(Object.keys(tokens).length > 0 ? { cssVars: { light: tokens, dark: tokens } } : {}),
     files,
   };
 }

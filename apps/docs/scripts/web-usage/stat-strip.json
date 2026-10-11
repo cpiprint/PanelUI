@@ -1,23 +1,30 @@
 {
   "slug": "stat-strip",
-  "demo": "session",
+  "demo": "repository",
   "demoOptions": {
-    "height": 260
+    "height": 280
   },
-  "intro": "Use it for two to four figures that belong together and need no chart: the totals under a workout, the summary under a card. Each figure is large with its label under it.\n\nThe first figure lines up with the left edge and the last with the right, so the strip shares the margins of whatever it sits in.\n\nIt has no room for a trend, a comparison or an icon. For a single figure with those, use a card of its own.",
-  "usage": "<StatStrip>\n  <StatStrip.Item label=\"Average session\">9 minutes</StatStrip.Item>\n  <StatStrip.Item label=\"Current mood\">Calm</StatStrip.Item>\n  <StatStrip.Item label=\"Meditation time\" accent>\n    8:30 <StatStrip.Unit>PM</StatStrip.Unit>\n  </StatStrip.Item>\n</StatStrip>",
-  "anatomy": "<StatStrip>\n  <StatStrip.Item label=\"…\">\n    … <StatStrip.Unit>…</StatStrip.Unit>\n  </StatStrip.Item>\n</StatStrip>",
+  "intro": "Use it for two to four figures that belong together and need no chart: the state of a repository, the totals under a run. Each figure has its label over it and, where there is one, the change under it.\n\nThe figures share the width equally, with a rule between each and the next.\n\nIt has no room for a sparkline or an icon. With more than four figures, or with long values, the columns get too narrow to read. Stack them with `orientation=\"vertical\"`, or use a grid of cards.",
+  "usage": "<StatStrip>\n  <StatStrip.Item label=\"Issues\">\n    48\n    <StatStrip.Trend value={-11} goodDirection=\"down\" />\n  </StatStrip.Item>\n  <StatStrip.Item label=\"Review\">\n    3.2 <StatStrip.Unit>h</StatStrip.Unit>\n  </StatStrip.Item>\n</StatStrip>",
+  "anatomy": "<StatStrip>\n  <StatStrip.Item label=\"…\">\n    … <StatStrip.Unit>…</StatStrip.Unit>\n    <StatStrip.Trend value={…} />\n  </StatStrip.Item>\n</StatStrip>",
   "parts": {
     "Item": "One figure. Its children are the value and `label` is what it measures.",
-    "Unit": "The unit after a figure, drawn smaller and quieter than the number."
+    "Unit": "The unit after a figure, drawn smaller and quieter than the number.",
+    "Trend": "How the figure has moved. It takes the change as a number, writes the sign and picks the colour."
   },
   "examples": [
     {
-      "title": "Four figures with units",
-      "description": "`StatStrip.Unit` keeps a unit attached to its number without giving it the number's weight. `accent` marks the one figure that matters most.",
-      "demo": "four",
-      "height": 240
+      "title": "Stacked",
+      "description": "`orientation=\"vertical\"` puts the figures one over the other with a level rule between them, which fits a narrow column. Children of `StatStrip.Trend` are a caption after the change, and `format` writes the change in a unit other than percent.",
+      "demo": "stacked",
+      "height": 320
+    },
+    {
+      "title": "Figures alone",
+      "description": "Without a card round it and without trends, the strip is a plain row. The first figure starts at the left edge and the last ends at the right.",
+      "demo": "plain",
+      "height": 200
     }
   ],
-  "notes": "### How many\n\nThe items share the width equally. Four fit on a phone if the values are short. Past four, or with long values, the columns get too narrow to read and the figures should be a grid or a list.\n\n### Order in the markup\n\nIt is a description list. Each item's label comes before its value in the markup, so a screen reader says \"Average session, 9 minutes\", and the value is drawn above the label with CSS.\n\n### Server Components\n\nStat Strip holds no state, so it is not a client module. It can be rendered from a Server Component as written, and it adds no JavaScript to the page.\n\n### Colour\n\n`accent` draws a value in the accent colour. Set `--panelui-accent` on the strip or an ancestor to change it."
+  "notes": "### Trend colours\n\n`StatStrip.Trend` is drawn in the success colour when the figure moved the good way, in the destructive colour when it moved the bad way, and in the muted colour when `value` is zero.\n\nUp is good unless you say otherwise. For a figure where less is better, such as review time, cost or open issues, pass `goodDirection=\"down\"`.\n\n### Writing the change\n\n`format` is given the size of the change without its sign and returns the text, which defaults to a percentage. The sign is added for you, with a true minus so a column of changes lines up.\n\n### Labels\n\nKeep a label to a word or two. A label too long for its column wraps to a second line, which pushes its figure down out of line with the others.\n\n### Narrow strips\n\nThe strip measures itself, not the screen. Under 24rem wide the figures are set one size smaller and the padding is tighter, so three figures still fit across a phone. The strip has to be given a width for that to work: it fills its container, and inside something that shrinks to fit its contents it has nothing to fill.\n\n### Spacing\n\nEach item is padded on the sides that face a rule. To change it, set `--pu-gap-x` on a horizontal strip or `--pu-gap-y` on a vertical one, with a class such as `[--pu-gap-x:1.5rem]`.\n\n### Order in the markup\n\nIt is a description list. Each label is the term and its figure the description, so a screen reader says \"Issues, 48\".\n\n### Server Components\n\nStat Strip holds no state, so it is not a client module. It can be rendered from a Server Component as written, and it adds no JavaScript to the page."
 }

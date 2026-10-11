@@ -2,10 +2,10 @@
   "title": "Components",
   "pages": [
     "index",
-    "activity-grid",
+    "bar-picker",
+    "day-grid",
     "feedback",
-    "forecast-bars",
-    "pill-stack",
+    "fold-stack",
     "planet",
     "range-meter",
     "rolling-number",

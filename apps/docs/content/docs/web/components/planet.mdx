@@ -4,142 +4,81 @@ description: The world as dots on a globe you can turn, with markers pinned to i
 status: new
 ---
 
-<ComponentPreview name="planet/realtime" height={860}>
+<ComponentPreview name="planet/regions" height={720}>
 
 ```tsx
 'use client';
 
-import { RotateCwIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Planet } from '@/components/panelui/planet';
+import { Planet, type PlanetMarkerColor } from '@/components/panelui/planet';
 import { RollingNumber } from '@/components/panelui/rolling-number';
 
-/** One marker per country, at the city most of its visitors are in. */
-const COUNTRIES = [
-  { name: 'Netherlands', visitors: 1, lat: 52.37, lng: 4.9 },
-  { name: 'Germany', visitors: 2, lat: 52.52, lng: 13.4 },
-  { name: 'France', visitors: 1, lat: 48.86, lng: 2.35 },
-  { name: 'Portugal', visitors: 1, lat: 38.72, lng: -9.14 },
-  { name: 'Morocco', visitors: 1, lat: 33.57, lng: -7.59 },
-  { name: 'Georgia', visitors: 1, lat: 41.72, lng: 44.79 },
-  { name: 'Saudi Arabia', visitors: 2, lat: 24.71, lng: 46.68 },
-  { name: 'Nepal', visitors: 1, lat: 27.72, lng: 85.32 },
-  { name: 'India', visitors: 2, lat: 19.08, lng: 72.88 },
-  { name: 'South Korea', visitors: 1, lat: 37.57, lng: 126.98 },
-  { name: 'Japan', visitors: 4, lat: 35.68, lng: 139.69 },
-  { name: 'Hong Kong', visitors: 1, lat: 22.32, lng: 114.17 },
-  { name: 'Philippines', visitors: 1, lat: 14.6, lng: 120.98 },
-  { name: 'Singapore', visitors: 1, lat: 1.35, lng: 103.82 },
-  { name: 'Indonesia', visitors: 3, lat: -6.21, lng: 106.85 },
-  { name: 'Australia', visitors: 1, lat: -33.87, lng: 151.21 },
-  { name: 'Brazil', visitors: 2, lat: -23.55, lng: -46.63 },
-  { name: 'Argentina', visitors: 1, lat: -34.6, lng: -58.38 },
-  { name: 'Canada', visitors: 1, lat: 43.65, lng: -79.38 },
-  { name: 'United States', visitors: 3, lat: 37.77, lng: -122.42 },
+type Health = 'healthy' | 'slow' | 'down';
+
+/** The data centres a service runs in, and how each is answering. */
+const REGIONS: { code: string; city: string; lat: number; lng: number; health: Health }[] = [
+  { code: 'dub', city: 'Dublin', lat: 53.35, lng: -6.26, health: 'healthy' },
+  { code: 'waw', city: 'Warsaw', lat: 52.23, lng: 21.01, health: 'healthy' },
+  { code: 'jnb', city: 'Johannesburg', lat: -26.2, lng: 28.05, health: 'slow' },
+  { code: 'bom', city: 'Mumbai', lat: 19.08, lng: 72.88, health: 'healthy' },
+  { code: 'sin', city: 'Singapore', lat: 1.35, lng: 103.82, health: 'healthy' },
+  { code: 'syd', city: 'Sydney', lat: -33.87, lng: 151.21, health: 'down' },
+  { code: 'icn', city: 'Seoul', lat: 37.57, lng: 126.98, health: 'healthy' },
+  { code: 'gru', city: 'São Paulo', lat: -23.55, lng: -46.63, health: 'healthy' },
+  { code: 'yul', city: 'Montreal', lat: 45.5, lng: -73.57, health: 'healthy' },
+  { code: 'pdx', city: 'Portland', lat: 45.52, lng: -122.68, health: 'slow' },
 ];
 
-/** What the event count does over a few refreshes. */
-const EVENTS = [124, 121, 127, 133, 130, 138];
+const COLOUR: Record<Health, PlanetMarkerColor> = {
+  healthy: 'success',
+  slow: 'warning',
+  down: 'destructive',
+};
 
-const SHIRTS = ['#e5484d', '#7c66dc', '#3e8ee0', '#30a46c', '#f5a524'];
-const BACKDROPS = ['#fde4e1', '#ebe4ff', '#dcebff', '#d9f3e4', '#ffecc7'];
+/** What the request rate does from one reading to the next: it wanders. */
+const RATES = [8420, 8395, 8510, 8473, 8602, 8548];
 
-/** A stand-in face. Use your own avatar here. */
-function Face({ index }: { index: number }) {
-  return (
-    <svg viewBox="0 0 24 24" className="size-full" aria-hidden="true">
-      <rect width="24" height="24" fill={BACKDROPS[index % BACKDROPS.length]} />
-      <circle cx="12" cy="9.5" r="4.2" fill="#8d5a44" />
-      <path d="M3.5 24c0-5 3.8-8 8.5-8s8.5 3 8.5 8z" fill={SHIRTS[index % SHIRTS.length]} />
-    </svg>
-  );
-}
-
-export default function PlanetRealtime() {
-  const [step, setStep] = useState(0);
-  const [live, setLive] = useState(true);
-  // Set after mounting: the server and the browser disagree about the time.
-  const [updated, setUpdated] = useState<string | null>(null);
+export default function PlanetRegions() {
+  const [reading, setReading] = useState(0);
 
   useEffect(() => {
-    setUpdated(new Date().toLocaleTimeString('en-US'));
-    if (!live) return;
-    const timer = setInterval(() => {
-      setStep((current) => current + 1);
-      setUpdated(new Date().toLocaleTimeString('en-US'));
-    }, 3200);
+    const timer = setInterval(() => setReading((current) => current + 1), 2800);
     return () => clearInterval(timer);
-  }, [live]);
+  }, []);
 
-  const refresh = () => {
-    setStep((current) => current + 1);
-    setUpdated(new Date().toLocaleTimeString('en-US'));
-  };
-
-  const visitors = COUNTRIES.reduce((total, country) => total + country.visitors, 0);
+  const healthy = REGIONS.filter((region) => region.health === 'healthy').length;
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-4">
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h3 className="text-lg font-semibold">Realtime</h3>
-        <p className="text-xs text-muted-foreground">
-          Last 5 minutes{updated ? ` · Updated ${updated}` : null}
-        </p>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={() => setLive((current) => !current)}>
-          {live ? 'Pause updates' : 'Resume updates'}
-        </Button>
-        <Button variant="ghost" size="icon-sm" aria-label="Refresh" onClick={refresh}>
-          <RotateCwIcon />
-        </Button>
-      </div>
-
-      <div className="flex flex-col gap-5 rounded-2xl border bg-card p-5 text-card-foreground">
+    <div className="flex w-full max-w-sm flex-col gap-4 rounded-2xl border bg-card p-5 text-card-foreground">
+      <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <p className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span className="size-2 rounded-full bg-emerald-500" aria-hidden="true" />
-            Active visitors
-          </p>
-          <RollingNumber value={visitors} className="text-5xl font-semibold tracking-tight" />
+          <h3 className="text-sm font-medium text-muted-foreground">Requests a second</h3>
+          <RollingNumber
+            value={RATES[reading % RATES.length]}
+            className="text-2xl font-bold tracking-tight"
+          />
         </div>
-
-        <Planet defaultRotation={[82, 16]} className="-mt-10">
-          <Planet.Globe label="Visitors by country">
-            {COUNTRIES.map((country, index) => (
-              <Planet.Marker
-                key={country.name}
-                lat={country.lat}
-                lng={country.lng}
-                label={country.name}
-                count={country.visitors > 1 ? country.visitors : undefined}
-              >
-                <Face index={index} />
-              </Planet.Marker>
-            ))}
-          </Planet.Globe>
-          <Planet.Controls />
-        </Planet>
-
-        <p className="text-center text-sm text-muted-foreground">
-          Approximate country locations, not precise visitor positions.
+        <p className="text-sm text-muted-foreground">
+          {healthy} of {REGIONS.length} regions healthy
         </p>
-
-        <dl className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1">
-            <dt className="text-sm text-muted-foreground">Events</dt>
-            <dd className="text-2xl font-semibold">
-              <RollingNumber value={EVENTS[step % EVENTS.length]} />
-            </dd>
-          </div>
-          <div className="flex flex-col gap-1">
-            <dt className="text-sm text-muted-foreground">Countries</dt>
-            <dd className="text-2xl font-semibold">{COUNTRIES.length}</dd>
-          </div>
-        </dl>
       </div>
+
+      <Planet defaultRotation={[96, 8]}>
+        <Planet.Globe label="Regions" color="info">
+          {REGIONS.map((region) => (
+            <Planet.Marker
+              key={region.code}
+              lat={region.lat}
+              lng={region.lng}
+              color={COLOUR[region.health]}
+              pulse={region.health !== 'healthy'}
+              label={region.health === 'healthy' ? undefined : region.city}
+              count={region.health === 'healthy' ? undefined : region.health}
+            />
+          ))}
+        </Planet.Globe>
+        <Planet.Controls />
+      </Planet>
     </div>
   );
 }
@@ -147,7 +86,7 @@ export default function PlanetRealtime() {
 
 </ComponentPreview>
 
-Use it to show where things are in the world when the answer is a handful of places: visitors by country, offices, the regions a service runs in. The land is drawn as dots and the markers are your own elements, so a marker can hold an avatar, a count or a link.
+Use it to show where things are in the world when the answer is a handful of places: the regions a service runs in, offices, where a team is this week. The land is drawn as dots and the markers are your own elements, so a marker can hold initials, an icon or a link.
 
 Drag the globe to turn it. `Planet.Controls` adds two buttons for the same thing, and the arrow keys work when the globe has focus.
 
@@ -206,10 +145,10 @@ import { Planet } from "@/components/panelui/planet"
 ```
 
 ```tsx
-<Planet defaultRotation={[78, 18]}>
+<Planet defaultRotation={[60, 14]}>
   <Planet.Globe>
-    <Planet.Marker lat={24.71} lng={46.68} label="Saudi Arabia" count={2} />
-    <Planet.Marker lat={-33.87} lng={151.21} label="Australia" />
+    <Planet.Marker lat={53.35} lng={-6.26} label="Dublin" />
+    <Planet.Marker lat={-33.87} lng={151.21} label="Sydney" color="destructive" />
   </Planet.Globe>
   <Planet.Controls />
 </Planet>
@@ -226,9 +165,9 @@ import { Planet } from "@/components/panelui/planet"
 </Planet>
 ```
 
-- **`Planet.Globe`** — The sphere and its dots. Markers go inside it.
-- **`Planet.Marker`** — An element pinned to a latitude and longitude. Its children are drawn at the point, in a circle; without children it is a dot. `label` and `count` go in a pill above it.
-- **`Planet.Controls`** — Two buttons that turn the globe by `step` degrees, with a caption between them.
+- **`Planet.Globe`** — The sphere and its dots, with a soft light round its edge in the theme colour named by `color`. Markers go inside it.
+- **`Planet.Marker`** — An element pinned to a latitude and longitude. Without children it is a dot in the theme colour named by `color`; with children they are drawn at the point, in a circle ringed in that colour. `label` and `count` go in a tag above it, and `pulse` spreads a fading ring from it.
+- **`Planet.Controls`** — Two buttons joined in one group that turn the globe by `step` degrees. Children are a caption between them.
 
 ## Examples
 
@@ -257,6 +196,45 @@ export default function PlanetPins() {
       <Planet.Globe label="Offices">
         {OFFICES.map((office) => (
           <Planet.Marker key={office.city} lat={office.lat} lng={office.lng} label={office.city} />
+        ))}
+      </Planet.Globe>
+    </Planet>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Something in the pin
+
+Children of a marker are drawn in a circle at the point. Initials fit, and so does an image or an icon.
+
+<ComponentPreview name="planet/people" height={460}>
+
+```tsx
+'use client';
+
+import { Planet } from '@/components/panelui/planet';
+
+/** Where a remote team is working from this week. */
+const TEAM = [
+  { initials: 'IF', city: 'Lisbon', lat: 38.72, lng: -9.14 },
+  { initials: 'TN', city: 'Nairobi', lat: -1.29, lng: 36.82 },
+  { initials: 'KS', city: 'Tbilisi', lat: 41.72, lng: 44.79 },
+  { initials: 'RA', city: 'Colombo', lat: 6.93, lng: 79.85 },
+  { initials: 'MV', city: 'Helsinki', lat: 60.17, lng: 24.94 },
+];
+
+export default function PlanetPeople() {
+  return (
+    <Planet defaultRotation={[38, 20]} className="max-w-sm">
+      <Planet.Globe label="Where the team is">
+        {TEAM.map((person) => (
+          <Planet.Marker key={person.initials} lat={person.lat} lng={person.lng} label={person.city}>
+            <span className="text-[0.6875rem] font-semibold">
+              {person.initials}
+            </span>
+          </Planet.Marker>
         ))}
       </Planet.Globe>
     </Planet>
@@ -366,7 +344,8 @@ export default function PlanetFlyTo() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `label` | `string` | — | What a screen reader calls the globe. |
+| `color` | `PlanetMarkerColor` | `'primary'` | Which of the theme's roles the light round the globe is drawn in. |
+| `label` | `string` | `'Globe'` | What a screen reader calls the globe. |
 
 ### Planet.Marker
 
@@ -374,9 +353,11 @@ export default function PlanetFlyTo() {
 | --- | --- | --- | --- |
 | `lat` | `number` | — | Degrees north of the equator. South is negative. |
 | `lng` | `number` | — | Degrees east of Greenwich. West is negative. |
-| `label` | `ReactNode` | — | A caption in a pill above the pin. |
+| `label` | `ReactNode` | — | A caption in a tag above the pin. |
 | `count` | `ReactNode` | — | A figure after the label, in a quieter colour. |
-| `labelClassName` | `string` | — | Extra classes for the label pill. |
+| `color` | `PlanetMarkerColor` | `'primary'` | Which of the theme's roles the dot, or the ring of a pin with children, is drawn in. |
+| `pulse` | `boolean` | `false` | Spreads a fading ring from the marker, for one that wants looking at. |
+| `labelClassName` | `string` | — | Extra classes for the label. |
 
 ### Planet.Controls
 
@@ -394,7 +375,11 @@ The globe is a square as wide as its container, up to 28rem. Set a width on `Pla
 
 ### Colour
 
-The dots and the shading are drawn in the text colour of the element. On a dark card the land is light, on a light card it is dark. Set `className="text-emerald-500"` on `Planet.Globe` to tint it.
+The dots and the shading are drawn in the text colour of the element. On a dark card the land is light, on a light card it is dark. A text colour class on `Planet.Globe`, such as `text-muted-foreground`, changes it.
+
+`color` on `Planet.Globe` sets the light round the globe's edge, which is `primary` unless it names another of the theme's roles.
+
+A marker's dot is the `primary` colour unless `color` names another of the theme's roles. Use the status roles when the colour means something, as the first example does for regions that are slow or down.
 
 ### Rotation
 

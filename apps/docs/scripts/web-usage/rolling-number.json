@@ -1,11 +1,11 @@
 {
   "slug": "rolling-number",
-  "demo": "counter",
+  "demo": "queue",
   "demoOptions": {
     "height": 260
   },
-  "intro": "Use it for a figure that changes while someone is looking at it: a live count, a balance, a score. Each digit rolls to its new value on its own, so going from 124 to 121 moves one column and leaves the other two where they were.\n\nThe number is written by `Intl.NumberFormat`. Currency, percent and compact notation are options you pass, not strings you build.\n\nFor a number that is shown once and never changes, plain text does the same job.",
-  "usage": "<RollingNumber value={events} />",
+  "intro": "Use it for a figure that changes while someone is looking at it: a live count, a balance, a score. Each digit rolls to its new value on its own, so going from 312 to 318 moves one column and leaves the other two where they were.\n\nThe number is written by `Intl.NumberFormat`. Currency, percent and compact notation are options you pass, not strings you build.\n\nFor a number that is shown once and never changes, plain text does the same job.",
+  "usage": "<RollingNumber value={waiting} />",
   "examples": [
     {
       "title": "Currency",
