@@ -417,3 +417,11 @@ The globe is announced as a slider whose value is the longitude facing you. Left
 ### The land data
 
 The outlines are Natural Earth's 1:110m land polygons, which are in the public domain, reduced to one bit per square degree. Small islands are missing at that resolution, so a marker on one sits on open water.
+
+### Server Components
+
+`Planet` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Planet.Globe` off the import, so each part is also exported by name: `PlanetGlobe` is `Planet.Globe`, and so on for the others.
+
+```tsx
+import { Planet, PlanetGlobe, PlanetMarker, PlanetControls } from "@/components/panelui/planet"
+```

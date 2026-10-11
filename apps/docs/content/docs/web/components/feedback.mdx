@@ -581,3 +581,11 @@ While `Submit` is disabled it drops its fill, where most buttons would only dim.
 ### What it is built on
 
 The dialog is the Base UI dialog, which the package depends on directly. It does not use your project's own dialog component, so it looks the same whichever one you have.
+
+### Server Components
+
+`Feedback` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Feedback.Trigger` off the import, so each part is also exported by name: `FeedbackTrigger` is `Feedback.Trigger`, and so on for the others.
+
+```tsx
+import { Feedback, FeedbackTrigger, FeedbackContent, FeedbackPanel, FeedbackTitle, FeedbackClose, FeedbackField, FeedbackFooter, FeedbackCancel, FeedbackSubmit } from "@/components/panelui/feedback"
+```

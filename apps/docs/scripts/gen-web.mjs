@@ -266,7 +266,22 @@ for (const slug of slugs) {
     );
   }
 
-  if (u.notes) sections.push(`## Notes\n\n${u.notes}`);
+  /*
+   * A compound component in a client module cannot be dotted into from a
+   * Server Component. Every page that has parts says so, with its own names,
+   * since this is an error nobody expects and the message for it does not
+   * mention the fix.
+   */
+  const notes = [];
+  if (u.notes) notes.push(u.notes);
+  const entrySource = fs.readFileSync(path.join(WEB_SRC, slug, 'index.tsx'), 'utf8');
+  if (c.parts.length > 0 && entrySource.startsWith("'use client'")) {
+    const first = c.parts[0];
+    notes.push(
+      `### Server Components\n\n\`${name}\` is a client component. In a file that starts with \`"use client"\`, write its parts with a dot, as on this page. A Server Component cannot read \`${name}.${first}\` off the import, so each part is also exported by name: \`${name}${first}\` is \`${name}.${first}\`${c.parts.length > 1 ? ', and so on for the others' : ''}.\n\n${fence(`import { ${name}, ${c.parts.map((part) => `${name}${part}`).join(', ')} } from "@/components/${WEB_TARGET}/${slug}"`)}`
+    );
+  }
+  if (notes.length > 0) sections.push(`## Notes\n\n${notes.join('\n\n')}`);
 
   fs.writeFileSync(path.join(CONTENT, `${slug}.mdx`), `${sections.join('\n\n')}\n`);
 }

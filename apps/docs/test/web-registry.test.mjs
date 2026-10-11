@@ -63,7 +63,6 @@ test('demos import the package, and pages show the path a project has', () => {
     assert.ok(demos.length > 0, `${slug} has no demos`);
     for (const demo of demos) {
       const source = fs.readFileSync(path.join(directory, demo), 'utf8');
-      assert.match(source, /^'use client';\n/, `${slug}/${demo} must be a client module`);
       assert.match(source, /export default function /, `${slug}/${demo} needs a default export`);
       assert.match(source, /from 'panelui-web\/[a-z0-9-]+'/, `${slug}/${demo} must import the package`);
     }

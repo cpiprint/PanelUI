@@ -494,3 +494,17 @@ export const Feedback = Object.assign(FeedbackRoot, {
   Cancel: FeedbackCancel,
   Submit: FeedbackSubmit,
 });
+
+/* The parts by name, for a Server Component, which cannot dot into a client
+   module. `<FeedbackContent>` there is `<Feedback.Content>` everywhere else. */
+export {
+  FeedbackTrigger,
+  FeedbackContent,
+  FeedbackPanel,
+  FeedbackTitle,
+  FeedbackClose,
+  FeedbackField,
+  FeedbackFooter,
+  FeedbackCancel,
+  FeedbackSubmit,
+};

@@ -33,12 +33,40 @@ test('there is at least one component, each with an entry', () => {
   }
 });
 
-test('every component entry is a client module', () => {
-  // They all hold state or touch the DOM. Without the directive a Server
-  // Component that imports one fails at build, in the reader's project.
+test('an entry that holds state or handles events is a client module', () => {
+  // Without the directive a Server Component that imports one fails at build,
+  // in the reader's project. One that needs neither is left as it is, so it
+  // can be rendered on the server and costs the page no JavaScript.
+  const CLIENT_ONLY =
+    /\buse(?:State|Effect|LayoutEffect|Ref|Memo|Callback|Context|Id|ImperativeHandle|Reducer|SyncExternalStore)\(|\bcreateContext\(|\bon[A-Z]\w*=\{/;
+  let server = 0;
   for (const slug of slugs) {
     const entry = fs.readFileSync(path.join(components, slug, 'index.tsx'), 'utf8');
-    assert.match(entry, /^'use client';\n/, `${slug}/index.tsx must start with 'use client'`);
+    const directive = /^'use client';\n/.test(entry);
+    if (CLIENT_ONLY.test(entry)) {
+      assert.ok(directive, `${slug}/index.tsx uses state or events and must start with 'use client'`);
+    } else {
+      assert.ok(!directive, `${slug}/index.tsx needs no 'use client' and should not have one`);
+      server += 1;
+    }
+  }
+  // StatStrip is the one that is not, and the test should notice if the
+  // pattern above stops recognising client code altogether.
+  assert.ok(server < slugs.length, 'no component was recognised as a client module');
+});
+
+test('a compound client component also exports its parts by name', () => {
+  // `Planet.Globe` cannot be read off a client module from a Server
+  // Component. `PlanetGlobe` can, so every dotted part needs a named twin.
+  for (const slug of slugs) {
+    const entry = fs.readFileSync(path.join(components, slug, 'index.tsx'), 'utf8');
+    const assigned = /export const (\w+) = Object\.assign\(\w+, \{([\s\S]*?)\n\}\)/.exec(entry);
+    if (!assigned) continue;
+    const [, name, body] = assigned;
+    for (const [, part] of body.matchAll(/^\s*(\w+):/gm)) {
+      const exported = new RegExp(`export \\{[^}]*\\b${name}${part}\\b[^}]*\\}`).test(entry);
+      assert.ok(exported, `${slug}: ${name}.${part} has no named export ${name}${part}`);
+    }
   }
 });
 

@@ -872,3 +872,12 @@ export const Planet = Object.assign(PlanetRoot, {
   Marker: PlanetMarker,
   Controls: PlanetControls,
 });
+
+/*
+ * The parts again, by name. `Planet.Globe` is a property of a component, and a
+ * Server Component cannot read a property off something imported from a
+ * client module, only pass the import itself along. So a page that is a
+ * Server Component writes `<PlanetGlobe>`; anywhere else the dotted form is
+ * the same thing.
+ */
+export { PlanetGlobe, PlanetMarker, PlanetControls };

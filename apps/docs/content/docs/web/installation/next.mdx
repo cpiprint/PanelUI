@@ -3,7 +3,7 @@ title: Next.js
 description: Add PanelUI web components to a Next.js app.
 ---
 
-For the App Router. The components are Client Components, and you can import them straight into a Server Component page.
+For the App Router. The components are Client Components, and a Server Component page can render them.
 
 ## A new project
 
@@ -60,9 +60,16 @@ Then add a component as in the steps above.
 
 ## Server Components
 
-Every component starts with `"use client"`, so it runs in the browser and can be rendered from a
-Server Component without a wrapper. A value that changes over time has to come from client
-state, so the part of the page that owns that state needs `"use client"` too.
+A component that holds state starts with `"use client"`, so it runs in the browser and can be
+rendered from a Server Component without a wrapper.
+
+Two things need a Client Component of your own:
+
+- **A value that changes.** State lives in the browser, so the part of the page that holds it
+  needs `"use client"`.
+- **Dotted parts.** A Server Component cannot read `Planet.Globe` off a client import. Either put
+  `"use client"` at the top of the file, or import the part by name: every `Planet.Globe` is
+  also exported as `PlanetGlobe`. Each component's page lists its names under **Notes**.
 
 ## From npm
 

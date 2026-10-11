@@ -2,6 +2,9 @@ export { cn } from './lib/cn';
 export { RollingNumber, type RollingNumberProps } from './components/rolling-number';
 export {
   Planet,
+  PlanetGlobe,
+  PlanetMarker,
+  PlanetControls,
   type PlanetProps,
   type PlanetHandle,
   type PlanetRotation,
@@ -11,6 +14,15 @@ export {
 } from './components/planet';
 export {
   Feedback,
+  FeedbackTrigger,
+  FeedbackContent,
+  FeedbackPanel,
+  FeedbackTitle,
+  FeedbackClose,
+  FeedbackField,
+  FeedbackFooter,
+  FeedbackCancel,
+  FeedbackSubmit,
   type FeedbackProps,
   type FeedbackTriggerProps,
   type FeedbackContentProps,
