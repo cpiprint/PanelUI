@@ -8,5 +8,14 @@
       "category": "data",
       "title": "Rolling Number"
     }
+  ],
+  "planet": [
+    "Planet",
+    "The world as dots on a globe you can turn, with markers pinned to it.",
+    "react globe component dotted world map markers",
+    {
+      "addedIn": "0.1.0",
+      "category": "data"
+    }
   ]
 }

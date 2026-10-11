@@ -6,6 +6,10 @@ import type { ComponentType } from 'react';
 
 /** Every demo a docs page shows, each in a chunk of its own. */
 export const WEB_DEMOS: Record<string, ComponentType> = {
+  'planet/fly-to': dynamic(() => import('./planet/fly-to')),
+  'planet/pins': dynamic(() => import('./planet/pins')),
+  'planet/realtime': dynamic(() => import('./planet/realtime')),
+  'planet/turning': dynamic(() => import('./planet/turning')),
   'rolling-number/counter': dynamic(() => import('./rolling-number/counter')),
   'rolling-number/currency': dynamic(() => import('./rolling-number/currency')),
   'rolling-number/formats': dynamic(() => import('./rolling-number/formats')),

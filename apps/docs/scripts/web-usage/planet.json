@@ -1,0 +1,36 @@
+{
+  "slug": "planet",
+  "demo": "realtime",
+  "demoOptions": {
+    "height": 860
+  },
+  "intro": "Use it to show where things are in the world when the answer is a handful of places: visitors by country, offices, the regions a service runs in. The land is drawn as dots and the markers are your own elements, so a marker can hold an avatar, a count or a link.\n\nDrag the globe to turn it. `Planet.Controls` adds two buttons for the same thing, and the arrow keys work when the globe has focus.\n\nIt shows that a place is somewhere, not exactly where. A marker covers a few hundred kilometres at this scale, so for anything a street address matters to, use a map.",
+  "usage": "<Planet defaultRotation={[78, 18]}>\n  <Planet.Globe>\n    <Planet.Marker lat={24.71} lng={46.68} label=\"Saudi Arabia\" count={2} />\n    <Planet.Marker lat={-33.87} lng={151.21} label=\"Australia\" />\n  </Planet.Globe>\n  <Planet.Controls />\n</Planet>",
+  "anatomy": "<Planet>\n  <Planet.Globe>\n    <Planet.Marker lat={…} lng={…} label=\"…\">…</Planet.Marker>\n  </Planet.Globe>\n  <Planet.Controls />\n</Planet>",
+  "parts": {
+    "Globe": "The sphere and its dots. Markers go inside it.",
+    "Marker": "An element pinned to a latitude and longitude. Its children are drawn at the point, in a circle; without children it is a dot. `label` and `count` go in a pill above it.",
+    "Controls": "Two buttons that turn the globe by `step` degrees, with a caption between them."
+  },
+  "examples": [
+    {
+      "title": "Pins",
+      "description": "A marker without children is a dot. Give it a `label` to name the place.",
+      "demo": "pins",
+      "height": 460
+    },
+    {
+      "title": "Turning on its own",
+      "description": "`autoRotate` takes degrees of longitude a second, or `true` for 6. It pauses while the pointer is over the globe, while the globe is off screen, and for anyone who has asked their system for reduced motion.",
+      "demo": "turning",
+      "height": 400
+    },
+    {
+      "title": "Turning it from outside",
+      "description": "A ref on `Planet` is a handle with `rotateTo`, `rotateBy` and `getRotation`. `rotateTo` takes `[longitude, latitude]` and turns the short way round.",
+      "demo": "fly-to",
+      "height": 500
+    }
+  ],
+  "notes": "### Size\n\nThe globe is a square as wide as its container, up to 28rem. Set a width on `Planet` or on `Planet.Globe` with `className` to change it. The dots keep the same spacing in pixels at every size, so a small globe has fewer of them and stays crisp.\n\n### Colour\n\nThe dots and the shading are drawn in the text colour of the element. On a dark card the land is light, on a light card it is dark. Set `className=\"text-emerald-500\"` on `Planet.Globe` to tint it.\n\n### Rotation\n\n`defaultRotation` is `[longitude, latitude]` of the point facing you, in degrees. It sets the opening view only. To move the globe afterwards, use the handle or let the reader drag it. `onRotationChange` is called each time the globe comes to rest.\n\nThe tilt stops at 60 degrees either way. Past that the far pole comes into view and the continents are seen from above, where they are hard to recognise.\n\n### Markers near the edge\n\nA marker fades as its point approaches the edge of the globe and is gone when it passes behind. It stays in the page for a screen reader the whole time. Labels are not kept apart: two markers a few degrees from each other overlap, so merge nearby places into one marker with a `count`.\n\n### Touch\n\nOn a touch screen a horizontal drag turns the globe and a vertical one scrolls the page. Tilting needs a mouse, a pen or the arrow keys.\n\n### Keyboard and screen readers\n\nThe globe is announced as a slider whose value is the longitude facing you. Left and right turn it 15 degrees, up and down tilt it. Pass `interactive={false}` for a globe that cannot be turned, which is announced as an image.\n\n### The land data\n\nThe outlines are Natural Earth's 1:110m land polygons, which are in the public domain, reduced to one bit per square degree. Small islands are missing at that resolution, so a marker on one sits on open water."
+}

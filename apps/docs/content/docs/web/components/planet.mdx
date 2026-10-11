@@ -1,0 +1,419 @@
+---
+title: Planet
+description: The world as dots on a globe you can turn, with markers pinned to it.
+status: new
+---
+
+<ComponentPreview name="planet/realtime" height={860}>
+
+```tsx
+'use client';
+
+import { RotateCwIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Planet } from '@/components/panelui/planet';
+import { RollingNumber } from '@/components/panelui/rolling-number';
+
+/** One marker per country, at the city most of its visitors are in. */
+const COUNTRIES = [
+  { name: 'Netherlands', visitors: 1, lat: 52.37, lng: 4.9 },
+  { name: 'Germany', visitors: 2, lat: 52.52, lng: 13.4 },
+  { name: 'France', visitors: 1, lat: 48.86, lng: 2.35 },
+  { name: 'Portugal', visitors: 1, lat: 38.72, lng: -9.14 },
+  { name: 'Morocco', visitors: 1, lat: 33.57, lng: -7.59 },
+  { name: 'Georgia', visitors: 1, lat: 41.72, lng: 44.79 },
+  { name: 'Saudi Arabia', visitors: 2, lat: 24.71, lng: 46.68 },
+  { name: 'Nepal', visitors: 1, lat: 27.72, lng: 85.32 },
+  { name: 'India', visitors: 2, lat: 19.08, lng: 72.88 },
+  { name: 'South Korea', visitors: 1, lat: 37.57, lng: 126.98 },
+  { name: 'Japan', visitors: 4, lat: 35.68, lng: 139.69 },
+  { name: 'Hong Kong', visitors: 1, lat: 22.32, lng: 114.17 },
+  { name: 'Philippines', visitors: 1, lat: 14.6, lng: 120.98 },
+  { name: 'Singapore', visitors: 1, lat: 1.35, lng: 103.82 },
+  { name: 'Indonesia', visitors: 3, lat: -6.21, lng: 106.85 },
+  { name: 'Australia', visitors: 1, lat: -33.87, lng: 151.21 },
+  { name: 'Brazil', visitors: 2, lat: -23.55, lng: -46.63 },
+  { name: 'Argentina', visitors: 1, lat: -34.6, lng: -58.38 },
+  { name: 'Canada', visitors: 1, lat: 43.65, lng: -79.38 },
+  { name: 'United States', visitors: 3, lat: 37.77, lng: -122.42 },
+];
+
+/** What the event count does over a few refreshes. */
+const EVENTS = [124, 121, 127, 133, 130, 138];
+
+const SHIRTS = ['#e5484d', '#7c66dc', '#3e8ee0', '#30a46c', '#f5a524'];
+const BACKDROPS = ['#fde4e1', '#ebe4ff', '#dcebff', '#d9f3e4', '#ffecc7'];
+
+/** A stand-in face. Use your own avatar here. */
+function Face({ index }: { index: number }) {
+  return (
+    <svg viewBox="0 0 24 24" className="size-full" aria-hidden="true">
+      <rect width="24" height="24" fill={BACKDROPS[index % BACKDROPS.length]} />
+      <circle cx="12" cy="9.5" r="4.2" fill="#8d5a44" />
+      <path d="M3.5 24c0-5 3.8-8 8.5-8s8.5 3 8.5 8z" fill={SHIRTS[index % SHIRTS.length]} />
+    </svg>
+  );
+}
+
+export default function PlanetRealtime() {
+  const [step, setStep] = useState(0);
+  const [live, setLive] = useState(true);
+  // Set after mounting: the server and the browser disagree about the time.
+  const [updated, setUpdated] = useState<string | null>(null);
+
+  useEffect(() => {
+    setUpdated(new Date().toLocaleTimeString('en-US'));
+    if (!live) return;
+    const timer = setInterval(() => {
+      setStep((current) => current + 1);
+      setUpdated(new Date().toLocaleTimeString('en-US'));
+    }, 3200);
+    return () => clearInterval(timer);
+  }, [live]);
+
+  const refresh = () => {
+    setStep((current) => current + 1);
+    setUpdated(new Date().toLocaleTimeString('en-US'));
+  };
+
+  const visitors = COUNTRIES.reduce((total, country) => total + country.visitors, 0);
+
+  return (
+    <div className="flex w-full max-w-md flex-col gap-4">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h3 className="text-lg font-semibold">Realtime</h3>
+        <p className="text-xs text-muted-foreground">
+          Last 5 minutes{updated ? ` · Updated ${updated}` : null}
+        </p>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm" onClick={() => setLive((current) => !current)}>
+          {live ? 'Pause updates' : 'Resume updates'}
+        </Button>
+        <Button variant="ghost" size="icon-sm" aria-label="Refresh" onClick={refresh}>
+          <RotateCwIcon />
+        </Button>
+      </div>
+
+      <div className="flex flex-col gap-5 rounded-2xl border bg-card p-5 text-card-foreground">
+        <div className="flex flex-col gap-1">
+          <p className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="size-2 rounded-full bg-emerald-500" aria-hidden="true" />
+            Active visitors
+          </p>
+          <RollingNumber value={visitors} className="text-5xl font-semibold tracking-tight" />
+        </div>
+
+        <Planet defaultRotation={[82, 16]} className="-mt-10">
+          <Planet.Globe label="Visitors by country">
+            {COUNTRIES.map((country, index) => (
+              <Planet.Marker
+                key={country.name}
+                lat={country.lat}
+                lng={country.lng}
+                label={country.name}
+                count={country.visitors > 1 ? country.visitors : undefined}
+              >
+                <Face index={index} />
+              </Planet.Marker>
+            ))}
+          </Planet.Globe>
+          <Planet.Controls />
+        </Planet>
+
+        <p className="text-center text-sm text-muted-foreground">
+          Approximate country locations, not precise visitor positions.
+        </p>
+
+        <dl className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-1">
+            <dt className="text-sm text-muted-foreground">Events</dt>
+            <dd className="text-2xl font-semibold">
+              <RollingNumber value={EVENTS[step % EVENTS.length]} />
+            </dd>
+          </div>
+          <div className="flex flex-col gap-1">
+            <dt className="text-sm text-muted-foreground">Countries</dt>
+            <dd className="text-2xl font-semibold">{COUNTRIES.length}</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it to show where things are in the world when the answer is a handful of places: visitors by country, offices, the regions a service runs in. The land is drawn as dots and the markers are your own elements, so a marker can hold an avatar, a count or a link.
+
+Drag the globe to turn it. `Planet.Controls` adds two buttons for the same thing, and the arrow keys work when the globe has focus.
+
+It shows that a place is somewhere, not exactly where. A marker covers a few hundred kilometres at this scale, so for anything a street address matters to, use a map.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/planet.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/planet` instead of `@/components/panelui/planet`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/planet/`, one file for each below:
+
+<RegistrySource name="planet" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { Planet } from "@/components/panelui/planet"
+```
+
+```tsx
+<Planet defaultRotation={[78, 18]}>
+  <Planet.Globe>
+    <Planet.Marker lat={24.71} lng={46.68} label="Saudi Arabia" count={2} />
+    <Planet.Marker lat={-33.87} lng={151.21} label="Australia" />
+  </Planet.Globe>
+  <Planet.Controls />
+</Planet>
+```
+
+## Composition
+
+```tsx
+<Planet>
+  <Planet.Globe>
+    <Planet.Marker lat={…} lng={…} label="…">…</Planet.Marker>
+  </Planet.Globe>
+  <Planet.Controls />
+</Planet>
+```
+
+- **`Planet.Globe`** — The sphere and its dots. Markers go inside it.
+- **`Planet.Marker`** — An element pinned to a latitude and longitude. Its children are drawn at the point, in a circle; without children it is a dot. `label` and `count` go in a pill above it.
+- **`Planet.Controls`** — Two buttons that turn the globe by `step` degrees, with a caption between them.
+
+## Examples
+
+### Pins
+
+A marker without children is a dot. Give it a `label` to name the place.
+
+<ComponentPreview name="planet/pins" height={460}>
+
+```tsx
+'use client';
+
+import { Planet } from '@/components/panelui/planet';
+
+const OFFICES = [
+  { city: 'London', lat: 51.51, lng: -0.13 },
+  { city: 'Lagos', lat: 6.52, lng: 3.38 },
+  { city: 'Dubai', lat: 25.2, lng: 55.27 },
+  { city: 'Bengaluru', lat: 12.97, lng: 77.59 },
+  { city: 'Singapore', lat: 1.35, lng: 103.82 },
+];
+
+export default function PlanetPins() {
+  return (
+    <Planet defaultRotation={[45, 18]} className="max-w-sm">
+      <Planet.Globe label="Offices">
+        {OFFICES.map((office) => (
+          <Planet.Marker key={office.city} lat={office.lat} lng={office.lng} label={office.city} />
+        ))}
+      </Planet.Globe>
+    </Planet>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Turning on its own
+
+`autoRotate` takes degrees of longitude a second, or `true` for 6. It pauses while the pointer is over the globe, while the globe is off screen, and for anyone who has asked their system for reduced motion.
+
+<ComponentPreview name="planet/turning" height={400}>
+
+```tsx
+'use client';
+
+import { Planet } from '@/components/panelui/planet';
+
+export default function PlanetTurning() {
+  return (
+    <Planet autoRotate={10} defaultRotation={[-40, 12]} className="max-w-xs">
+      <Planet.Globe label="A turning globe" />
+    </Planet>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Turning it from outside
+
+A ref on `Planet` is a handle with `rotateTo`, `rotateBy` and `getRotation`. `rotateTo` takes `[longitude, latitude]` and turns the short way round.
+
+<ComponentPreview name="planet/fly-to" height={500}>
+
+```tsx
+'use client';
+
+import { useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Planet, type PlanetHandle } from '@/components/panelui/planet';
+
+const CITIES = [
+  { name: 'Tokyo', lat: 35.68, lng: 139.69 },
+  { name: 'Nairobi', lat: -1.29, lng: 36.82 },
+  { name: 'Reykjavík', lat: 64.15, lng: -21.94 },
+  { name: 'São Paulo', lat: -23.55, lng: -46.63 },
+];
+
+export default function PlanetFlyTo() {
+  const planet = useRef<PlanetHandle>(null);
+  const [city, setCity] = useState(CITIES[0].name);
+
+  return (
+    <div className="flex w-full flex-col items-center gap-5">
+      <Planet ref={planet} defaultRotation={[139.69, 30]} className="max-w-xs">
+        <Planet.Globe label="Cities">
+          {CITIES.map((place) => (
+            <Planet.Marker
+              key={place.name}
+              lat={place.lat}
+              lng={place.lng}
+              label={place.name === city ? place.name : undefined}
+            />
+          ))}
+        </Planet.Globe>
+      </Planet>
+
+      <div className="flex flex-wrap justify-center gap-2">
+        {CITIES.map((place) => (
+          <Button
+            key={place.name}
+            size="sm"
+            variant={place.name === city ? 'default' : 'outline'}
+            onClick={() => {
+              setCity(place.name);
+              // The latitude is eased towards the equator so a city near a
+              // pole is seen from the side, not from directly above.
+              planet.current?.rotateTo([place.lng, place.lat * 0.6]);
+            }}
+          >
+            {place.name}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### Planet
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultRotation` | `PlanetRotation` | — | The coordinate facing the viewer to begin with, as `[longitude, latitude]` in degrees. Read once: turning the globe afterwards does not change it. |
+| `autoRotate` | `boolean \| number` | `false` | Turn on its own, at this many degrees of longitude a second. `true` is 6. It stops while the pointer is over the globe, while it is being dragged, while it is off screen, and for anyone who has asked for reduced motion. |
+| `interactive` | `boolean` | `true` | Let the globe be dragged and turned with the arrow keys. |
+| `onRotationChange` | `(rotation: PlanetRotation) => void` | — | Called with the coordinate facing the viewer each time the globe comes to rest. |
+
+### Planet.Globe
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `label` | `string` | — | What a screen reader calls the globe. |
+
+### Planet.Marker
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `lat` | `number` | — | Degrees north of the equator. South is negative. |
+| `lng` | `number` | — | Degrees east of Greenwich. West is negative. |
+| `label` | `ReactNode` | — | A caption in a pill above the pin. |
+| `count` | `ReactNode` | — | A figure after the label, in a quieter colour. |
+| `labelClassName` | `string` | — | Extra classes for the label pill. |
+
+### Planet.Controls
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `step` | `number` | — | Degrees of longitude one press turns the globe. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Size
+
+The globe is a square as wide as its container, up to 28rem. Set a width on `Planet` or on `Planet.Globe` with `className` to change it. The dots keep the same spacing in pixels at every size, so a small globe has fewer of them and stays crisp.
+
+### Colour
+
+The dots and the shading are drawn in the text colour of the element. On a dark card the land is light, on a light card it is dark. Set `className="text-emerald-500"` on `Planet.Globe` to tint it.
+
+### Rotation
+
+`defaultRotation` is `[longitude, latitude]` of the point facing you, in degrees. It sets the opening view only. To move the globe afterwards, use the handle or let the reader drag it. `onRotationChange` is called each time the globe comes to rest.
+
+The tilt stops at 60 degrees either way. Past that the far pole comes into view and the continents are seen from above, where they are hard to recognise.
+
+### Markers near the edge
+
+A marker fades as its point approaches the edge of the globe and is gone when it passes behind. It stays in the page for a screen reader the whole time. Labels are not kept apart: two markers a few degrees from each other overlap, so merge nearby places into one marker with a `count`.
+
+### Touch
+
+On a touch screen a horizontal drag turns the globe and a vertical one scrolls the page. Tilting needs a mouse, a pen or the arrow keys.
+
+### Keyboard and screen readers
+
+The globe is announced as a slider whose value is the longitude facing you. Left and right turn it 15 degrees, up and down tilt it. Pass `interactive={false}` for a globe that cannot be turned, which is announced as an image.
+
+### The land data
+
+The outlines are Natural Earth's 1:110m land polygons, which are in the public domain, reduced to one bit per square degree. Small islands are missing at that resolution, so a marker on one sits on open water.
