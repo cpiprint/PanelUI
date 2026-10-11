@@ -4,6 +4,23 @@
   "homepage": "https://panelui.dev/docs/web",
   "items": [
     {
+      "name": "activity-grid",
+      "type": "registry:component",
+      "title": "Activity Grid",
+      "description": "A period as a grid of pills: each day met, partly met or missed.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/activity-grid.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/activity-grid.tsx"
+        }
+      ]
+    },
+    {
       "name": "feedback",
       "type": "registry:component",
       "title": "Feedback",

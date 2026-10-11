@@ -6,6 +6,9 @@ import type { ComponentType } from 'react';
 
 /** Every demo a docs page shows, each in a chunk of its own. */
 export const WEB_DEMOS: Record<string, ComponentType> = {
+  'activity-grid/columns': dynamic(() => import('./activity-grid/columns')),
+  'activity-grid/mindfulness': dynamic(() => import('./activity-grid/mindfulness')),
+  'activity-grid/pick-a-day': dynamic(() => import('./activity-grid/pick-a-day')),
   'feedback/dialog': dynamic(() => import('./feedback/dialog')),
   'feedback/draft': dynamic(() => import('./feedback/draft')),
   'feedback/failed': dynamic(() => import('./feedback/failed')),

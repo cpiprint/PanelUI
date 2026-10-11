@@ -34,3 +34,11 @@ export {
   type FeedbackActionProps,
   type FeedbackSubmitProps,
 } from './components/feedback';
+export {
+  ActivityGrid,
+  ActivityGridLegend,
+  type ActivityGridProps,
+  type ActivityGridLegendProps,
+  type ActivityCell,
+  type ActivityLevel,
+} from './components/activity-grid';

@@ -26,5 +26,15 @@
       "addedIn": "0.1.0",
       "category": "feedback"
     }
+  ],
+  "activity-grid": [
+    "ActivityGrid",
+    "A period as a grid of pills: each day met, partly met or missed.",
+    "react activity grid habit tracker heatmap component",
+    {
+      "addedIn": "0.1.0",
+      "category": "data",
+      "title": "Activity Grid"
+    }
   ]
 }
