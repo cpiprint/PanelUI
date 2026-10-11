@@ -550,7 +550,8 @@ export default function FeedbackDraft() {
 | --- | --- | --- | --- |
 | `value` | `string` | — | The message. Leave unset to let the dialog hold it. |
 | `onValueChange` | `(value: string) => void` | — | Called with the message each time it changes. |
-| `minHeight` | `number` | `200` | Room to write in, in pixels, before the field scrolls. |
+| `minHeight` | `number` | `200` | Room to write in, in pixels, before the field starts to grow. |
+| `maxHeight` | `number` | `360` | How tall the field may grow, in pixels, before the area round it scrolls. |
 
 ### Feedback.Submit
 

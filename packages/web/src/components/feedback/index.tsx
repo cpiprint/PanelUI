@@ -44,10 +44,12 @@
  * message with it.
  */
 import { Dialog } from '@base-ui/react/dialog';
+import { ScrollArea } from '@base-ui/react/scroll-area';
 import {
   createContext,
   useCallback,
   useContext,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -86,8 +88,21 @@ const feedbackVariants = tv({
     // of a 44px target, which a circle that size would not fit on the line.
     close:
       'absolute end-5 top-[23px] inline-flex size-[22px] cursor-pointer items-center justify-center rounded-full bg-foreground/10 text-muted-foreground outline-none transition-colors after:absolute after:-inset-[11px] hover:bg-foreground/15 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring',
+    /*
+     * The field never scrolls itself. It is always as tall as what is written
+     * in it, and the area round it does the scrolling, which is what lets the
+     * bar be a drawn one: a thin rounded thumb that shows while the pointer is
+     * over the field or the text is moving, in place of the browser's own.
+     */
     field:
-      'block w-full resize-none bg-transparent p-0 text-[17px] leading-6 text-foreground outline-none placeholder:text-muted-foreground',
+      'block w-full resize-none overflow-hidden bg-transparent p-0 text-[17px] leading-6 text-foreground outline-none placeholder:text-muted-foreground',
+    scroller: 'relative',
+    scrollerViewport: 'rounded-[inherit] outline-none data-has-overflow-y:overscroll-y-contain',
+    // Moved out into the well's padding, so it runs beside the text and not
+    // over the ends of its lines.
+    scrollbar:
+      'my-1 -me-3.5 flex w-1.5 opacity-0 transition-opacity delay-300 data-hovering:opacity-100 data-hovering:delay-0 data-hovering:duration-100 data-scrolling:opacity-100 data-scrolling:delay-0 data-scrolling:duration-100',
+    thumb: 'relative flex-1 rounded-full bg-foreground/20',
     // Held in from the shell's edge further than the panel is. A row the full
     // width would read as a third edge of the dialog, not as two buttons.
     footer: 'flex items-center gap-3.5 px-[18px] pb-2.5 pt-4',
@@ -352,8 +367,10 @@ export interface FeedbackFieldProps
   value?: string;
   /** Called with the message each time it changes. */
   onValueChange?: (value: string) => void;
-  /** Room to write in, in pixels, before the field scrolls. */
+  /** Room to write in, in pixels, before the field starts to grow. */
   minHeight?: number;
+  /** How tall the field may grow, in pixels, before the area round it scrolls. */
+  maxHeight?: number;
 }
 
 /**
@@ -364,14 +381,28 @@ function FeedbackField({
   value,
   onValueChange,
   minHeight = 200,
+  maxHeight = 360,
   className,
   style,
   onKeyDown,
+  ref,
   'aria-label': ariaLabel = 'Your message',
   ...props
 }: FeedbackFieldProps) {
   const feedback = useFeedback('Feedback.Field');
   const slots = feedbackVariants();
+  const field = useRef<HTMLTextAreaElement | null>(null);
+  const text = value ?? feedback.value;
+
+  // As tall as what is written, and never shorter than the room it starts
+  // with. Measured with the height let go first, or a field that has grown
+  // could never shrink.
+  useLayoutEffect(() => {
+    const node = field.current;
+    if (!node) return;
+    node.style.height = 'auto';
+    node.style.height = `${Math.max(minHeight, node.scrollHeight)}px`;
+  }, [text, minHeight]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     onKeyDown?.(event);
@@ -385,18 +416,32 @@ function FeedbackField({
   };
 
   return (
-    <textarea
-      aria-label={ariaLabel}
-      value={value ?? feedback.value}
-      onChange={(event) => {
-        feedback.setValue(event.target.value);
-        onValueChange?.(event.target.value);
-      }}
-      onKeyDown={handleKeyDown}
-      className={slots.field({ className })}
-      style={{ minHeight, ...style }}
-      {...props}
-    />
+    <ScrollArea.Root className={slots.scroller()}>
+      <ScrollArea.Viewport className={slots.scrollerViewport()} style={{ maxHeight }}>
+        <ScrollArea.Content style={{ minWidth: 0 }}>
+          <textarea
+            ref={(node) => {
+              field.current = node;
+              if (typeof ref === 'function') ref(node);
+              else if (ref) ref.current = node;
+            }}
+            aria-label={ariaLabel}
+            value={text}
+            onChange={(event) => {
+              feedback.setValue(event.target.value);
+              onValueChange?.(event.target.value);
+            }}
+            onKeyDown={handleKeyDown}
+            className={slots.field({ className })}
+            style={{ minHeight, ...style }}
+            {...props}
+          />
+        </ScrollArea.Content>
+      </ScrollArea.Viewport>
+      <ScrollArea.Scrollbar orientation="vertical" className={slots.scrollbar()}>
+        <ScrollArea.Thumb className={slots.thumb()} />
+      </ScrollArea.Scrollbar>
+    </ScrollArea.Root>
   );
 }
 FeedbackField.displayName = 'Feedback.Field';
