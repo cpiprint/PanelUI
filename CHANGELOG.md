@@ -9,6 +9,66 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.109.0] — 2026-10-11
+
+### Added
+
+- **A size scale shared by the controls.** Button, Button Group, Toggle Button, Input, Textarea,
+  Select, Badge, Checkbox, Radio Group, Switch, Tabs and Chip all take
+  `size="xs" | "sm" | "md" | "lg" | "xl"`. Until now the steps differed from one control to the
+  next: Button had four, Input three, Switch two, and Badge, Checkbox, Radio Group, Tabs and the
+  Select trigger had none, so a dense toolbar or a touch-first form meant overriding padding,
+  height and type size by hand.
+  - `md` is still the default, and every size that already existed keeps its measurements, so
+    nothing already built changes size.
+  - A size is a step on each control's own scale. An `sm` Button is 36 points tall and an `sm`
+    Input is 40.
+  - Radio Group and Tabs take `size` on the root and pass it to everything inside.
+  - On Select, `size` sets the trigger. `sheetProps.size` is still how tall the sheet opens.
+  - Badge's `count` and `dot` shapes follow the same steps.
+  - Small controls keep a large press target. Button, Switch, a Toggle Button at `xs` outside a
+    group, Tabs at `xs` and `sm`, and Select at `xs` extend theirs past what is drawn. Checkbox
+    and Radio Group rows stay 48 points tall at every size.
+  - A `native` Button maps `xs` onto the platform's smallest control size.
+  - `SwitchSize`, `BadgeSize`, `CheckboxSize`, `RadioSize`, `TabsSize` and `SelectSize` are
+    exported.
+- **Map** — `Map.Overlay` holds your own views over the map: a card along the `top` or the
+  `bottom`, or in one corner. A view positioned by hand covered the `Map.Controls` in the same
+  corner, and the controls had no way to move. An overlay is measured, so the controls in a
+  corner it covers sit 12 points past it and follow when the card changes height.
+- **Map** — `Map.Controls` and `Map.Overlay` take `inset` and `safeArea`. `inset` is the
+  distance from the map's edges, one number or per side, for chrome that floats over the map
+  from outside it such as a tab bar; `0` on an overlay runs a card edge to edge. `safeArea` adds
+  the device's insets, for a map that runs under the status bar or the home indicator. It reads
+  them from the nearest `SafeAreaProvider` and does nothing without one. Neither moves the
+  camera, so use per-side `padding` on `fitBounds` to frame a box clear of a card.
+
+### Changed
+
+- **Blocks** — Onboarding is withdrawn while its design is redone. `panelui-cli add onboarding`
+  no longer resolves, and the other four blocks are unchanged.
+
+### Fixed
+
+- **Blocks** — Smart Home's scene buttons keep their labels on one line at larger text sizes.
+  Four to a row, "Morning" broke mid-word and its tile grew taller than the rest. They are now
+  two to a row with the icon beside the label, and the climate row wraps instead of squeezing.
+- **Blocks** — Activity's rings show a compact figure in the centre (486, 3.7k, 15k). A month's
+  14,920 kcal was cut to "14,…" in a hole about fifty points across. The header above the rings
+  still gives the exact figure.
+- **Blocks** — pressing a scene or a device in Smart Home no longer redraws the energy chart.
+
+### Docs
+
+- A **Sizing** page under Customization: what each size sets on each control, how to give two
+  different controls the same height, and where an extended press target stops working.
+- **Map** — a *Cards over a full-screen map* example and a full-screen version of it in the
+  example app.
+- **Blocks** — each block page opens on a recording of the block in use.
+- **Studio** — pages that differ between Expo and the web have an App / Web switch, and
+  Quickstart, Feedback, Custom forms, Conversations, Support, Announcements and Identify users
+  each have a Web version covering Next.js and Vite.
+
 ## [0.108.0] — 2026-10-09
 
 ### Added
