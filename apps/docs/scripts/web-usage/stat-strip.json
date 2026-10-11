@@ -1,0 +1,23 @@
+{
+  "slug": "stat-strip",
+  "demo": "session",
+  "demoOptions": {
+    "height": 260
+  },
+  "intro": "Use it for two to four figures that belong together and need no chart: the totals under a workout, the summary under a card. Each figure is large with its label under it.\n\nThe first figure lines up with the left edge and the last with the right, so the strip shares the margins of whatever it sits in.\n\nIt has no room for a trend, a comparison or an icon. For a single figure with those, use a card of its own.",
+  "usage": "<StatStrip>\n  <StatStrip.Item label=\"Average session\">9 minutes</StatStrip.Item>\n  <StatStrip.Item label=\"Current mood\">Calm</StatStrip.Item>\n  <StatStrip.Item label=\"Meditation time\" accent>\n    8:30 <StatStrip.Unit>PM</StatStrip.Unit>\n  </StatStrip.Item>\n</StatStrip>",
+  "anatomy": "<StatStrip>\n  <StatStrip.Item label=\"…\">\n    … <StatStrip.Unit>…</StatStrip.Unit>\n  </StatStrip.Item>\n</StatStrip>",
+  "parts": {
+    "Item": "One figure. Its children are the value and `label` is what it measures.",
+    "Unit": "The unit after a figure, drawn smaller and quieter than the number."
+  },
+  "examples": [
+    {
+      "title": "Four figures with units",
+      "description": "`StatStrip.Unit` keeps a unit attached to its number without giving it the number's weight. `accent` marks the one figure that matters most.",
+      "demo": "four",
+      "height": 240
+    }
+  ],
+  "notes": "### How many\n\nThe items share the width equally. Four fit on a phone if the values are short. Past four, or with long values, the columns get too narrow to read and the figures should be a grid or a list.\n\n### Order in the markup\n\nIt is a description list. Each item's label comes before its value in the markup, so a screen reader says \"Average session, 9 minutes\", and the value is drawn above the label with CSS.\n\n### Server Components\n\nStat Strip holds no state, so it is not a client module. It can be rendered from a Server Component as written, and it adds no JavaScript to the page.\n\n### Colour\n\n`accent` draws a value in the accent colour. Set `--panelui-accent` on the strip or an ancestor to change it."
+}

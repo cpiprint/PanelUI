@@ -1,0 +1,172 @@
+---
+title: Stat Strip
+description: A row of figures, each over the words that say what it is.
+status: new
+---
+
+<ComponentPreview name="stat-strip/session" height={260}>
+
+```tsx
+import { StatStrip } from '@/components/panelui/stat-strip';
+
+export default function StatStripSession() {
+  return (
+    <div className="dark w-full max-w-xl rounded-[36px] bg-card px-7 py-6 text-card-foreground">
+      <StatStrip>
+        <StatStrip.Item label="Average session">9 minutes</StatStrip.Item>
+        <StatStrip.Item label="Current mood">Calm</StatStrip.Item>
+        <StatStrip.Item label="Meditation time" accent>
+          8:30 <StatStrip.Unit>PM</StatStrip.Unit>
+        </StatStrip.Item>
+      </StatStrip>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it for two to four figures that belong together and need no chart: the totals under a workout, the summary under a card. Each figure is large with its label under it.
+
+The first figure lines up with the left edge and the last with the right, so the strip shares the margins of whatever it sits in.
+
+It has no room for a trend, a comparison or an icon. For a single figure with those, use a card of its own.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/stat-strip.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/stat-strip` instead of `@/components/panelui/stat-strip`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/stat-strip.tsx`:
+
+<RegistrySource name="stat-strip" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { StatStrip } from "@/components/panelui/stat-strip"
+```
+
+```tsx
+<StatStrip>
+  <StatStrip.Item label="Average session">9 minutes</StatStrip.Item>
+  <StatStrip.Item label="Current mood">Calm</StatStrip.Item>
+  <StatStrip.Item label="Meditation time" accent>
+    8:30 <StatStrip.Unit>PM</StatStrip.Unit>
+  </StatStrip.Item>
+</StatStrip>
+```
+
+## Composition
+
+```tsx
+<StatStrip>
+  <StatStrip.Item label="…">
+    … <StatStrip.Unit>…</StatStrip.Unit>
+  </StatStrip.Item>
+</StatStrip>
+```
+
+- **`StatStrip.Item`** — One figure. Its children are the value and `label` is what it measures.
+- **`StatStrip.Unit`** — The unit after a figure, drawn smaller and quieter than the number.
+
+## Examples
+
+### Four figures with units
+
+`StatStrip.Unit` keeps a unit attached to its number without giving it the number's weight. `accent` marks the one figure that matters most.
+
+<ComponentPreview name="stat-strip/four" height={240}>
+
+```tsx
+import { StatStrip } from '@/components/panelui/stat-strip';
+
+export default function StatStripFour() {
+  return (
+    <div className="w-full max-w-2xl rounded-2xl border bg-card px-6 py-5 text-card-foreground">
+      <StatStrip className="gap-6">
+        <StatStrip.Item label="Distance">
+          12.4 <StatStrip.Unit>km</StatStrip.Unit>
+        </StatStrip.Item>
+        <StatStrip.Item label="Moving time">48:12</StatStrip.Item>
+        <StatStrip.Item label="Elevation">
+          186 <StatStrip.Unit>m</StatStrip.Unit>
+        </StatStrip.Item>
+        <StatStrip.Item label="Average pace" accent>
+          3:53 <StatStrip.Unit>/km</StatStrip.Unit>
+        </StatStrip.Item>
+      </StatStrip>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### StatStrip.Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `label` | `ReactNode` | — | What the figure is. Drawn under it. |
+| `accent` | `boolean` | `false` | Draw the figure in the accent colour. For the one that matters now. |
+| `valueClassName` | `string` | — | Extra classes for the figure. |
+| `labelClassName` | `string` | — | Extra classes for the label. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### How many
+
+The items share the width equally. Four fit on a phone if the values are short. Past four, or with long values, the columns get too narrow to read and the figures should be a grid or a list.
+
+### Order in the markup
+
+It is a description list. Each item's label comes before its value in the markup, so a screen reader says "Average session, 9 minutes", and the value is drawn above the label with CSS.
+
+### Server Components
+
+Stat Strip holds no state, so it is not a client module. It can be rendered from a Server Component as written, and it adds no JavaScript to the page.
+
+### Colour
+
+`accent` draws a value in the accent colour. Set `--panelui-accent` on the strip or an ancestor to change it.

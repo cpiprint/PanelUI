@@ -44,3 +44,11 @@ export {
 } from './components/activity-grid';
 export { RangeMeter, type RangeMeterProps } from './components/range-meter';
 export { ForecastBars, type ForecastBarsProps, type ForecastBar } from './components/forecast-bars';
+export {
+  StatStrip,
+  StatStripItem,
+  StatStripUnit,
+  type StatStripProps,
+  type StatStripItemProps,
+  type StatStripUnitProps,
+} from './components/stat-strip';

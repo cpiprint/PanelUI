@@ -28,4 +28,6 @@ export const WEB_DEMOS: Record<string, ComponentType> = {
   'rolling-number/currency': dynamic(() => import('./rolling-number/currency')),
   'rolling-number/formats': dynamic(() => import('./rolling-number/formats')),
   'rolling-number/slow': dynamic(() => import('./rolling-number/slow')),
+  'stat-strip/four': dynamic(() => import('./stat-strip/four')),
+  'stat-strip/session': dynamic(() => import('./stat-strip/session')),
 };

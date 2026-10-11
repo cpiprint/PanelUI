@@ -56,5 +56,15 @@
       "category": "data",
       "title": "Forecast Bars"
     }
+  ],
+  "stat-strip": [
+    "StatStrip",
+    "A row of figures, each over the words that say what it is.",
+    "react stat row kpi strip component",
+    {
+      "addedIn": "0.1.0",
+      "category": "data",
+      "title": "Stat Strip"
+    }
   ]
 }

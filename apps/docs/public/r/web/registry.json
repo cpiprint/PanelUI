@@ -110,6 +110,23 @@
           "target": "@components/panelui/rolling-number.tsx"
         }
       ]
+    },
+    {
+      "name": "stat-strip",
+      "type": "registry:component",
+      "title": "Stat Strip",
+      "description": "A row of figures, each over the words that say what it is.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/stat-strip.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/stat-strip.tsx"
+        }
+      ]
     }
   ]
 }
