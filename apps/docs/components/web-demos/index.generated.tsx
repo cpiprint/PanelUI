@@ -6,6 +6,12 @@ import type { ComponentType } from 'react';
 
 /** Every demo a docs page shows, each in a chunk of its own. */
 export const WEB_DEMOS: Record<string, ComponentType> = {
+  'feedback/dialog': dynamic(() => import('./feedback/dialog')),
+  'feedback/draft': dynamic(() => import('./feedback/draft')),
+  'feedback/failed': dynamic(() => import('./feedback/failed')),
+  'feedback/in-the-page': dynamic(() => import('./feedback/in-the-page')),
+  'feedback/score': dynamic(() => import('./feedback/score')),
+  'feedback/tags': dynamic(() => import('./feedback/tags')),
   'planet/fly-to': dynamic(() => import('./planet/fly-to')),
   'planet/pins': dynamic(() => import('./planet/pins')),
   'planet/realtime': dynamic(() => import('./planet/realtime')),

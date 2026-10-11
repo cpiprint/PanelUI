@@ -17,5 +17,14 @@
       "addedIn": "0.1.0",
       "category": "data"
     }
+  ],
+  "feedback": [
+    "Feedback",
+    "A dialog with a well to write in and two actions in the band around it.",
+    "react feedback dialog form component",
+    {
+      "addedIn": "0.1.0",
+      "category": "feedback"
+    }
   ]
 }

@@ -9,3 +9,16 @@ export {
   type PlanetMarkerProps,
   type PlanetControlsProps,
 } from './components/planet';
+export {
+  Feedback,
+  type FeedbackProps,
+  type FeedbackTriggerProps,
+  type FeedbackContentProps,
+  type FeedbackPanelProps,
+  type FeedbackTitleProps,
+  type FeedbackCloseProps,
+  type FeedbackFieldProps,
+  type FeedbackFooterProps,
+  type FeedbackActionProps,
+  type FeedbackSubmitProps,
+} from './components/feedback';

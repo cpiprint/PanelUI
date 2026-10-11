@@ -4,6 +4,24 @@
   "homepage": "https://panelui.dev/docs/web",
   "items": [
     {
+      "name": "feedback",
+      "type": "registry:component",
+      "title": "Feedback",
+      "description": "A dialog with a well to write in and two actions in the band around it.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/feedback.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/feedback.tsx"
+        }
+      ]
+    },
+    {
       "name": "planet",
       "type": "registry:component",
       "title": "Planet",
