@@ -9,7 +9,8 @@
  * - the demos in `components/web-demos/<slug>/`, which are real components.
  *   Each is rendered live on the page, and its own source is the code shown
  *   beside it, so what a reader copies is what they just watched run;
- * - the registry item, for the source a reader copies by hand;
+ * - the registry item, for the packages a component needs and the files it is
+ *   made of;
  * - `web-usage/<slug>.json`, for the parts no parser can infer: the intro, the
  *   order of the examples and what each one is for.
  *
@@ -153,9 +154,13 @@ function installation(slug, item) {
     const links = builtOn.map((other) => `[${titleOf(meta[other])}](/docs/web/components/${other})`);
     manual.push(`<Step>\n\nAdd the ${links.length > 1 ? 'components' : 'component'} it is built on: ${links.join(', ')}.\n\n</Step>`);
   }
-  for (const file of item.files) {
-    manual.push(`<Step>\n\nCopy this into \`${file.path}\`:\n\n${fence(file.content.trimEnd(), `tsx title="${file.path}"`)}\n\n</Step>`);
-  }
+  // The source is fetched when the tab is opened, from the item the CLI
+  // installs. Written out here it was most of the page: see RegistrySource.
+  const where =
+    item.files.length === 1
+      ? `\`${item.files[0].path}\``
+      : `\`components/${WEB_TARGET}/${slug}/\`, one file for each below`;
+  manual.push(`<Step>\n\nCopy the source into ${where}:\n\n<RegistrySource name="${slug}" />\n\n</Step>`);
   manual.push('</Steps>');
 
   return `## Installation

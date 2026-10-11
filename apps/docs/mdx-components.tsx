@@ -11,6 +11,7 @@ import { InstallTabs } from '@/components/install-tabs';
 import { Preview } from '@/components/preview';
 import { Platform } from '@/components/platform';
 import { PreviewVideo } from '@/components/preview-video';
+import { RegistrySource } from '@/components/registry-source';
 import type { MDXComponents } from 'mdx/types';
 
 /** Components available to every MDX page without importing them. */
@@ -30,6 +31,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     InstallTabs,
     Preview,
     PreviewVideo,
+    RegistrySource,
     Platform,
     ...components,
   };
