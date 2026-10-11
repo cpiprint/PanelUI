@@ -29,25 +29,43 @@ const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
 export default function DayGridWriting() {
   const total = WORDS.reduce((sum, words) => sum + words, 0);
+  const written = WORDS.filter((words) => words > 0).length;
 
   return (
-    <div className="flex w-full max-w-72 flex-col gap-4 rounded-2xl border bg-card p-5 text-card-foreground">
-      <div className="flex items-baseline justify-between gap-3">
-        <h3 className="text-sm font-medium text-muted-foreground">Words written</h3>
-        <p className="text-sm text-muted-foreground">6 weeks</p>
+    // A frame: a band that names what is inside, round a panel that holds it.
+    <div className="w-full max-w-xs rounded-3xl bg-muted p-1.5">
+      <div className="flex items-center justify-between gap-3 px-3.5 py-2.5">
+        <h3 className="text-sm font-medium">Words written</h3>
+        <p className="text-sm text-muted-foreground">Last 6 weeks</p>
       </div>
-      <p className="text-2xl font-bold tracking-tight">{total.toLocaleString('en-GB')}</p>
 
-      <div className="flex flex-col gap-1.5">
-        <div aria-hidden="true" className="grid grid-cols-7 gap-1 text-center text-xs text-muted-foreground">
-          {WEEKDAYS.map((day, index) => (
-            <span key={index}>{day}</span>
-          ))}
+      <div className="flex flex-col gap-5 rounded-[1.125rem] border bg-card p-5 text-card-foreground shadow-xs">
+        <div className="flex items-end justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <p className="text-sm text-muted-foreground">In total</p>
+            <p className="text-4xl font-bold leading-none tracking-tight">
+              {total.toLocaleString('en-GB')}
+            </p>
+          </div>
+          <p className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+            {written} of {WORDS.length} days
+          </p>
         </div>
-        <DayGrid cells={CELLS} columns={7} color="success" label="Words written" />
-      </div>
 
-      <DayGrid.Legend color="success" className="self-end" />
+        <div className="flex flex-col gap-1.5">
+          <div
+            aria-hidden="true"
+            className="grid grid-cols-7 gap-1 text-center text-xs text-muted-foreground"
+          >
+            {WEEKDAYS.map((day, index) => (
+              <span key={index}>{day}</span>
+            ))}
+          </div>
+          <DayGrid cells={CELLS} columns={7} color="success" label="Words written" />
+        </div>
+
+        <DayGrid.Legend color="success" className="self-end" />
+      </div>
     </div>
   );
 }

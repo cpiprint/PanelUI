@@ -2,7 +2,7 @@
   "slug": "day-grid",
   "demo": "writing",
   "demoOptions": {
-    "height": 540
+    "height": 640
   },
   "extraImports": [
     "type DayCell"
