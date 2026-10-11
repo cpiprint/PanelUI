@@ -1,0 +1,24 @@
+{
+  "slug": "range-meter",
+  "demo": "heart-rate",
+  "demoOptions": {
+    "height": 380
+  },
+  "intro": "Use it for one reading that only means something next to its range: a heart rate between the day's lowest and its peak, a goal between a floor and a ceiling. The value is written on the thumb, so where it is and what it is are read together.\n\nWith `onValueChange` it is a slider you can drag. Without it, it is a meter that shows a value.\n\nIt holds one value. For two ends of a range, or a control in a form where the number matters less than the label, use a slider.",
+  "usage": "<RangeMeter min={54} max={98} value={bpm} onValueChange={setBpm} marker={76}>\n  <HeartIcon />\n</RangeMeter>",
+  "examples": [
+    {
+      "title": "A meter",
+      "description": "Leave out `onValueChange` and it cannot be moved. `formatValue` writes the number on the thumb, here with its unit. The accent is the `--panelui-accent` variable, set on the meter in this example.",
+      "demo": "reading",
+      "height": 280
+    },
+    {
+      "title": "Steps and a format",
+      "description": "`step` is what a drag snaps to and what one arrow key press moves by. A long number is shortened on the thumb with `formatValue`, and `valueText` gives a screen reader the whole figure.",
+      "demo": "steps",
+      "height": 300
+    }
+  ],
+  "notes": "### The marker\n\n`marker` draws a dashed line at a value on the track: an average, a goal, yesterday's reading. It is decoration and is not announced, so say what it marks in the text around the meter.\n\n### Keyboard\n\nAs a slider it takes focus. Left and right move by `step`, Page Up and Page Down by a tenth of the range, Home and End go to the ends.\n\n### Screen readers\n\nIt is announced as a slider or a meter with its value, minimum and maximum. Pass `valueText` when the bare number is not enough: \"89 beats per minute\" in place of \"89\".\n\n### The thumb near the ends\n\nThe thumb is held in from each end of the track by half its own width, so at the lowest and highest values it stays inside the meter. The gradient still deepens at the true position.\n\n### Colour\n\nThe track and thumb use the accent, deepened towards red under the thumb. Set `--panelui-accent` on the meter or on any ancestor to change it. The number on the thumb is white, so pick an accent dark enough to read it against."
+}

@@ -61,6 +61,23 @@
       ]
     },
     {
+      "name": "range-meter",
+      "type": "registry:component",
+      "title": "Range Meter",
+      "description": "A reading on a track between its lowest and highest, with the number on the thumb.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/range-meter.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/range-meter.tsx"
+        }
+      ]
+    },
+    {
       "name": "rolling-number",
       "type": "registry:component",
       "title": "Rolling Number",

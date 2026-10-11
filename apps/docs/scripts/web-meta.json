@@ -36,5 +36,15 @@
       "category": "data",
       "title": "Activity Grid"
     }
+  ],
+  "range-meter": [
+    "RangeMeter",
+    "A reading on a track between its lowest and highest, with the number on the thumb.",
+    "react range slider meter gradient thumb component",
+    {
+      "addedIn": "0.1.0",
+      "category": "data",
+      "title": "Range Meter"
+    }
   ]
 }

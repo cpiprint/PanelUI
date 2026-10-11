@@ -42,3 +42,4 @@ export {
   type ActivityCell,
   type ActivityLevel,
 } from './components/activity-grid';
+export { RangeMeter, type RangeMeterProps } from './components/range-meter';
