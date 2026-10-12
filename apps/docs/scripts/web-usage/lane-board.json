@@ -1,0 +1,31 @@
+{
+  "slug": "lane-board",
+  "demo": "release",
+  "demoOptions": {
+    "height": 560
+  },
+  "extraImports": [
+    "type LaneBoardLane"
+  ],
+  "intro": "Use it for things that move through a few stages: changes going into a release, tasks, orders. Each stage is a lane with its cards and a count, and a card is dragged to another place in its lane or into another lane.\n\nThe board does not keep the cards. You give it the lanes and it tells you what they should become when a card is set down, so the order on screen is always the order in your state.\n\nIt lays lanes side by side, and on a narrow screen they scroll sideways. For one list that only needs reordering, a sortable list is the simpler thing.",
+  "usage": "const [lanes, setLanes] = useState<LaneBoardLane<Change>[]>([\n  { id: 'building', title: 'Building', cards: [{ id: 'REL-224', title: 'Faster search' }] },\n  { id: 'shipped', title: 'Shipped', cards: [] },\n])\n\n<LaneBoard\n  lanes={lanes}\n  onLanesChange={setLanes}\n  renderCard={(change) => (\n    <>\n      <LaneBoard.Title>{change.title}</LaneBoard.Title>\n      <LaneBoard.Code>{change.id}</LaneBoard.Code>\n    </>\n  )}\n/>",
+  "anatomy": "<LaneBoard\n  lanes={…}\n  renderCard={(card) => (\n    <>\n      <LaneBoard.Title />\n      <LaneBoard.Code />\n      <LaneBoard.Row>\n        <LaneBoard.Steps />\n        <LaneBoard.Meta />\n      </LaneBoard.Row>\n    </>\n  )}\n/>",
+  "parts": {
+    "Title": "A card's name.",
+    "Code": "A card's reference, in a fixed-width face so a column of them lines up.",
+    "Row": "The last line of a card, with something at each end.",
+    "Steps": "How far along a card is: a row of dashes with `value` of `max` lit, in the theme colour named by `color`.",
+    "Tag": "A word in a pill, for a card's state.",
+    "Meta": "A short figure at the end of the row: a time, a count."
+  },
+  "examples": [
+    {
+      "title": "Refusing a move",
+      "description": "`onLanesChange` is an offer. Here a task with steps left is not let into Done: the lanes it was offered are not applied, so the card goes back to where it was.",
+      "demo": "rules",
+      "height": 440
+    }
+  ],
+  "notes": "### The data\n\n`lanes` is a list of `{ id, title, cards }`, and a card is any object with an `id` of its own across the whole board. Everything else on a card is yours, and `renderCard` draws it. The parts above are there for the common pieces and none of them is required.\n\nPass `defaultLanes` in place of `lanes` and the board holds the order itself.\n\n### Hearing about a move\n\n`onLanesChange` is called with all the lanes as they should now be. `onMove` is called with the one card and where it went from and to, which is the shape a request to a server usually wants. Neither is called when a card is set down where it started.\n\n### Dragging\n\nA press on a card becomes a drag once the pointer has moved a few pixels. On a touch screen a card is picked up by resting a finger on it for a moment, so a swipe still scrolls. A button, a link or a field inside a card works as usual and does not start a drag; put `data-no-drag` on anything else that should not.\n\nNear either end of the board, a carried card scrolls it. Escape puts the card back.\n\n### Keyboard\n\nEvery card is a Tab stop. Space or Enter picks one up; up and down move it within its lane, left and right into the lane beside; Space or Enter sets it down and Escape puts it back. Moving focus away also puts it back.\n\n### Screen readers\n\nPicking up, each move and setting down are announced with the card's name, its lane and its place in it. `cardName` says what a card is called; without it, its `id` is used. A lane is named by its `title` when that is plain text.\n\n### Width\n\nLanes share the board's width and are never narrower than 13rem. When they do not fit, the board scrolls sideways and stops on a lane.\n\n### Motion\n\nCards slide to their new places as one is carried over them. With reduced motion on, they move at once.",
+  "full": true
+}

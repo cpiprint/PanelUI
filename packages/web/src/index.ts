@@ -88,3 +88,23 @@ export {
   type KpiGoodDirection,
   type KpiTone,
 } from './components/kpi';
+export {
+  LaneBoard,
+  LaneBoardTitle,
+  LaneBoardCode,
+  LaneBoardRow,
+  LaneBoardSteps,
+  LaneBoardTag,
+  LaneBoardMeta,
+  type LaneBoardProps,
+  type LaneBoardTitleProps,
+  type LaneBoardCodeProps,
+  type LaneBoardRowProps,
+  type LaneBoardStepsProps,
+  type LaneBoardTagProps,
+  type LaneBoardMetaProps,
+  type LaneBoardCard,
+  type LaneBoardLane,
+  type LaneBoardMove,
+  type LaneBoardColor,
+} from './components/lane-board';

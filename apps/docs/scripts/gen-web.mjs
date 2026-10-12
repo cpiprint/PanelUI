@@ -217,6 +217,9 @@ for (const slug of slugs) {
     `title: ${yamlScalar(titleOf(entry))}`,
     `description: ${yamlScalar(summary)}`,
     ...(status ? [`status: ${status}`] : []),
+    // A component that is wide by nature gets the width the contents list
+    // would have taken.
+    ...(u.full ? ['full: true'] : []),
     '---',
   ].join('\n');
 

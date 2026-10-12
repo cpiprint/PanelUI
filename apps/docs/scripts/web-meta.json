@@ -66,5 +66,15 @@
       "category": "data",
       "title": "KPI"
     }
+  ],
+  "lane-board": [
+    "LaneBoard",
+    "Lanes of cards that can be dragged within a lane and from one lane to another.",
+    "react kanban board drag and drop lanes component",
+    {
+      "addedIn": "0.1.0",
+      "category": "layout",
+      "title": "Lane Board"
+    }
   ]
 }
