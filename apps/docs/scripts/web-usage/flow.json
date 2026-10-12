@@ -3,7 +3,7 @@
   "demo": "pipeline",
   "full": true,
   "demoOptions": {
-    "height": 620
+    "height": 780
   },
   "extraImports": [],
   "intro": "Use it to show how things are connected and let somebody move them about: the stages of a pipeline, an automation, the parts of a system. Nodes are boxes with your own contents, edges join them, and the canvas is panned and zoomed.\n\nIt has the same parts and props as the app library's Flow, so a graph written for one reads the same in the other.\n\nIt lays nothing out for you. Every node is given a position, so for a graph whose shape comes from data you need to work the positions out first. For steps in a fixed order with nothing to rearrange, a list of steps is the simpler thing.",

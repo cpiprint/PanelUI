@@ -196,9 +196,9 @@ import { Flow } from '@/components/panelui/flow';
 /** An article on its way to being published, one stage under the other. */
 const STAGES = [
   { id: 'draft', name: 'Draft', detail: '1,840 words', x: 40, y: 20 },
-  { id: 'edit', name: 'Edit', detail: 'Two rounds', x: 40, y: 170 },
-  { id: 'check', name: 'Fact check', detail: '14 claims', x: 170, y: 320 },
-  { id: 'publish', name: 'Publish', detail: 'Thursday, 09:00', x: 40, y: 470 },
+  { id: 'edit', name: 'Edit', detail: 'Two rounds', x: 40, y: 150 },
+  { id: 'check', name: 'Fact check', detail: '14 claims', x: 170, y: 280 },
+  { id: 'publish', name: 'Publish', detail: 'Thursday, 09:00', x: 40, y: 410 },
 ];
 
 const TAG = {
@@ -213,7 +213,7 @@ export default function FlowPipeline() {
 
   return (
     <div className="flex w-full max-w-2xl flex-col gap-3">
-      <Flow fitViewOnMount label="Article pipeline" className="h-[30rem]">
+      <Flow fitViewOnMount label="Article pipeline" className="h-[40rem]">
         <Flow.Background variant="lines" gap={28} />
         {STAGES.map((stage, index) => {
           const state = index < at ? 'done' : index === at ? 'live' : 'waiting';
@@ -238,7 +238,7 @@ export default function FlowPipeline() {
             from={STAGES[index].id}
             to={stage.id}
             variant="smoothstep"
-            gap={14}
+            gap={10}
             arrow
             // Only the edge into the stage being worked on is marching.
             animated={index + 1 === at}
