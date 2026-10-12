@@ -3,6 +3,7 @@
   "pages": [
     "!index",
     "bar-picker",
+    "command-dock",
     "day-grid",
     "feedback",
     "flow",
@@ -10,6 +11,7 @@
     "lane-board",
     "planet",
     "range-meter",
-    "rolling-number"
+    "rolling-number",
+    "tilt-card"
   ]
 }

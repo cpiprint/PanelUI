@@ -2,9 +2,14 @@
 
 Generated from the collection's source. Read a component's own file before using it: the props in it are the real ones.
 
+## Overlays
+
+- [Command Dock](components/command-dock.md) — A small button that opens into a field, with the answer arriving under it a row at a time.
+
 ## Layout and structure
 
 - [Lane Board](components/lane-board.md) — Lanes of cards that can be dragged within a lane and from one lane to another.
+- [Tilt Card](components/tilt-card.md) — A card that leans towards the pointer, with layers inside it that move by their depth.
 
 ## Data
 

@@ -9,6 +9,9 @@ export const WEB_DEMOS: Record<string, ComponentType> = {
   'bar-picker/coverage': dynamic(() => import('./bar-picker/coverage')),
   'bar-picker/deploys': dynamic(() => import('./bar-picker/deploys')),
   'bar-picker/thumb': dynamic(() => import('./bar-picker/thumb')),
+  'command-dock/choose': dynamic(() => import('./command-dock/choose')),
+  'command-dock/find': dynamic(() => import('./command-dock/find')),
+  'command-dock/thumb': dynamic(() => import('./command-dock/thumb')),
   'day-grid/colours': dynamic(() => import('./day-grid/colours')),
   'day-grid/pick-a-day': dynamic(() => import('./day-grid/pick-a-day')),
   'day-grid/thumb': dynamic(() => import('./day-grid/thumb')),
@@ -47,4 +50,7 @@ export const WEB_DEMOS: Record<string, ComponentType> = {
   'rolling-number/queue': dynamic(() => import('./rolling-number/queue')),
   'rolling-number/slow': dynamic(() => import('./rolling-number/slow')),
   'rolling-number/thumb': dynamic(() => import('./rolling-number/thumb')),
+  'tilt-card/figures': dynamic(() => import('./tilt-card/figures')),
+  'tilt-card/plain': dynamic(() => import('./tilt-card/plain')),
+  'tilt-card/thumb': dynamic(() => import('./tilt-card/thumb')),
 };

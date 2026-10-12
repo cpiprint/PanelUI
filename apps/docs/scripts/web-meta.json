@@ -86,5 +86,25 @@
       "category": "data",
       "title": "Flow"
     }
+  ],
+  "tilt-card": [
+    "TiltCard",
+    "A card that leans towards the pointer, with layers inside it that move by their depth.",
+    "react tilt card 3d parallax hover component",
+    {
+      "addedIn": "0.1.0",
+      "category": "layout",
+      "title": "Tilt Card"
+    }
+  ],
+  "command-dock": [
+    "CommandDock",
+    "A small button that opens into a field, with the answer arriving under it a row at a time.",
+    "react command palette prompt search dock component",
+    {
+      "addedIn": "0.1.0",
+      "category": "overlays",
+      "title": "Command Dock"
+    }
   ]
 }

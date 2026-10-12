@@ -134,3 +134,26 @@ export {
   type FlowColor,
   type FlowSide,
 } from './components/flow';
+export {
+  TiltCard,
+  TiltCardLayer,
+  type TiltCardProps,
+  type TiltCardLayerProps,
+  type TiltCardColor,
+} from './components/tilt-card';
+export {
+  CommandDock,
+  CommandDockTrigger,
+  CommandDockPanel,
+  CommandDockInput,
+  CommandDockResults,
+  CommandDockRow,
+  CommandDockStatus,
+  type CommandDockProps,
+  type CommandDockTriggerProps,
+  type CommandDockPanelProps,
+  type CommandDockInputProps,
+  type CommandDockResultsProps,
+  type CommandDockRowProps,
+  type CommandDockStatusProps,
+} from './components/command-dock';

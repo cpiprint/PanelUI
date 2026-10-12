@@ -33,6 +33,23 @@
       ]
     },
     {
+      "name": "command-dock",
+      "type": "registry:component",
+      "title": "Command Dock",
+      "description": "A small button that opens into a field, with the answer arriving under it a row at a time.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/command-dock.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/command-dock.tsx"
+        }
+      ]
+    },
+    {
       "name": "day-grid",
       "type": "registry:component",
       "title": "Day Grid",
@@ -248,6 +265,35 @@
           "path": "components/panelui/rolling-number.tsx",
           "type": "registry:component",
           "target": "@components/panelui/rolling-number.tsx"
+        }
+      ]
+    },
+    {
+      "name": "tilt-card",
+      "type": "registry:component",
+      "title": "Tilt Card",
+      "description": "A card that leans towards the pointer, with layers inside it that move by their depth.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/tilt-card.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/tilt-card.tsx"
         }
       ]
     }

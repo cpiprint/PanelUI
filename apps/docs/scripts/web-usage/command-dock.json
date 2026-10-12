@@ -1,0 +1,28 @@
+{
+  "slug": "command-dock",
+  "demo": "find",
+  "demoOptions": {
+    "height": 420,
+    "align": "start"
+  },
+  "intro": "Use it for one question a reader can ask from wherever they are: search these notes, find an action, ask an assistant. It is a small button that opens into a field, and the answer arrives under the field a row at a time.\n\nIt runs nothing itself. `onSubmit` is handed what was typed and the rows are whatever you render, so it works the same over a search, a model or a list you already have.\n\nIt holds one field and a short list. For a conversation that goes back and forth, use a chat interface, and for a list long enough to scroll, a full search page.",
+  "usage": "<CommandDock onSubmit={find} busy={busy}>\n  <CommandDock.Trigger>Search the notes</CommandDock.Trigger>\n  <CommandDock.Panel>\n    <CommandDock.Input placeholder=\"Try: pricing\" />\n    <CommandDock.Results>\n      {found.map((note) => (\n        <CommandDock.Row key={note.id}>{note.title}</CommandDock.Row>\n      ))}\n    </CommandDock.Results>\n  </CommandDock.Panel>\n</CommandDock>",
+  "anatomy": "<CommandDock>\n  <CommandDock.Trigger />\n  <CommandDock.Panel>\n    <CommandDock.Input />\n    <CommandDock.Results>\n      <CommandDock.Row />\n      <CommandDock.Status />\n    </CommandDock.Results>\n  </CommandDock.Panel>\n</CommandDock>",
+  "parts": {
+    "Trigger": "The closed form: a button with your label that opens the dock.",
+    "Panel": "The open form. It is only rendered while the dock is open.",
+    "Input": "The field, with a send button. Enter sends too.",
+    "Results": "Where the rows go. It takes no room until there is a row or the dock is busy.",
+    "Row": "One row of the answer. It slides in when it is added, and `onSelect` makes it a button.",
+    "Status": "Three dots and a few words, for while an answer is on its way."
+  },
+  "examples": [
+    {
+      "title": "Rows that can be chosen",
+      "description": "`onSelect` makes a row a button. Here the dock is held open from outside with `open`, the list is narrowed as you type through `value`, and choosing a row closes it.",
+      "demo": "choose",
+      "height": 400
+    }
+  ],
+  "notes": "### Sending\n\n`onSubmit` is called with the text, trimmed, when Enter is pressed or the send button is used. It is not called for an empty field or while `busy` is true.\n\n### Busy\n\nSet `busy` while an answer is on its way. The send button is disabled and the results area opens, so a `CommandDock.Status` in it has somewhere to show. Render the status yourself where you want it among the rows; the first example puts it after them.\n\n### Rows arriving\n\nA row slides in when it is added to the page. Add rows one at a time, as they come, and they read as an answer being written. Rows rendered together arrive together. Give each row a stable `key`, or a row that was already there is drawn as new.\n\n### Size\n\nClosed, the dock is `closedWidth` wide, 9rem unless you set it. It has to be a real length for the opening to be animated, so set it to fit your label. Open, it is as wide as its container up to 28rem.\n\nThe dock grows downwards as rows arrive and pushes what is under it. Give its container a `min-h-*` if that should not move the page.\n\n### Closing\n\nEscape closes the dock and returns focus to its button. A press outside it closes it too. What was typed is kept.\n\n### Screen readers\n\nThe field is a search landmark and takes `aria-label`. The results are a list that is announced politely as rows arrive, so they do not cut in on typing."
+}
