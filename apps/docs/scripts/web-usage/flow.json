@@ -1,0 +1,36 @@
+{
+  "slug": "flow",
+  "demo": "pipeline",
+  "full": true,
+  "demoOptions": {
+    "height": 620
+  },
+  "extraImports": [],
+  "intro": "Use it to show how things are connected and let somebody move them about: the stages of a pipeline, an automation, the parts of a system. Nodes are boxes with your own contents, edges join them, and the canvas is panned and zoomed.\n\nIt has the same parts and props as the app library's Flow, so a graph written for one reads the same in the other.\n\nIt lays nothing out for you. Every node is given a position, so for a graph whose shape comes from data you need to work the positions out first. For steps in a fixed order with nothing to rearrange, a list of steps is the simpler thing.",
+  "usage": "<Flow fitViewOnMount>\n  <Flow.Background />\n  <Flow.Node id=\"draft\" position={{ x: 40, y: 20 }}>Draft</Flow.Node>\n  <Flow.Node id=\"edit\" position={{ x: 40, y: 150 }}>Edit</Flow.Node>\n  <Flow.Edge from=\"draft\" to=\"edit\" arrow />\n  <Flow.Controls />\n</Flow>",
+  "anatomy": "<Flow>\n  <Flow.Background />\n  <Flow.Node id=\"…\" position={…}>\n    …\n    <Flow.Handle />\n  </Flow.Node>\n  <Flow.Group id=\"…\" position={…} />\n  <Flow.Edge from=\"…\" to=\"…\" />\n  <Flow.Controls />\n  <Flow.MiniMap />\n</Flow>",
+  "parts": {
+    "Background": "The pattern behind the graph: dots, lines or crosses. It moves and scales with the graph.",
+    "Node": "A box on the graph. `id` is what edges call it, `position` is where it starts, and its children are yours.",
+    "Handle": "A dot on a node's edge that a connection can be drawn from or dropped on. Give it an `id` to join an edge to it by name.",
+    "Edge": "A line from one node to another: a curve, a routed line or a straight one, optionally dashed, marching and with an arrowhead.",
+    "Group": "A dashed box with a label, round things that belong together. It is dragged as one and an edge can be joined to it.",
+    "Controls": "Buttons to zoom, fit everything in view and lock the canvas.",
+    "MiniMap": "The whole graph, small, with the part in view marked on it."
+  },
+  "examples": [
+    {
+      "title": "Wiring it up",
+      "description": "A `Flow.Handle` is somewhere to start a connection. Drag from one to another node and `onConnect` is told which two; the edges are yours to keep. `isValidConnection` refuses the ones you do not want, here a second wire between the same two steps.",
+      "demo": "wiring",
+      "height": 480
+    },
+    {
+      "title": "Groups and a minimap",
+      "description": "`Flow.Group` holds ordinary elements and moves as one. The edge is joined to the groups by their `id`. `Flow.MiniMap` shows where the view is on the whole graph.",
+      "demo": "groups",
+      "height": 480
+    }
+  ],
+  "notes": "### Size\n\nThe canvas is 24rem tall and as wide as its container. Set a height with `className`.\n\n### Positions\n\n`position` is the node's top left corner on the graph, in pixels at a zoom of 1. The canvas holds a node's position after that: a drag moves it, and `onNodeDragEnd` reports where it stopped. To move a node yourself, keep its position in state and pass the new one.\n\n`fitViewOnMount` zooms and pans so every node is in view once they have been measured. It never zooms in past 1.\n\n### Edges\n\n`from` and `to` are node ids, or `{ node, handle }` to join a handle by its `id`. The faces an edge uses are worked out from where the two nodes are, and change as one is dragged past the other; `fromSide` and `toSide` fix them.\n\n`variant` is `bezier`, `smoothstep`, `step` or `straight`. `animated` sets dashes marching towards the target, and stops for anyone who has asked for reduced motion. `color` names one of the theme's roles; without it an edge is a quiet grey.\n\n### Panning and zooming\n\nDrag the empty canvas to pan. Zoom with a pinch, or with Control or Command and the wheel. The plain wheel is left to the page, so a diagram in a long page does not trap its scroll. `Flow.Controls` has buttons for the same things, and a lock that stops all of it.\n\n### Keyboard\n\nThe canvas and every node are Tab stops. On the canvas the arrow keys pan, plus and minus zoom and 0 fits everything. On a node the arrow keys move it by `moveStep`, four times as far with Shift, Enter presses it and Delete calls `onDelete`.\n\nA connection can only be drawn with a pointer. Where joining nodes matters to everyone, give them another way to do it, such as a menu on the node.\n\n### Inside a node\n\nA node is a card by default; pass `className` to change it. Buttons, links and fields inside a node work as usual and do not start a drag. Put `data-no-drag` on anything else that should not.\n\n### Groups\n\nA group's children are ordinary elements, laid out however you like inside it. They are not nodes: an edge is joined to the group, not to something in it."
+}

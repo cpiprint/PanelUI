@@ -76,5 +76,15 @@
       "category": "layout",
       "title": "Lane Board"
     }
+  ],
+  "flow": [
+    "Flow",
+    "A canvas of nodes joined by edges, that you pan, zoom and rearrange.",
+    "react flow diagram node graph canvas component",
+    {
+      "addedIn": "0.1.0",
+      "category": "data",
+      "title": "Flow"
+    }
   ]
 }
