@@ -5,6 +5,7 @@
   "pages": [
     "---Get started---",
     "index",
+    "components/index",
     "...installation",
     "---Components---",
     "...components"

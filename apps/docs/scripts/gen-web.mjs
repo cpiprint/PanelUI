@@ -288,6 +288,18 @@ for (const slug of slugs) {
   fs.writeFileSync(path.join(CONTENT, `${slug}.mdx`), `${sections.join('\n\n')}\n`);
 }
 
+/*
+ * The index shows each component running in a card, from a small demo written
+ * for that size. A component without one would be an empty card on the page
+ * people come to first.
+ */
+for (const slug of slugs) {
+  if (!demos.includes(`${slug}/thumb`)) {
+    throw new Error(`gen-web: ${slug} has no components/web-demos/${slug}/thumb.tsx for the index`);
+  }
+  used.add(`${slug}/thumb`);
+}
+
 /* A demo nothing shows is a file that will rot without anyone noticing. */
 const unused = demos.filter((name) => !used.has(name));
 if (unused.length > 0) {
@@ -302,26 +314,21 @@ const ordered = [...slugs].sort((a, b) => titleOf(meta[a]).localeCompare(titleOf
 
 fs.writeFileSync(
   path.join(CONTENT, 'meta.json'),
-  `${JSON.stringify({ title: 'Components', pages: ['index', ...ordered] }, null, 2)}\n`
+  `${JSON.stringify({ title: 'Components', pages: ['!index', ...ordered] }, null, 2)}\n`
 );
-
-const cards = ordered
-  .map((slug) => `  <Card title="${titleOf(meta[slug])}" href="/docs/web/components/${slug}">\n    ${meta[slug][1]}\n  </Card>`)
-  .join('\n');
 
 fs.writeFileSync(
   path.join(CONTENT, 'index.mdx'),
   `---
 title: Components
-description: ${yamlScalar(`The ${ordered.length} components in the web collection.`)}
+description: ${yamlScalar(`The ${ordered.length} components in the web collection, each one running.`)}
+full: true
 ---
 
-Every page opens on the component running. Press **Code** on any preview for the source of what
-you are looking at.
+Every card is the component itself, running. Open one for its page, where it can be used, and
+where its source is under it.
 
-<Cards>
-${cards}
-</Cards>
+<WebComponentGallery />
 `
 );
 

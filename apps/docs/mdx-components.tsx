@@ -3,6 +3,7 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 import { ComponentGallery } from '@/components/component-gallery';
+import { WebComponentGallery } from '@/components/web-component-gallery';
 import { ComponentPreview } from '@/components/component-preview';
 import { Diagram } from '@/components/diagram';
 import { FrameworkGrid } from '@/components/framework-grid';
@@ -22,6 +23,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Tabs,
     Callout,
     ComponentGallery,
+    WebComponentGallery,
     ComponentPreview,
     Step,
     Steps,
