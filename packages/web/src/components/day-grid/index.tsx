@@ -120,6 +120,12 @@ export interface DayGridProps
   cells: DayCell[];
   /** Cells per row. Seven makes each row a week. */
   columns?: number;
+  /**
+   * Cells per column. Giving this fills the grid column by column, and
+   * `columns` is ignored. Seven makes each column a week, which lays a long
+   * period out wide and short.
+   */
+  rows?: number;
   /** Which of the theme's roles the dots are drawn in. */
   color?: DayGridColor;
   /** The index of the selected day, when the caller holds it. */
@@ -138,6 +144,7 @@ export interface DayGridProps
 function DayGridRoot({
   cells,
   columns = 7,
+  rows: perColumn,
   color = 'primary',
   value = null,
   onValueChange,
@@ -159,18 +166,21 @@ function DayGridRoot({
   // The dots start at nothing and arrive along the diagonals.
   const [arrived, setArrived] = useState<'no' | 'arriving' | 'yes'>('no');
 
-  const rows = Math.ceil(cells.length / columns);
+  // Which way the days run: along each row, or down each column.
+  const byColumn = perColumn !== undefined;
+  const across = byColumn ? Math.ceil(cells.length / Math.max(1, perColumn)) : columns;
+  const rows = byColumn ? Math.max(1, perColumn) : Math.ceil(cells.length / columns);
 
   useEffect(() => {
     const start = requestAnimationFrame(() => setArrived('arriving'));
     // Once the last diagonal is in, the delays come off. Left on, they would
     // hold every dot back from the lens by its own share of the stagger.
-    const settle = setTimeout(() => setArrived('yes'), (rows + columns) * STAGGER + 450);
+    const settle = setTimeout(() => setArrived('yes'), (rows + across) * STAGGER + 450);
     return () => {
       cancelAnimationFrame(start);
       clearTimeout(settle);
     };
-  }, [rows, columns]);
+  }, [rows, across]);
 
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
@@ -217,12 +227,21 @@ function DayGridRoot({
     setPointed(null);
   };
 
-  const layout = { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, ...style };
+  const layout = byColumn
+    ? {
+        gridTemplateRows: `repeat(${rows}, auto)`,
+        gridAutoFlow: 'column' as const,
+        gridAutoColumns: 'minmax(0, 1fr)',
+        ...style,
+      }
+    : { gridTemplateColumns: `repeat(${across}, minmax(0, 1fr))`, ...style };
 
   /** Where a dot is in its entrance, as the styles that put it there. */
   const dotStyle = (index: number): CSSProperties | undefined => {
     if (arrived === 'yes') return undefined;
-    const diagonal = Math.floor(index / columns) + (index % columns);
+    const diagonal = byColumn
+      ? Math.floor(index / rows) + (index % rows)
+      : Math.floor(index / across) + (index % across);
     return {
       ['--pu-in' as string]: arrived === 'no' ? 0 : 1,
       transitionDelay: `${diagonal * STAGGER}ms`,
@@ -288,10 +307,11 @@ function DayGridRoot({
   const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
     const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
     const moves: Record<string, number> = {
-      ArrowLeft: rtl ? 1 : -1,
-      ArrowRight: rtl ? -1 : 1,
-      ArrowUp: -columns,
-      ArrowDown: columns,
+      // One day along a row, or one whole column when the days run downwards.
+      ArrowLeft: (rtl ? 1 : -1) * (byColumn ? rows : 1),
+      ArrowRight: (rtl ? -1 : 1) * (byColumn ? rows : 1),
+      ArrowUp: byColumn ? -1 : -across,
+      ArrowDown: byColumn ? 1 : across,
     };
     let next: number | undefined;
     if (event.key in moves) next = index + (moves[event.key] ?? 0);

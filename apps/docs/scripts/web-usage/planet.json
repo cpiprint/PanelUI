@@ -2,7 +2,7 @@
   "slug": "planet",
   "demo": "regions",
   "demoOptions": {
-    "height": 760
+    "height": 480
   },
   "intro": "Use it to show where things are in the world when the answer is a handful of places: the regions a service runs in, offices, where a team is this week. The land is drawn as dots and the markers are your own elements, so a marker can hold initials, an icon or a link.\n\nDrag the globe to turn it. `Planet.Controls` adds two buttons for the same thing, and the arrow keys work when the globe has focus.\n\nIt shows that a place is somewhere, not exactly where. A marker covers a few hundred kilometres at this scale, so for anything a street address matters to, use a map.",
   "usage": "<Planet defaultRotation={[60, 14]}>\n  <Planet.Globe>\n    <Planet.Marker lat={53.35} lng={-6.26} label=\"Dublin\" />\n    <Planet.Marker lat={-33.87} lng={151.21} label=\"Sydney\" color=\"destructive\" />\n  </Planet.Globe>\n  <Planet.Controls />\n</Planet>",

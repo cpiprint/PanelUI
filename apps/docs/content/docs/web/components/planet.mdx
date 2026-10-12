@@ -4,7 +4,7 @@ description: The world as dots on a globe you can turn, with markers pinned to i
 status: new
 ---
 
-<ComponentPreview name="planet/regions" height={760}>
+<ComponentPreview name="planet/regions" height={480}>
 
 ```tsx lineNumbers
 'use client';
@@ -34,6 +34,13 @@ const COLOUR: Record<Health, PlanetMarkerColor> = {
   down: 'destructive',
 };
 
+/** The same three colours for the dots in the list. */
+const DOT: Record<Health, string> = {
+  healthy: 'bg-(--success)',
+  slow: 'bg-(--warning)',
+  down: 'bg-destructive',
+};
+
 const SAYS: Record<Health, string> = {
   healthy: 'Answering normally',
   slow: 'Answering slowly',
@@ -57,7 +64,7 @@ export default function PlanetRegions() {
 
   return (
     // A frame: a band that names what is inside, round a panel that holds it.
-    <div className="w-full max-w-sm rounded-3xl bg-muted p-1.5">
+    <div className="w-full max-w-2xl rounded-3xl bg-muted p-1.5">
       <div className="flex items-center justify-between gap-3 px-3.5 py-2.5">
         <h3 className="text-sm font-medium">Regions</h3>
         <p className="text-sm text-muted-foreground">
@@ -65,8 +72,9 @@ export default function PlanetRegions() {
         </p>
       </div>
 
-      <div className="flex flex-col gap-4 rounded-[1.125rem] border bg-card p-5 text-card-foreground shadow-xs">
-        <Planet ref={planet} defaultRotation={[103.82, 4]}>
+      {/* The globe beside the list on a wide screen, over it on a narrow one. */}
+      <div className="grid gap-5 rounded-[1.125rem] border bg-card p-5 text-card-foreground shadow-xs sm:grid-cols-[minmax(0,17rem)_minmax(0,1fr)] sm:items-center">
+        <Planet ref={planet} defaultRotation={[103.82, 4]} className="mx-auto max-w-64 gap-3">
           <Planet.Globe label="Regions" color="info">
             {REGIONS.map((entry) => (
               <Planet.Marker
@@ -85,17 +93,35 @@ export default function PlanetRegions() {
           <Planet.Controls />
         </Planet>
 
-        <div className="flex items-end justify-between gap-4 border-t pt-4" aria-live="polite">
-          <div className="flex flex-col gap-1">
-            <p className="text-sm text-muted-foreground">{region.city}</p>
-            <p className="text-sm font-medium">{SAYS[region.health]}</p>
+        <div className="flex min-w-0 flex-col gap-3">
+          <div className="flex items-end justify-between gap-4" aria-live="polite">
+            <div className="flex flex-col gap-1">
+              <p className="text-sm text-muted-foreground">{region.city}</p>
+              <p className="text-sm font-medium">{SAYS[region.health]}</p>
+            </div>
+            <p className="text-3xl font-bold leading-none tracking-tight">
+              {region.ms === null ? '\u2014' : region.ms}
+              {region.ms === null ? null : (
+                <span className="ms-1 text-sm font-medium text-muted-foreground">ms</span>
+              )}
+            </p>
           </div>
-          <p className="text-2xl font-bold leading-none tracking-tight">
-            {region.ms === null ? '\u2014' : region.ms}
-            {region.ms === null ? null : (
-              <span className="ms-1 text-sm font-medium text-muted-foreground">ms</span>
-            )}
-          </p>
+
+          <ul className="grid grid-cols-2 gap-1 border-t pt-3">
+            {REGIONS.map((entry) => (
+              <li key={entry.city}>
+                <button
+                  type="button"
+                  aria-pressed={entry.city === picked}
+                  onClick={() => pick(entry.city)}
+                  className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-start text-sm text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring aria-pressed:bg-muted aria-pressed:text-foreground"
+                >
+                  <span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${DOT[entry.health]}`} />
+                  <span className="truncate">{entry.city}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>

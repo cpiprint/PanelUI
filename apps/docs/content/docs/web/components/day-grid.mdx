@@ -4,25 +4,28 @@ description: A run of days as a field of dots, each sized by how much happened o
 status: new
 ---
 
-<ComponentPreview name="day-grid/writing" height={700}>
+<ComponentPreview name="day-grid/writing" height={460}>
 
 ```tsx lineNumbers
 'use client';
 
 import { DayGrid, type DayCell, type DayLevel } from '@/components/panelui/day-grid';
 
-/** Words written on each of the last 42 days, oldest first. */
+/** Words written on each of the last 112 days, oldest first, starting on a Monday. */
 const WORDS = [
   0, 420, 1310, 880, 0, 0, 240, 1650, 1920, 760, 0, 310, 0, 0, 980, 1440, 2210, 1180, 640, 0, 0,
   1890, 2460, 1730, 920, 0, 150, 0, 2050, 1380, 0, 1120, 1960, 0, 0, 870, 2320, 1610, 1240, 2580,
-  430, 0,
+  430, 0, 0, 0, 760, 1340, 0, 0, 280, 1470, 1980, 2240, 640, 1010, 0, 0, 2120, 940, 1760, 0, 520, 0,
+  190, 1560, 2380, 1820, 2050, 1290, 0, 0, 0, 610, 1430, 1070, 0, 0, 0, 2290, 2510, 1940, 1680, 730,
+  0, 360, 1210, 0, 1850, 2400, 1530, 0, 0, 990, 1720, 2160, 0, 1340, 220, 0, 2070, 2450, 1890, 2630,
+  1160, 0, 0, 1480, 2220, 1960, 2540, 870, 410, 0,
 ];
 
-/** A day's count as one of the five strengths. */
+/** A day's count as one of the five sizes. */
 const levelOf = (words: number): DayLevel =>
   words === 0 ? 0 : words < 600 ? 1 : words < 1300 ? 2 : words < 2000 ? 3 : 4;
 
-const START = new Date(2026, 7, 31);
+const START = new Date(2026, 5, 22);
 
 const CELLS: DayCell[] = WORDS.map((words, index) => {
   const day = new Date(START);
@@ -34,7 +37,7 @@ const CELLS: DayCell[] = WORDS.map((words, index) => {
   };
 });
 
-const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+const WEEKDAYS = ['Mon', '', 'Wed', '', 'Fri', '', 'Sun'];
 
 export default function DayGridWriting() {
   const total = WORDS.reduce((sum, words) => sum + words, 0);
@@ -42,13 +45,13 @@ export default function DayGridWriting() {
 
   return (
     // A frame: a band that names what is inside, round a panel that holds it.
-    <div className="w-full max-w-sm rounded-3xl bg-muted p-1.5">
+    <div className="w-full max-w-2xl rounded-3xl bg-muted p-1.5">
       <div className="flex items-center justify-between gap-3 px-3.5 py-2.5">
         <h3 className="text-sm font-medium">Words written</h3>
-        <p className="text-sm text-muted-foreground">Last 6 weeks</p>
+        <p className="text-sm text-muted-foreground">Last 16 weeks</p>
       </div>
 
-      <div className="flex flex-col gap-5 rounded-[1.125rem] border bg-card p-5 text-card-foreground shadow-xs">
+      <div className="flex flex-col gap-4 rounded-[1.125rem] border bg-card p-5 text-card-foreground shadow-xs">
         <div className="flex items-end justify-between gap-4">
           <div className="flex flex-col gap-1">
             <p className="text-sm text-muted-foreground">In total</p>
@@ -61,16 +64,19 @@ export default function DayGridWriting() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-1.5">
+        {/* A week to a column: `rows` runs the days downwards. */}
+        <div className="flex gap-2">
           <div
             aria-hidden="true"
-            className="grid grid-cols-7 gap-1 text-center text-xs text-muted-foreground"
+            className="grid grid-rows-7 gap-1 text-xs leading-none text-muted-foreground"
           >
             {WEEKDAYS.map((day, index) => (
-              <span key={index}>{day}</span>
+              <span key={index} className="flex items-center">
+                {day}
+              </span>
             ))}
           </div>
-          <DayGrid cells={CELLS} columns={7} color="success" label="Words written" />
+          <DayGrid cells={CELLS} rows={7} color="success" label="Words written" />
         </div>
 
         <DayGrid.Legend color="success" className="self-end" />
@@ -82,7 +88,7 @@ export default function DayGridWriting() {
 
 </ComponentPreview>
 
-Use it to show how much happened on each day of a period: words written, commits pushed, minutes practised. Each day is a dot that grows with the amount, from a speck for an empty day to a full disc for the busiest, and seven columns make each row a week.
+Use it to show how much happened on each day of a period: words written, commits pushed, minutes practised. Each day is a dot that grows with the amount, from a speck for an empty day to a full disc for the busiest, and the days can run along rows or down columns.
 
 It shows a pattern, not a figure. Nobody can read a count off the size of a dot, so put the number that matters beside the grid, and give each day a `label`: it is shown in a tag when the pointer is over that day.
 
@@ -260,6 +266,7 @@ export default function DayGridColours() {
 | --- | --- | --- | --- |
 | `cells` | `DayCell[]` | — | The days, in order. They fill the grid row by row. |
 | `columns` | `number` | `7` | Cells per row. Seven makes each row a week. |
+| `rows` | `number` | — | Cells per column. Giving this fills the grid column by column, and `columns` is ignored. Seven makes each column a week, which lays a long period out wide and short. |
 | `color` | `DayGridColor` | `'primary'` | Which of the theme's roles the dots are drawn in. |
 | `value` | `number \| null` | `null` | The index of the selected day, when the caller holds it. |
 | `onValueChange` | `(index: number) => void` | — | Called with the index of a day when it is pressed. Passing this makes the days buttons; without it the grid is a picture. |
@@ -294,7 +301,9 @@ The dots grow in from nothing when the grid mounts, one diagonal after the next.
 
 ### Layout
 
-Days fill the grid row by row and stay round at any width. `columns` defaults to 7. For a strip that runs along one line, set `columns` to the number of days.
+Days fill the grid row by row and stay round at any width. `columns` defaults to 7, which makes each row a week and the grid tall. For a strip that runs along one line, set `columns` to the number of days.
+
+Give `rows` and the days run down each column, `rows` to a column, for as many columns as it takes. `rows={7}` makes each column a week, which lays a long period out wide and short.
 
 The grid takes the width of its container. Set a `max-w-*` class on it or on its parent to stop the dots growing too large.
 
@@ -306,7 +315,7 @@ The grid as a whole is announced with its `label` and how many of the days have 
 
 ### Keyboard
 
-When the days are buttons, Tab moves to the selected day, or the first. Left and right move a day, up and down move a row, and Home and End go to the first and last day.
+When the days are buttons, Tab moves to the selected day, or the first. The arrow keys move to the cell beside, above or below, whichever way the days run, and Home and End go to the first and last day.
 
 ### Server Components
 
