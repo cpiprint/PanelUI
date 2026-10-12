@@ -66,15 +66,5 @@
       "category": "data",
       "title": "Stat Strip"
     }
-  ],
-  "fold-stack": [
-    "FoldStack",
-    "A stack of one-line summaries, one of them opened out into its card.",
-    "react stacked cards expanding summary component",
-    {
-      "addedIn": "0.1.0",
-      "category": "layout",
-      "title": "Fold Stack"
-    }
   ]
 }

@@ -80,35 +80,6 @@
       ]
     },
     {
-      "name": "fold-stack",
-      "type": "registry:component",
-      "title": "Fold Stack",
-      "description": "A stack of one-line summaries, one of them opened out into its card.",
-      "dependencies": [
-        "tailwind-variants"
-      ],
-      "registryDependencies": [],
-      "cssVars": {
-        "light": {
-          "success": "oklch(0.696 0.17 162.48)",
-          "warning": "oklch(0.769 0.188 70.08)",
-          "info": "oklch(0.623 0.214 259.815)"
-        },
-        "dark": {
-          "success": "oklch(0.696 0.17 162.48)",
-          "warning": "oklch(0.769 0.188 70.08)",
-          "info": "oklch(0.623 0.214 259.815)"
-        }
-      },
-      "files": [
-        {
-          "path": "components/panelui/fold-stack.tsx",
-          "type": "registry:component",
-          "target": "@components/panelui/fold-stack.tsx"
-        }
-      ]
-    },
-    {
       "name": "planet",
       "type": "registry:component",
       "title": "Planet",
