@@ -1,0 +1,95 @@
+# Publishes panelui-web to npm when a GitHub release is published, in the same
+# shape as publish.yml does for the library and publish-cli.yml for the CLIs.
+#
+# The web collection is versioned independently of all of them, so a release is
+# for it only when the tag says so:
+#
+#   web-vX.Y.Z   -> packages/web   (panelui-web)
+#
+# A release whose tag does not start with `web-v` publishes nothing here and
+# says so, rather than failing: every workflow on `release: published` sees
+# every release.
+#
+# Authentication is npm Trusted Publishing: the job asks GitHub for an OIDC
+# token and npm exchanges it for a short-lived one, so there is no credential in
+# this repository to leak or rotate, and the package carries a provenance
+# attestation naming this workflow and commit.
+#
+# One-time setup on npmjs.com, without which every run fails at the last step.
+# A trusted publisher can only be set on a package that exists, so the first
+# version has to be published by hand, once, by somebody with the account's
+# second factor. After that:
+#   panelui-web -> Settings -> Trusted Publisher -> GitHub Actions
+#   Organization or user: panel-ui
+#   Repository:           PanelUI
+#   Workflow filename:    publish-web.yml
+name: Publish web
+
+on:
+  release:
+    types: [published]
+  # A dry run on demand, so the whole path — install, build, test, pack — can
+  # be exercised without putting anything on the registry.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # required for trusted publishing
+
+jobs:
+  publish:
+    # Decided before anything is installed: a library or CLI release has
+    # nothing to do here, and should not spend a job finding that out.
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref_name, 'web-v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      # Node 22 ships npm 10, which has no trusted publishing. Without this the
+      # publish step fails asking for a token that deliberately does not exist.
+      - name: Use an npm that can publish with OIDC
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck --workspace=panelui-web
+
+      - name: Build
+        run: npm run build --workspace=panelui-web
+
+      # The package contract: every component is exported, client modules say
+      # so, and every compound part has a name a Server Component can import.
+      - name: Test the package
+        run: node --test packages/web/test/*.test.mjs
+
+      # The only thing standing between a mistyped tag and a wrong version on
+      # npm, which cannot be taken back — npm does not allow a version to be
+      # republished, even after an unpublish.
+      - name: Check the tag matches the package version
+        if: github.event_name == 'release'
+        run: |
+          tag="${GITHUB_REF_NAME#web-v}"
+          version="$(node -p "require('./packages/web/package.json').version")"
+          if [ "$tag" != "$version" ]; then
+            echo "::error::Release tag ${GITHUB_REF_NAME} does not match packages/web/package.json (${version}). Fix one of them and re-cut the release."
+            exit 1
+          fi
+          echo "Publishing panelui-web ${version} from ${GITHUB_REF_NAME}."
+
+      - name: Publish
+        if: github.event_name == 'release'
+        run: npm publish --provenance --access public
+        working-directory: packages/web
+
+      - name: Dry run
+        if: github.event_name == 'workflow_dispatch'
+        run: npm publish --dry-run --access public
+        working-directory: packages/web
