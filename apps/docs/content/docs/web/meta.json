@@ -7,6 +7,10 @@
     "index",
     "components/index",
     "...installation",
+    "mcp",
+    "skills",
+    "style",
+    "theme",
     "---Components---",
     "...components"
   ]

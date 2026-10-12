@@ -81,3 +81,36 @@ test('every demo a page names is in the generated map', () => {
     }
   }
 });
+
+test('the skill has a reference for every component and for nothing else', () => {
+  const skill = path.resolve(docs, '../../skills/panelui-web');
+  const pages = fs
+    .readdirSync(path.join(skill, 'components'))
+    .map((file) => file.replace(/\.md$/, ''))
+    .sort();
+  assert.deepEqual(pages, slugs);
+  const index = fs.readFileSync(path.join(skill, 'components.md'), 'utf8');
+  for (const slug of slugs) {
+    assert.match(index, new RegExp(`\\(components/${slug}\\.md\\)`), `${slug}: listed in components.md`);
+    const page = fs.readFileSync(path.join(skill, 'components', `${slug}.md`), 'utf8');
+    assert.match(page, new RegExp(`from "@/components/panelui/${slug}"`), `${slug}: import line`);
+    // The worked example is shown the way a project imports it, never the package's own path.
+    assert.doesNotMatch(page, /from ['"]panelui-web\//, `${slug}: example imports the package`);
+  }
+});
+
+test('the skill manifest carries the package version', () => {
+  const version = JSON.parse(read('../../packages/web/package.json')).version;
+  const manifest = read('../../skills/panelui-web/SKILL.md');
+  assert.match(manifest, new RegExp(`^  version: ${version.replaceAll('.', '\\.')}$`, 'm'));
+});
+
+test('every component has a thumb for the index, and the index shows the gallery', () => {
+  for (const slug of slugs) {
+    assert.ok(
+      fs.existsSync(path.join(docs, `components/web-demos/${slug}/thumb.tsx`)),
+      `${slug}: thumb demo`
+    );
+  }
+  assert.match(read('content/docs/web/components/index.mdx'), /<WebComponentGallery \/>/);
+});

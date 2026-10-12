@@ -17,18 +17,15 @@
  * It also writes the map the pages load demos through, because a page cannot
  * import a component it only knows the name of.
  */
-import { spawnSync } from 'child_process';
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { buildItem, WEB_TARGET } from './build-web-registry.mjs';
+import { demoSource, readWebApi, WEB_DEMOS as DEMOS, WEB_SRC } from './web-source.mjs';
 import { statusOf, yamlScalar } from './page-status.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '../../..');
-const WEB_SRC = path.join(ROOT, 'packages/web/src/components');
-const DEMOS = path.join(HERE, '../components/web-demos');
 const USAGE = path.join(HERE, 'web-usage');
 const CONTENT = path.join(HERE, '../content/docs/web/components');
 
@@ -37,25 +34,7 @@ const webVersion = JSON.parse(
   fs.readFileSync(path.join(ROOT, 'packages/web/package.json'), 'utf8')
 ).version;
 
-/*
- * The props, read off the source. Run as a child so the extractor stays one
- * script with one behaviour, pointed somewhere else.
- *
- * Its output goes to a temporary file and is read straight back. Kept beside
- * the library's `api.json` it would be one more gitignored file a build step
- * could come to depend on without anything writing it first.
- */
-const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'panelui-web-api-'));
-const extractedTo = path.join(scratch, 'api.json');
-const extracted = spawnSync(process.execPath, [path.join(HERE, 'extract.mjs')], {
-  env: { ...process.env, PANELUI_EXTRACT_ROOT: WEB_SRC, PANELUI_EXTRACT_OUT: extractedTo },
-  encoding: 'utf8',
-});
-if (extracted.status !== 0) {
-  throw new Error(`gen-web: extracting props failed\n${extracted.stderr}`);
-}
-const api = JSON.parse(fs.readFileSync(extractedTo, 'utf8'));
-fs.rmSync(scratch, { recursive: true, force: true });
+const api = readWebApi();
 
 /* -------------------------------------------------------------------------- */
 /* Usage modules                                                              */
@@ -88,22 +67,6 @@ for (const slug of fs.existsSync(DEMOS) ? fs.readdirSync(DEMOS).sort() : []) {
   for (const file of fs.readdirSync(directory).sort()) {
     if (file.endsWith('.tsx')) demos.push(`${slug}/${file.replace(/\.tsx$/, '')}`);
   }
-}
-
-/**
- * A demo's source as a reader should copy it.
- *
- * The demo imports the package, because that is what resolves inside this
- * repository. A reader who ran the install command has the component in their
- * own tree instead, so the import is written the way their project spells it.
- */
-function demoSource(name) {
-  const file = path.join(DEMOS, `${name}.tsx`);
-  if (!fs.existsSync(file)) throw new Error(`gen-web: no demo at components/web-demos/${name}.tsx`);
-  return fs
-    .readFileSync(file, 'utf8')
-    .replace(/(['"])panelui-web\/([a-z0-9-]+)\1/g, `$1@/components/${WEB_TARGET}/$2$1`)
-    .trimEnd();
 }
 
 /* -------------------------------------------------------------------------- */
