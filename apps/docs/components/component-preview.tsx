@@ -31,11 +31,23 @@ export interface ComponentPreviewProps {
   height?: number;
   /** `start` puts the demo at the top, for one that grows downwards as it is used. */
   align?: 'center' | 'start';
+  /**
+   * Gives the demo the whole frame, edge to edge, with no room round it. For
+   * a component that is itself a surface, such as a canvas: set in a frame
+   * with a margin it is a box in a box, with nothing in the margin.
+   */
+  flush?: boolean;
   /** The highlighted source, written under the tag in MDX. */
   children?: ReactNode;
 }
 
-export function ComponentPreview({ name, height = 360, align = 'center', children }: ComponentPreviewProps) {
+export function ComponentPreview({
+  name,
+  height = 360,
+  align = 'center',
+  flush = false,
+  children,
+}: ComponentPreviewProps) {
   const [open, setOpen] = useState(false);
   // Bumped to remount the demo, so one that plays once on arrival can be
   // watched again without reloading the page.
@@ -60,9 +72,11 @@ export function ComponentPreview({ name, height = 360, align = 'center', childre
     >
       <div
         data-preview-stage=""
+        data-flush={flush ? '' : undefined}
         className={cn(
-          'relative flex w-full justify-center p-6 sm:p-10',
-          align === 'center' ? 'items-center' : 'items-start'
+          'relative flex w-full',
+          !flush && 'justify-center p-6 sm:p-10',
+          !flush && (align === 'center' ? 'items-center' : 'items-start')
         )}
         style={{ minHeight: height }}
       >

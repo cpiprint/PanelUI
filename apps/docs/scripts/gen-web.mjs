@@ -86,6 +86,7 @@ function preview(name, options = {}) {
   const attributes = [`name="${name}"`];
   if (options.height) attributes.push(`height={${options.height}}`);
   if (options.align) attributes.push(`align="${options.align}"`);
+  if (options.flush) attributes.push('flush');
   // Numbered: under a preview the code is read against the thing it draws,
   // and "line 14" is how two people point at the same place in it.
   return `<ComponentPreview ${attributes.join(' ')}>\n\n${fence(demoSource(name), 'tsx lineNumbers')}\n\n</ComponentPreview>`;
