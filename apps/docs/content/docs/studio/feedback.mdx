@@ -37,8 +37,8 @@ const { feedback, warnings } = await studio.feedback.submit({
 | `tags` | Up to 5. Unknown tags are created, up to 100 per project. |
 | `screen` | Where the user was. A route works well. |
 | `appVersion`, `build` | Filled from the device when left out. |
-| `metadata` | Your own context, as a JSON object. Pro and Team. |
-| `fields` | Answers to the project's [custom form](/docs/studio/custom-forms). Pro and Team. |
+| `metadata` | Your own context, as a JSON object. Pro and Max. |
+| `fields` | Answers to the project's [custom form](/docs/studio/custom-forms). Pro and Max. |
 | `attachmentIds` | Screenshots, from `uploads.screenshot()`. |
 | `country` | ISO-3166 alpha-2, when your app knows it better than the device locale. |
 
@@ -116,7 +116,7 @@ PNG, JPEG or WebP, up to 5 MB. The bytes go straight to private storage; Studio 
 shows them to your team through links that expire within minutes.
 
 Each plan allows a number of screenshots per report — 1 on Free, 3 on Pro and
-Team — and a total amount of storage across the workspace. Once storage is full,
+Max — and a total amount of storage across the workspace. Once storage is full,
 `uploads.screenshot()` fails with `storage_full` and reports still go through
 without images.
 
@@ -127,7 +127,7 @@ Going over doesn't lose anything your users send:
 
 - **Free:** reports past the allowance are saved but held out of the inbox until
   the workspace upgrades.
-- **Pro and Team:** reports keep arriving for another 20%, and the workspace's
+- **Pro and Max:** reports keep arriving for another 20%, and the workspace's
   owners get an email.
 
 Past that, `submit()` fails with `quota_exceeded` until the next month or an
