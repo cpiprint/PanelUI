@@ -57,14 +57,14 @@
       "title": "Bar Picker"
     }
   ],
-  "stat-strip": [
-    "StatStrip",
-    "A few figures as one panel, each under its label and split by rules.",
-    "react stat row kpi panel component",
+  "kpi": [
+    "Kpi",
+    "One number and what it is doing: its change, its shape over time, its progress to a target.",
+    "react kpi metric card sparkline trend component",
     {
       "addedIn": "0.1.0",
       "category": "data",
-      "title": "Stat Strip"
+      "title": "KPI"
     }
   ]
 }

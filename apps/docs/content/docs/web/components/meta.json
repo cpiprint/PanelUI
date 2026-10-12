@@ -5,9 +5,9 @@
     "bar-picker",
     "day-grid",
     "feedback",
+    "kpi",
     "planet",
     "range-meter",
-    "rolling-number",
-    "stat-strip"
+    "rolling-number"
   ]
 }
