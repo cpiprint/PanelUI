@@ -25,6 +25,7 @@ export default function LaneBoardThumb() {
     <div className="w-[30rem] shrink-0 scale-[0.6]">
       <LaneBoard
         defaultLanes={LANES}
+        height="auto"
         renderCard={(item) => (
           <>
             <LaneBoard.Title>{item.title}</LaneBoard.Title>

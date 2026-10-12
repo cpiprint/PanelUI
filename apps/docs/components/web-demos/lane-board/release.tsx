@@ -29,6 +29,8 @@ const START: LaneBoardLane<Change>[] = [
       { id: 'REL-224', title: 'Faster search', checks: 2, waiting: '1d' },
       { id: 'REL-229', title: 'Invite by link', checks: 3, waiting: '3h' },
       { id: 'REL-233', title: 'Keyboard shortcuts', checks: 2, waiting: '40m' },
+      { id: 'REL-236', title: 'Saved filters', checks: 1, waiting: '25m' },
+      { id: 'REL-240', title: 'Bulk archive', checks: 0, waiting: '10m' },
     ],
   },
   {
@@ -54,6 +56,7 @@ export default function LaneBoardRelease() {
       lanes={lanes}
       onLanesChange={setLanes}
       label="Release 4.2"
+      height="30rem"
       cardName={(change) => change.title}
       renderCard={(change, { lane }) => (
         <>

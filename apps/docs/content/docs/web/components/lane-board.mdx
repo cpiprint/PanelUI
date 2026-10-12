@@ -5,7 +5,7 @@ status: new
 full: true
 ---
 
-<ComponentPreview name="lane-board/release" height={560} align="start">
+<ComponentPreview name="lane-board/release" height={570}>
 
 ```tsx lineNumbers
 'use client';
@@ -39,6 +39,8 @@ const START: LaneBoardLane<Change>[] = [
       { id: 'REL-224', title: 'Faster search', checks: 2, waiting: '1d' },
       { id: 'REL-229', title: 'Invite by link', checks: 3, waiting: '3h' },
       { id: 'REL-233', title: 'Keyboard shortcuts', checks: 2, waiting: '40m' },
+      { id: 'REL-236', title: 'Saved filters', checks: 1, waiting: '25m' },
+      { id: 'REL-240', title: 'Bulk archive', checks: 0, waiting: '10m' },
     ],
   },
   {
@@ -64,6 +66,7 @@ export default function LaneBoardRelease() {
       lanes={lanes}
       onLanesChange={setLanes}
       label="Release 4.2"
+      height="30rem"
       cardName={(change) => change.title}
       renderCard={(change, { lane }) => (
         <>
@@ -90,7 +93,7 @@ Use it for things that move through a few stages: changes going into a release, 
 
 The board does not keep the cards. You give it the lanes and it tells you what they should become when a card is set down, so the order on screen is always the order in your state.
 
-It lays lanes side by side, and on a narrow screen they scroll sideways. For one list that only needs reordering, a sortable list is the simpler thing.
+The board has a fixed height. A lane with more cards than fit scrolls on its own, and on a narrow screen the lanes scroll sideways. For one list that only needs reordering, a sortable list is the simpler thing.
 
 ## Installation
 
@@ -120,7 +123,7 @@ Import from `panelui-web/lane-board` instead of `@/components/panelui/lane-board
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -193,7 +196,7 @@ const [lanes, setLanes] = useState<LaneBoardLane<Change>[]>([
 
 A lane can have a `color`, drawn as a dot before its title, and a `limit`: the count is written against it and turns to the warning colour once the lane holds more. `renderLaneFooter` draws under a lane's cards, here a button that adds one. The cards are built from the same parts, with a tag for priority and the owner's initials.
 
-<ComponentPreview name="lane-board/sprint" height={620}>
+<ComponentPreview name="lane-board/sprint" height={540}>
 
 ```tsx lineNumbers
 'use client';
@@ -321,7 +324,7 @@ export default function LaneBoardSprint() {
 
 `onLanesChange` is an offer. Here a task with steps left is not let into Done: the lanes it was offered are not applied, so the card goes back to where it was.
 
-<ComponentPreview name="lane-board/rules" height={440}>
+<ComponentPreview name="lane-board/rules" height={420}>
 
 ```tsx lineNumbers
 'use client';
@@ -357,6 +360,7 @@ export default function LaneBoardRules() {
     <div className="flex w-full max-w-2xl flex-col gap-3">
       <LaneBoard
         lanes={lanes}
+        height="18rem"
         // The board proposes and this decides: a task with steps left is not
         // let into Done, by not applying the lanes it was offered.
         onLanesChange={(next) => {
@@ -405,6 +409,7 @@ export default function LaneBoardRules() {
 | `renderLaneFooter` | `(lane: LaneBoardLane<T>) => ReactNode` | — | Draws something under a lane's cards, such as a button that adds one. |
 | `cardName` | `(card: T) => string` | `(card) => card.id` | What a screen reader calls a card, where its id would not mean much. |
 | `label` | `string` | `'Board'` | What a screen reader calls the board. |
+| `height` | `number \| string` | `'28rem'` | How tall the board is: a number of pixels, or any CSS length. Lanes fill it, and one with more cards than fit scrolls. `'auto'` lets the board grow with its longest lane. |
 
 ### LaneBoard.Steps
 
@@ -445,7 +450,7 @@ Besides `id`, `title` and `cards`, a lane takes `color`, one of the theme's role
 
 A press on a card becomes a drag once the pointer has moved a few pixels. On a touch screen a card is picked up by resting a finger on it for a moment, so a swipe still scrolls. A button, a link or a field inside a card works as usual and does not start a drag; put `data-no-drag` on anything else that should not.
 
-Near either end of the board, a carried card scrolls it. Escape puts the card back.
+The lane a carried card is over is drawn with a firmer border, and the place it would land is outlined. Near either end of the board, a carried card scrolls it. Escape puts the card back.
 
 ### Keyboard
 
@@ -457,15 +462,19 @@ Picking up, each move and setting down are announced with the card's name, its l
 
 ### Width
 
-Lanes share the board's width and are never narrower than 13rem. When they do not fit, the board scrolls sideways and stops on a lane.
+Lanes share the board's width and are never narrower than 12.5rem. When they do not fit, the board scrolls sideways and stops on a lane.
 
 ### Height
 
-Every lane is as tall as the tallest one. The board keeps the greatest height it has had and does not shrink when cards leave the tallest lane, so nothing moves under the pointer during a drag or when a card is set down.
+The board is 28rem tall unless `height` says otherwise: a number of pixels or any CSS length. Every lane fills it. A lane with more cards than fit scrolls, with a thin bar that shows while the pointer is on the lane, and its cards fade out towards the edge they carry on past. Adding a card to a full lane therefore moves nothing else on the page.
+
+A card carried near the top or bottom of a lane scrolls it, so a card can be set down anywhere in a long lane. What `renderLaneFooter` draws stays under the lane and does not scroll away.
+
+`height="auto"` lets the board grow with its longest lane. It then keeps the greatest height it has had and does not shrink when cards leave that lane, so nothing moves under the pointer during a drag.
 
 ### Motion
 
-Cards slide to their new places as one is carried over them, and a card that is let go flies the last of the way into its place. With reduced motion on, they move at once.
+Cards slide to their new places as one is carried over them, and a card that is let go flies the last of the way into its place. A card moved to another lane with the keyboard appears there without sliding. With reduced motion on, they move at once.
 
 ### Server Components
 

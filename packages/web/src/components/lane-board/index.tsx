@@ -30,12 +30,20 @@
  * now, with the cards round it sliding to their new places. Nothing is
  * decided until the pointer is released, and Escape puts everything back.
  *
+ * ## The board has a height
+ *
+ * The board is a fixed height and every lane fills it. A lane with more cards
+ * than fit scrolls on its own, so a card added to a long lane moves nothing
+ * else on the page. Pass `height="auto"` for a board that grows with its
+ * longest lane.
+ *
  * ## It works without a pointer
  *
  * Space or Enter on a card picks it up. The arrow keys then move it, up and
  * down within its lane and left and right between lanes. Space or Enter sets
  * it down, Escape puts it back, and each step is said to a screen reader.
  */
+import { ScrollArea } from '@base-ui/react/scroll-area';
 import {
   useCallback,
   useEffect,
@@ -43,6 +51,7 @@ import {
   useRef,
   useState,
   type ComponentProps,
+  type CSSProperties,
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
@@ -81,17 +90,40 @@ export interface LaneBoardMove<T extends LaneBoardCard = LaneBoardCard> {
 
 const laneBoardVariants = tv({
   slots: {
+    root: 'relative w-full',
+    board: 'size-full',
     // Lanes share the width when there is room and scroll sideways, one lane
-    // at a time, when there is not.
-    root: 'relative flex w-full snap-x gap-3 overflow-x-auto pb-1 [scrollbar-width:thin]',
-    lane: 'flex min-w-52 flex-1 shrink-0 snap-start flex-col gap-2 rounded-3xl bg-muted p-2 transition-colors duration-200',
-    laneHeader: 'flex items-center justify-between gap-3 px-2.5 pt-1.5 text-sm',
+    // at a time, when there is not. Room is made under them for the bar only
+    // when there is something to scroll.
+    boardViewport: 'size-full snap-x outline-none data-has-overflow-x:pb-3',
+    lanes: 'flex h-full gap-3',
+    /*
+     * The border is the lane's own, inside its box, and not a ring round it:
+     * the board clips what is drawn outside a lane, and a ring would lose its
+     * top edge to that.
+     */
+    lane: 'flex min-h-0 min-w-50 flex-1 shrink-0 snap-start flex-col rounded-3xl border bg-muted py-2 transition-colors duration-200',
+    laneHeader: 'flex items-center justify-between gap-3 px-4.5 pb-1.5 pt-1.5 text-sm',
+    laneScroller: 'min-h-0 flex-1',
+    /*
+     * Padded on every side, so a card's focus ring and shadow have room and
+     * are not cut by the edge they scroll under. Where cards carry on past an
+     * edge, they fade out towards it.
+     */
+    laneViewport:
+      'h-full px-2 py-0.5 outline-none data-has-overflow-y:overscroll-y-contain data-has-overflow-y:[mask-image:linear-gradient(to_bottom,transparent,black_min(1.25rem,var(--scroll-area-overflow-y-start)),black_calc(100%-min(1.25rem,var(--scroll-area-overflow-y-end))),transparent)]',
+    laneFooter: 'flex flex-col px-2 pt-1.5 empty:hidden',
+    // A drawn bar, thin and rounded, that shows while the pointer is on the
+    // lane or it is being scrolled.
+    scrollbar:
+      'flex opacity-0 transition-opacity delay-300 data-hovering:opacity-100 data-hovering:delay-0 data-hovering:duration-100 data-scrolling:opacity-100 data-scrolling:delay-0 data-scrolling:duration-100 data-[orientation=horizontal]:mx-3 data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:flex-col data-[orientation=vertical]:my-1 data-[orientation=vertical]:me-px data-[orientation=vertical]:w-1.5',
+    thumb: 'relative flex-1 rounded-full bg-foreground/20',
     laneHeading: 'flex min-w-0 items-center gap-2',
     laneDot: 'size-2 shrink-0 rounded-full bg-[var(--pu-color)]',
     laneTitle: 'truncate font-medium text-muted-foreground',
     laneCount: 'tabular-nums text-muted-foreground',
     // Tall enough when empty to be somewhere a card can be dropped.
-    list: 'flex min-h-20 flex-1 flex-col gap-2',
+    list: 'flex min-h-20 flex-col gap-2',
     card: 'flex cursor-grab touch-manipulation select-none flex-col gap-1 rounded-2xl border bg-card p-4 text-card-foreground shadow-xs outline-none transition-shadow duration-150 focus-visible:ring-2 focus-visible:ring-ring',
     overlay:
       'pointer-events-none fixed left-0 top-0 z-50 flex rotate-2 cursor-grabbing flex-col gap-1 rounded-2xl border bg-card p-4 text-card-foreground shadow-xl',
@@ -100,7 +132,7 @@ const laneBoardVariants = tv({
     row: 'mt-2 flex items-center justify-between gap-3',
     steps: 'flex items-center gap-1',
     step: 'h-1 w-4 rounded-full',
-    tag: 'inline-flex items-center rounded-full border border-[color-mix(in_oklab,var(--pu-color)_35%,transparent)] bg-[color-mix(in_oklab,var(--pu-color)_14%,transparent)] px-2 py-0.5 text-xs font-medium text-[var(--pu-color)]',
+    tag: 'inline-flex items-center rounded-full border border-[color-mix(in_oklab,var(--pu-color)_35%,var(--card))] bg-[color-mix(in_oklab,var(--pu-color)_14%,transparent)] px-2 py-0.5 text-xs font-medium text-[var(--pu-color)]',
     meta: 'font-mono text-sm tabular-nums text-foreground',
   },
   variants: {
@@ -131,14 +163,15 @@ const laneBoardVariants = tv({
         laneDot: '[--pu-color:var(--destructive)]',
       },
     },
-    // The lane a carried card is over.
-    over: { true: { lane: 'bg-accent ring-1 ring-ring/40' } },
+    // The lane a carried card is over: a firmer edge and a deeper tray.
+    over: { true: { lane: 'border-ring/70 bg-foreground/8' } },
     // A lane holding more than its limit says so in its count.
     full: { true: { laneCount: 'font-medium text-[var(--warning)]' } },
     state: {
       rest: {},
-      // Where a carried card would land: its room is kept, its drawing is not.
-      placeholder: { card: 'opacity-0' },
+      // Where a carried card would land: its room is kept and outlined, and
+      // what is on it is not drawn.
+      placeholder: { card: 'border-dashed border-ring/70 bg-transparent shadow-none *:invisible' },
       // Picked up with the keyboard: it stays where it is and is ringed.
       held: { card: 'cursor-grabbing shadow-lg ring-2 ring-ring' },
     },
@@ -156,6 +189,19 @@ const SLOP = 4;
 const HOLD = 220;
 /** How near an edge of the board the pointer has to be for it to scroll, in pixels. */
 const EDGE = 48;
+
+/** Where something is laid out, measured from the board through whatever it is nested in. */
+function placeIn(node: HTMLElement, board: HTMLElement) {
+  let x = 0;
+  let y = 0;
+  let at: HTMLElement | null = node;
+  while (at && at !== board) {
+    x += at.offsetLeft;
+    y += at.offsetTop;
+    at = at.offsetParent as HTMLElement | null;
+  }
+  return { x, y };
+}
 
 const reducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -210,6 +256,12 @@ export interface LaneBoardProps<T extends LaneBoardCard>
   cardName?: (card: T) => string;
   /** What a screen reader calls the board. */
   label?: string;
+  /**
+   * How tall the board is: a number of pixels, or any CSS length. Lanes fill
+   * it, and one with more cards than fit scrolls. `'auto'` lets the board
+   * grow with its longest lane.
+   */
+  height?: number | string;
 }
 
 function LaneBoardRoot<T extends LaneBoardCard>({
@@ -221,7 +273,9 @@ function LaneBoardRoot<T extends LaneBoardCard>({
   renderLaneFooter,
   cardName = (card) => card.id,
   label = 'Board',
+  height = '28rem',
   className,
+  style,
   ...props
 }: LaneBoardProps<T>) {
   const slots = laneBoardVariants();
@@ -238,8 +292,14 @@ function LaneBoardRoot<T extends LaneBoardCard>({
   const root = useRef<HTMLDivElement>(null);
   const overlay = useRef<HTMLDivElement>(null);
   const cards = useRef(new Map<string, HTMLElement>());
-  const lists = useRef(new Map<string, HTMLElement>());
-  const places = useRef(new Map<string, { x: number; y: number; height: number }>());
+  /** The board's own scroller, which moves sideways. */
+  const scroller = useRef<HTMLDivElement>(null);
+  const sections = useRef(new Map<string, HTMLElement>());
+  /** Each lane's scroller, which moves up and down. */
+  const viewports = useRef(new Map<string, HTMLElement>());
+  const places = useRef(
+    new Map<string, { x: number; y: number; height: number; lane: string }>()
+  );
   /** Everything about a pointer drag that changes too often to be state. */
   const drag = useRef<{
     id: string;
@@ -277,23 +337,31 @@ function LaneBoardRoot<T extends LaneBoardCard>({
 
   /*
    * Cards slide to where they now belong. Each card's place is remembered from
-   * one drawing to the next; a card found somewhere else is started from where
-   * it was and let go. Places are measured from the board, so scrolling the
-   * page or the board between two drawings moves nothing.
+   * one drawing to the next; a card found somewhere else in its lane is
+   * started from where it was and let go. Places are where a card is laid
+   * out, so scrolling the page, the board or a lane between two drawings
+   * moves nothing. A card that has changed lanes is not slid: each lane clips
+   * its own cards, and it would be seen coming in through the lane's side.
    */
   useLayoutEffect(() => {
     const board = root.current;
     if (!board) return;
     const still = reducedMotion();
-    const next = new Map<string, { x: number; y: number; height: number }>();
+    const laneOf = new Map<string, string>();
+    for (const lane of shown) for (const card of lane.cards) laneOf.set(card.id, lane.id);
+    const next = new Map<string, { x: number; y: number; height: number; lane: string }>();
     cards.current.forEach((node, id) => {
       // Where the card is laid out, measured from the board. Not its box on
       // the page: a card that is still sliding has a box that is on its way,
       // and what is wanted here is where it is going.
-      const place = { x: node.offsetLeft, y: node.offsetTop, height: node.offsetHeight };
+      const place = {
+        ...placeIn(node, board),
+        height: node.offsetHeight,
+        lane: laneOf.get(id) ?? '',
+      };
       next.set(id, place);
       const before = places.current.get(id);
-      if (!before || still) return;
+      if (!before || still || before.lane !== place.lane) return;
       const dx = before.x - place.x;
       const dy = before.y - place.y;
       if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
@@ -306,25 +374,54 @@ function LaneBoardRoot<T extends LaneBoardCard>({
   });
 
   /*
-   * The board is as tall as its tallest lane, and which lane that is changes
-   * as cards move. Left to follow, the board would grow and shrink under the
-   * pointer in the middle of a drag, and again when the card is set down. So
-   * it keeps the greatest height it has had, and only ever grows.
+   * Only for a board left to grow, with `height="auto"`. It is then as tall
+   * as its tallest lane, and which lane that is changes as cards move. Left
+   * to follow, the board would grow and shrink under the pointer in the
+   * middle of a drag, and again when the card is set down. So it keeps the
+   * greatest height it has had, and only ever grows.
    */
   const tallest = useRef(0);
   useLayoutEffect(() => {
-    const board = root.current;
-    if (!board) return;
-    const lanes = [...board.querySelectorAll<HTMLElement>(':scope > section')];
-    board.style.minHeight = '';
+    const lanes = [...sections.current.values()];
     for (const lane of lanes) lane.style.minHeight = '';
+    if (height !== 'auto') {
+      tallest.current = 0;
+      return;
+    }
     const natural = Math.max(0, ...lanes.map((lane) => lane.offsetHeight));
     // Only what has been set down counts. A card carried across a full lane
     // makes it taller for a moment, and that is not a height to keep.
     if (!carry) tallest.current = Math.max(tallest.current, natural);
-    const height = Math.max(tallest.current, natural);
-    for (const lane of lanes) lane.style.minHeight = `${height}px`;
+    const keep = Math.max(tallest.current, natural);
+    for (const lane of lanes) lane.style.minHeight = `${keep}px`;
   });
+
+  /*
+   * Brings a card's place into view: its lane across the board, and the card
+   * down its lane. Worked out from where things are laid out, since a card
+   * that has just moved is still drawn on its way there.
+   */
+  const reveal = (id: string) => {
+    const board = root.current;
+    const spot = places.current.get(id);
+    if (!board || !spot) return;
+    const across = scroller.current;
+    const section = sections.current.get(spot.lane);
+    if (across && section) {
+      const before = placeIn(section, board).x - across.scrollLeft;
+      const after = before + section.offsetWidth - across.clientWidth;
+      if (before < 0) across.scrollLeft += before;
+      else if (after > 0) across.scrollLeft += after;
+    }
+    const lane = viewports.current.get(spot.lane);
+    if (lane) {
+      // A little clear of the edge, where cards fade out.
+      const above = spot.y - placeIn(lane, board).y - lane.scrollTop - 8;
+      const below = above + spot.height + 16 - lane.clientHeight;
+      if (above < 0) lane.scrollTop += above;
+      else if (below > 0) lane.scrollTop += below;
+    }
+  };
 
   /* ------------------------------------------------------------------ */
   /* Carrying with the pointer                                           */
@@ -334,8 +431,8 @@ function LaneBoardRoot<T extends LaneBoardCard>({
   const target = (x: number, y: number, id: string) => {
     let lane: string | null = null;
     let nearest = Infinity;
-    lists.current.forEach((node, laneId) => {
-      const box = node.parentElement?.getBoundingClientRect() ?? node.getBoundingClientRect();
+    sections.current.forEach((node, laneId) => {
+      const box = node.getBoundingClientRect();
       const distance = x < box.left ? box.left - x : x > box.right ? x - box.right : 0;
       if (distance < nearest) {
         nearest = distance;
@@ -349,13 +446,16 @@ function LaneBoardRoot<T extends LaneBoardCard>({
      * where it is drawn. Cards slide to their places, and a card read half
      * way through its slide can be on the wrong side of the pointer, which
      * moves the gap, which slides the card back: a flicker with no end.
+     * A place is where a card is laid out, so how far its lane has been
+     * scrolled is taken off the pointer and not off the card.
      */
     const top = root.current?.getBoundingClientRect().top ?? 0;
+    const scrolled = viewports.current.get(lane)?.scrollTop ?? 0;
     let index = 0;
     for (const card of over?.cards ?? []) {
       if (card.id === id) continue;
       const place = places.current.get(card.id);
-      if (place && y - top > place.y + place.height / 2) index += 1;
+      if (place && y - top + scrolled > place.y + place.height / 2) index += 1;
     }
     return { lane: lane as string, index };
   };
@@ -378,11 +478,18 @@ function LaneBoardRoot<T extends LaneBoardCard>({
       }
     }
     // Near either end of the board, it scrolls towards that end.
-    const board = root.current;
+    const board = scroller.current;
     if (board) {
       const box = board.getBoundingClientRect();
       if (state.x < box.left + EDGE) board.scrollLeft -= 10;
       else if (state.x > box.right - EDGE) board.scrollLeft += 10;
+    }
+    // And near the top or bottom of the lane it is over, that lane scrolls.
+    const lane = over ? viewports.current.get(over.lane) : undefined;
+    if (lane) {
+      const box = lane.getBoundingClientRect();
+      if (state.y < box.top + EDGE) lane.scrollTop -= 8;
+      else if (state.y > box.bottom - EDGE) lane.scrollTop += 8;
     }
     state.frame = requestAnimationFrame(follow);
   };
@@ -419,12 +526,20 @@ function LaneBoardRoot<T extends LaneBoardCard>({
      */
     requestAnimationFrame(() => {
       const lifted = overlay.current;
-      const slot = cards.current.get(state.id)?.getBoundingClientRect();
-      if (!lifted || !slot || reducedMotion()) return finish();
+      const board = root.current;
+      const slot = places.current.get(state.id);
+      if (!lifted || !board || !slot || reducedMotion()) return finish();
+      // The gap may have been left under an edge of its lane. It is brought
+      // into view first, so the card flies to somewhere that can be seen.
+      reveal(state.id);
+      const lane = viewports.current.get(slot.lane);
+      const box = board.getBoundingClientRect();
+      const left = box.left + slot.x - (scroller.current?.scrollLeft ?? 0);
+      const top = box.top + slot.y - (lane?.scrollTop ?? 0);
       const flight = lifted.animate(
         [
           { translate: lifted.style.translate, rotate: '2deg' },
-          { translate: `${slot.left}px ${slot.top}px`, rotate: '0deg' },
+          { translate: `${left}px ${top}px`, rotate: '0deg' },
         ],
         { duration: 180, easing: 'cubic-bezier(0.2, 0, 0, 1)', fill: 'forwards' }
       );
@@ -571,82 +686,127 @@ function LaneBoardRoot<T extends LaneBoardCard>({
 
   // Moving to another lane redraws the card under a new parent, which would
   // drop the focus it is being steered by.
+  // A move within a long lane can also take it under the lane's edge, where
+  // focus alone would not bring it back.
   useLayoutEffect(() => {
-    if (carry?.by === 'keys') cards.current.get(carry.id)?.focus({ preventScroll: false });
+    if (carry?.by !== 'keys') return;
+    cards.current.get(carry.id)?.focus({ preventScroll: true });
+    reveal(carry.id);
   });
 
   const carried = carry ? whereIs(shown, carry.id) : null;
   const carriedLane = carried ? shown.find((lane) => lane.id === carried.lane) : undefined;
 
   return (
-    <div ref={root} role="group" aria-label={label} className={slots.root({ className })} {...props}>
-      {shown.map((lane) => (
-        <section
-          key={lane.id}
-          aria-label={typeof lane.title === 'string' ? lane.title : undefined}
-          className={laneBoardVariants({ over: carried?.lane === lane.id }).lane()}
-        >
-          <header className={slots.laneHeader()}>
-            <div className={slots.laneHeading()}>
-              {lane.color ? (
-                <span aria-hidden="true" className={laneBoardVariants({ color: lane.color }).laneDot()} />
-              ) : null}
-              <h3 className={slots.laneTitle()}>{lane.title}</h3>
-            </div>
-            <span
-              className={laneBoardVariants({
-                full: lane.limit !== undefined && lane.cards.length > lane.limit,
-              }).laneCount()}
-            >
-              {lane.limit === undefined ? lane.cards.length : `${lane.cards.length}/${lane.limit}`}
-            </span>
-          </header>
-          <ol
-            ref={(node) => {
-              if (node) lists.current.set(lane.id, node);
-              else lists.current.delete(lane.id);
-            }}
-            className={slots.list()}
-          >
-            {lane.cards.map((card) => {
-              const isCarried = carry?.id === card.id;
-              const state = !isCarried ? 'rest' : carry.by === 'pointer' ? 'placeholder' : 'held';
-              return (
-                <li
-                  key={card.id}
-                  ref={(node) => {
-                    if (node) cards.current.set(card.id, node);
-                    else cards.current.delete(card.id);
-                  }}
-                  tabIndex={0}
-                  aria-roledescription="Card that can be moved"
-                  aria-label={cardName(card)}
-                  data-card={card.id}
-                  data-carried={isCarried ? carry.by : undefined}
-                  className={laneBoardVariants({ state }).card()}
-                  onPointerDown={(event) => onPointerDown(event, card.id)}
-                  onKeyDown={(event) => onKeyDown(event, card)}
-                  onBlur={() => {
-                    // Focus leaving a card held with the keyboard puts it back:
-                    // nothing is steering it any more.
-                    if (carry?.by === 'keys' && carry.id === card.id && !cards.current.get(card.id)?.matches(':focus')) {
-                      requestAnimationFrame(() => {
-                        if (document.activeElement !== cards.current.get(card.id)) {
-                          setDraft(null);
-                          setCarry(null);
-                        }
-                      });
-                    }
-                  }}
-                >
-                  {renderCard(card, { lane, carried: isCarried })}
-                </li>
-              );
-            })}
-          </ol>
-          {renderLaneFooter?.(lane)}
-        </section>
-      ))}
+    <div
+      ref={root}
+      role="group"
+      aria-label={label}
+      className={slots.root({ className })}
+      style={{ height: height === 'auto' ? undefined : height, ...style } as CSSProperties}
+      {...props}
+    >
+      <ScrollArea.Root className={slots.board()}>
+        <ScrollArea.Viewport ref={scroller} className={slots.boardViewport()}>
+          <div className={slots.lanes()}>
+            {shown.map((lane) => (
+              <section
+                key={lane.id}
+                ref={(node) => {
+                  if (node) sections.current.set(lane.id, node);
+                  else sections.current.delete(lane.id);
+                }}
+                aria-label={typeof lane.title === 'string' ? lane.title : undefined}
+                data-over={carried?.lane === lane.id ? '' : undefined}
+                className={laneBoardVariants({ over: carried?.lane === lane.id }).lane()}
+              >
+                <header className={slots.laneHeader()}>
+                  <div className={slots.laneHeading()}>
+                    {lane.color ? (
+                      <span
+                        aria-hidden="true"
+                        className={laneBoardVariants({ color: lane.color }).laneDot()}
+                      />
+                    ) : null}
+                    <h3 className={slots.laneTitle()}>{lane.title}</h3>
+                  </div>
+                  <span
+                    className={laneBoardVariants({
+                      full: lane.limit !== undefined && lane.cards.length > lane.limit,
+                    }).laneCount()}
+                  >
+                    {lane.limit === undefined
+                      ? lane.cards.length
+                      : `${lane.cards.length}/${lane.limit}`}
+                  </span>
+                </header>
+                <ScrollArea.Root className={slots.laneScroller()}>
+                  <ScrollArea.Viewport
+                    ref={(node: HTMLDivElement | null) => {
+                      if (node) viewports.current.set(lane.id, node);
+                      else viewports.current.delete(lane.id);
+                    }}
+                    className={slots.laneViewport()}
+                  >
+                    <ol className={slots.list()}>
+                      {lane.cards.map((card) => {
+                        const isCarried = carry?.id === card.id;
+                        const state = !isCarried
+                          ? 'rest'
+                          : carry.by === 'pointer'
+                            ? 'placeholder'
+                            : 'held';
+                        return (
+                          <li
+                            key={card.id}
+                            ref={(node) => {
+                              if (node) cards.current.set(card.id, node);
+                              else cards.current.delete(card.id);
+                            }}
+                            tabIndex={0}
+                            aria-roledescription="Card that can be moved"
+                            aria-label={cardName(card)}
+                            data-card={card.id}
+                            data-carried={isCarried ? carry.by : undefined}
+                            className={laneBoardVariants({ state }).card()}
+                            onPointerDown={(event) => onPointerDown(event, card.id)}
+                            onKeyDown={(event) => onKeyDown(event, card)}
+                            onBlur={() => {
+                              // Focus leaving a card held with the keyboard puts it
+                              // back: nothing is steering it any more.
+                              if (
+                                carry?.by === 'keys' &&
+                                carry.id === card.id &&
+                                !cards.current.get(card.id)?.matches(':focus')
+                              ) {
+                                requestAnimationFrame(() => {
+                                  if (document.activeElement !== cards.current.get(card.id)) {
+                                    setDraft(null);
+                                    setCarry(null);
+                                  }
+                                });
+                              }
+                            }}
+                          >
+                            {renderCard(card, { lane, carried: isCarried })}
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </ScrollArea.Viewport>
+                  <ScrollArea.Scrollbar orientation="vertical" className={slots.scrollbar()}>
+                    <ScrollArea.Thumb className={slots.thumb()} />
+                  </ScrollArea.Scrollbar>
+                </ScrollArea.Root>
+                <div className={slots.laneFooter()}>{renderLaneFooter?.(lane)}</div>
+              </section>
+            ))}
+          </div>
+        </ScrollArea.Viewport>
+        <ScrollArea.Scrollbar orientation="horizontal" className={slots.scrollbar()}>
+          <ScrollArea.Thumb className={slots.thumb()} />
+        </ScrollArea.Scrollbar>
+      </ScrollArea.Root>
 
       {carry?.by === 'pointer' && carried && carriedLane ? (
         <div

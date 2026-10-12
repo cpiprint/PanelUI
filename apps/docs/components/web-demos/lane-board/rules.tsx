@@ -31,6 +31,7 @@ export default function LaneBoardRules() {
     <div className="flex w-full max-w-2xl flex-col gap-3">
       <LaneBoard
         lanes={lanes}
+        height="18rem"
         // The board proposes and this decides: a task with steps left is not
         // let into Done, by not applying the lanes it was offered.
         onLanesChange={(next) => {
