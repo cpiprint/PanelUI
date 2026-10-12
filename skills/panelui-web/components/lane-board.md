@@ -74,6 +74,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | `onLanesChange` | `(lanes: LaneBoardLane<T>[]) => void` | — | Called with the lanes as they should now be, when a card is set down somewhere new. |
 | `onMove` | `(move: LaneBoardMove<T>) => void` | — | Called with the one card that moved, and where from and to. |
 | `renderCard` | `(card: T, state: { lane: LaneBoardLane<T>; carried: boolean }) => ReactNode` | **required** | Draws the inside of a card. |
+| `renderLaneFooter` | `(lane: LaneBoardLane<T>) => ReactNode` | — | Draws something under a lane's cards, such as a button that adds one. |
 | `cardName` | `(card: T) => string` | `(card) => card.id` | What a screen reader calls a card, where its id would not mean much. |
 | `label` | `string` | `'Board'` | What a screen reader calls the board. |
 
@@ -103,6 +104,12 @@ Every part also takes the props of the element it renders, and a `className`.
 `lanes` is a list of `{ id, title, cards }`, and a card is any object with an `id` of its own across the whole board. Everything else on a card is yours, and `renderCard` draws it. The parts above are there for the common pieces and none of them is required.
 
 Pass `defaultLanes` in place of `lanes` and the board holds the order itself.
+
+#### Lanes
+
+Besides `id`, `title` and `cards`, a lane takes `color`, one of the theme's roles, and `limit`. The limit is advice: the count shows it and warns when the lane is over, and the board still lets a card in. To hold a lane to its limit, refuse the move in `onLanesChange`, as the second example refuses one.
+
+`renderLaneFooter` is given the lane and draws under its cards. A button there is pressed as usual and does not start a drag.
 
 #### Hearing about a move
 

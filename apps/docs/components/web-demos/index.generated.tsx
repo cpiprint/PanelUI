@@ -34,6 +34,7 @@ export const WEB_DEMOS: Record<string, ComponentType> = {
   'kpi/thumb': dynamic(() => import('./kpi/thumb')),
   'lane-board/release': dynamic(() => import('./lane-board/release')),
   'lane-board/rules': dynamic(() => import('./lane-board/rules')),
+  'lane-board/sprint': dynamic(() => import('./lane-board/sprint')),
   'lane-board/thumb': dynamic(() => import('./lane-board/thumb')),
   'planet/fly-to': dynamic(() => import('./planet/fly-to')),
   'planet/people': dynamic(() => import('./planet/people')),

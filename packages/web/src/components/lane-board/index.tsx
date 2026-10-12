@@ -62,6 +62,14 @@ export interface LaneBoardLane<T extends LaneBoardCard = LaneBoardCard> {
   /** Written at the head of the lane. */
   title: ReactNode;
   cards: T[];
+  /** One of the theme's roles, drawn as a dot before the title. */
+  color?: LaneBoardColor;
+  /**
+   * How many cards the lane is meant to hold. The count is written against
+   * it, and drawn as a warning once the lane holds more. It is advice: the
+   * board does not refuse a card. Do that in `onLanesChange`.
+   */
+  limit?: number;
 }
 
 /** One card going from one place to another. */
@@ -78,6 +86,8 @@ const laneBoardVariants = tv({
     root: 'relative flex w-full snap-x gap-3 overflow-x-auto pb-1 [scrollbar-width:thin]',
     lane: 'flex min-w-52 flex-1 shrink-0 snap-start flex-col gap-2 rounded-3xl bg-muted p-2 transition-colors duration-200',
     laneHeader: 'flex items-center justify-between gap-3 px-2.5 pt-1.5 text-sm',
+    laneHeading: 'flex min-w-0 items-center gap-2',
+    laneDot: 'size-2 shrink-0 rounded-full bg-[var(--pu-color)]',
     laneTitle: 'truncate font-medium text-muted-foreground',
     laneCount: 'tabular-nums text-muted-foreground',
     // Tall enough when empty to be somewhere a card can be dropped.
@@ -95,17 +105,36 @@ const laneBoardVariants = tv({
   },
   variants: {
     color: {
-      primary: { steps: '[--pu-color:var(--primary)]', tag: '[--pu-color:var(--primary)]' },
-      info: { steps: '[--pu-color:var(--info)]', tag: '[--pu-color:var(--info)]' },
-      success: { steps: '[--pu-color:var(--success)]', tag: '[--pu-color:var(--success)]' },
-      warning: { steps: '[--pu-color:var(--warning)]', tag: '[--pu-color:var(--warning)]' },
+      primary: {
+        steps: '[--pu-color:var(--primary)]',
+        tag: '[--pu-color:var(--primary)]',
+        laneDot: '[--pu-color:var(--primary)]',
+      },
+      info: {
+        steps: '[--pu-color:var(--info)]',
+        tag: '[--pu-color:var(--info)]',
+        laneDot: '[--pu-color:var(--info)]',
+      },
+      success: {
+        steps: '[--pu-color:var(--success)]',
+        tag: '[--pu-color:var(--success)]',
+        laneDot: '[--pu-color:var(--success)]',
+      },
+      warning: {
+        steps: '[--pu-color:var(--warning)]',
+        tag: '[--pu-color:var(--warning)]',
+        laneDot: '[--pu-color:var(--warning)]',
+      },
       destructive: {
         steps: '[--pu-color:var(--destructive)]',
         tag: '[--pu-color:var(--destructive)]',
+        laneDot: '[--pu-color:var(--destructive)]',
       },
     },
     // The lane a carried card is over.
     over: { true: { lane: 'bg-accent ring-1 ring-ring/40' } },
+    // A lane holding more than its limit says so in its count.
+    full: { true: { laneCount: 'font-medium text-[var(--warning)]' } },
     state: {
       rest: {},
       // Where a carried card would land: its room is kept, its drawing is not.
@@ -175,6 +204,8 @@ export interface LaneBoardProps<T extends LaneBoardCard>
   onMove?: (move: LaneBoardMove<T>) => void;
   /** Draws the inside of a card. */
   renderCard: (card: T, state: { lane: LaneBoardLane<T>; carried: boolean }) => ReactNode;
+  /** Draws something under a lane's cards, such as a button that adds one. */
+  renderLaneFooter?: (lane: LaneBoardLane<T>) => ReactNode;
   /** What a screen reader calls a card, where its id would not mean much. */
   cardName?: (card: T) => string;
   /** What a screen reader calls the board. */
@@ -187,6 +218,7 @@ function LaneBoardRoot<T extends LaneBoardCard>({
   onLanesChange,
   onMove,
   renderCard,
+  renderLaneFooter,
   cardName = (card) => card.id,
   label = 'Board',
   className,
@@ -207,7 +239,7 @@ function LaneBoardRoot<T extends LaneBoardCard>({
   const overlay = useRef<HTMLDivElement>(null);
   const cards = useRef(new Map<string, HTMLElement>());
   const lists = useRef(new Map<string, HTMLElement>());
-  const places = useRef(new Map<string, { x: number; y: number }>());
+  const places = useRef(new Map<string, { x: number; y: number; height: number }>());
   /** Everything about a pointer drag that changes too often to be state. */
   const drag = useRef<{
     id: string;
@@ -246,18 +278,19 @@ function LaneBoardRoot<T extends LaneBoardCard>({
   /*
    * Cards slide to where they now belong. Each card's place is remembered from
    * one drawing to the next; a card found somewhere else is started from where
-   * it was and let go. Places are kept relative to the board and its scroll,
-   * so scrolling the page between two drawings moves nothing.
+   * it was and let go. Places are measured from the board, so scrolling the
+   * page or the board between two drawings moves nothing.
    */
   useLayoutEffect(() => {
     const board = root.current;
     if (!board) return;
-    const origin = board.getBoundingClientRect();
     const still = reducedMotion();
-    const next = new Map<string, { x: number; y: number }>();
+    const next = new Map<string, { x: number; y: number; height: number }>();
     cards.current.forEach((node, id) => {
-      const box = node.getBoundingClientRect();
-      const place = { x: box.left - origin.left + board.scrollLeft, y: box.top - origin.top };
+      // Where the card is laid out, measured from the board. Not its box on
+      // the page: a card that is still sliding has a box that is on its way,
+      // and what is wanted here is where it is going.
+      const place = { x: node.offsetLeft, y: node.offsetTop, height: node.offsetHeight };
       next.set(id, place);
       const before = places.current.get(id);
       if (!before || still) return;
@@ -311,11 +344,18 @@ function LaneBoardRoot<T extends LaneBoardCard>({
     });
     if (lane === null) return null;
     const over = (latest.current.draft ?? latest.current.settled).find((entry) => entry.id === lane);
+    /*
+     * Measured against where each card belongs, as last laid out, and not
+     * where it is drawn. Cards slide to their places, and a card read half
+     * way through its slide can be on the wrong side of the pointer, which
+     * moves the gap, which slides the card back: a flicker with no end.
+     */
+    const top = root.current?.getBoundingClientRect().top ?? 0;
     let index = 0;
     for (const card of over?.cards ?? []) {
       if (card.id === id) continue;
-      const box = cards.current.get(card.id)?.getBoundingClientRect();
-      if (box && y > box.top + box.height / 2) index += 1;
+      const place = places.current.get(card.id);
+      if (place && y - top > place.y + place.height / 2) index += 1;
     }
     return { lane: lane as string, index };
   };
@@ -547,8 +587,19 @@ function LaneBoardRoot<T extends LaneBoardCard>({
           className={laneBoardVariants({ over: carried?.lane === lane.id }).lane()}
         >
           <header className={slots.laneHeader()}>
-            <h3 className={slots.laneTitle()}>{lane.title}</h3>
-            <span className={slots.laneCount()}>{lane.cards.length}</span>
+            <div className={slots.laneHeading()}>
+              {lane.color ? (
+                <span aria-hidden="true" className={laneBoardVariants({ color: lane.color }).laneDot()} />
+              ) : null}
+              <h3 className={slots.laneTitle()}>{lane.title}</h3>
+            </div>
+            <span
+              className={laneBoardVariants({
+                full: lane.limit !== undefined && lane.cards.length > lane.limit,
+              }).laneCount()}
+            >
+              {lane.limit === undefined ? lane.cards.length : `${lane.cards.length}/${lane.limit}`}
+            </span>
           </header>
           <ol
             ref={(node) => {
@@ -593,6 +644,7 @@ function LaneBoardRoot<T extends LaneBoardCard>({
               );
             })}
           </ol>
+          {renderLaneFooter?.(lane)}
         </section>
       ))}
 
