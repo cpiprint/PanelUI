@@ -5,7 +5,7 @@ status: new
 full: true
 ---
 
-<ComponentPreview name="lane-board/release" height={560}>
+<ComponentPreview name="lane-board/release" height={560} align="start">
 
 ```tsx lineNumbers
 'use client';
@@ -324,9 +324,13 @@ Picking up, each move and setting down are announced with the card's name, its l
 
 Lanes share the board's width and are never narrower than 13rem. When they do not fit, the board scrolls sideways and stops on a lane.
 
+### Height
+
+Every lane is as tall as the tallest one. The board keeps the greatest height it has had and does not shrink when cards leave the tallest lane, so nothing moves under the pointer during a drag or when a card is set down.
+
 ### Motion
 
-Cards slide to their new places as one is carried over them. With reduced motion on, they move at once.
+Cards slide to their new places as one is carried over them, and a card that is let go flies the last of the way into its place. With reduced motion on, they move at once.
 
 ### Server Components
 

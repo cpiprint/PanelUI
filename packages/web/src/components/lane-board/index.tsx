@@ -82,7 +82,7 @@ const laneBoardVariants = tv({
     laneCount: 'tabular-nums text-muted-foreground',
     // Tall enough when empty to be somewhere a card can be dropped.
     list: 'flex min-h-20 flex-1 flex-col gap-2',
-    card: 'flex cursor-grab touch-manipulation select-none flex-col gap-1 rounded-2xl border bg-card p-4 text-card-foreground shadow-xs outline-none transition-[box-shadow,opacity] duration-150 focus-visible:ring-2 focus-visible:ring-ring',
+    card: 'flex cursor-grab touch-manipulation select-none flex-col gap-1 rounded-2xl border bg-card p-4 text-card-foreground shadow-xs outline-none transition-shadow duration-150 focus-visible:ring-2 focus-visible:ring-ring',
     overlay:
       'pointer-events-none fixed left-0 top-0 z-50 flex rotate-2 cursor-grabbing flex-col gap-1 rounded-2xl border bg-card p-4 text-card-foreground shadow-xl',
     title: 'truncate text-base font-semibold',
@@ -272,6 +272,27 @@ function LaneBoardRoot<T extends LaneBoardCard>({
     places.current = next;
   });
 
+  /*
+   * The board is as tall as its tallest lane, and which lane that is changes
+   * as cards move. Left to follow, the board would grow and shrink under the
+   * pointer in the middle of a drag, and again when the card is set down. So
+   * it keeps the greatest height it has had, and only ever grows.
+   */
+  const tallest = useRef(0);
+  useLayoutEffect(() => {
+    const board = root.current;
+    if (!board) return;
+    const lanes = [...board.querySelectorAll<HTMLElement>(':scope > section')];
+    board.style.minHeight = '';
+    for (const lane of lanes) lane.style.minHeight = '';
+    const natural = Math.max(0, ...lanes.map((lane) => lane.offsetHeight));
+    // Only what has been set down counts. A card carried across a full lane
+    // makes it taller for a moment, and that is not a height to keep.
+    if (!carry) tallest.current = Math.max(tallest.current, natural);
+    const height = Math.max(tallest.current, natural);
+    for (const lane of lanes) lane.style.minHeight = `${height}px`;
+  });
+
   /* ------------------------------------------------------------------ */
   /* Carrying with the pointer                                           */
   /* ------------------------------------------------------------------ */
@@ -343,9 +364,32 @@ function LaneBoardRoot<T extends LaneBoardCard>({
     drag.current = null;
     if (!state.started) return;
     const next = latest.current.draft;
-    if (drop && next) commit(next, state.id);
-    setDraft(null);
-    setCarry(null);
+    // Put back, the gap goes home first, so there is somewhere to fly to.
+    if (!drop) setDraft(latest.current.settled);
+
+    const finish = () => {
+      if (drop && next) commit(next, state.id);
+      setDraft(null);
+      setCarry(null);
+    };
+    /*
+     * The lifted card flies the last of the way into the gap that is waiting
+     * for it, and only then is the real card shown. Dropped where the pointer
+     * let go, it would vanish from one place and appear in another.
+     */
+    requestAnimationFrame(() => {
+      const lifted = overlay.current;
+      const slot = cards.current.get(state.id)?.getBoundingClientRect();
+      if (!lifted || !slot || reducedMotion()) return finish();
+      const flight = lifted.animate(
+        [
+          { translate: lifted.style.translate, rotate: '2deg' },
+          { translate: `${slot.left}px ${slot.top}px`, rotate: '0deg' },
+        ],
+        { duration: 180, easing: 'cubic-bezier(0.2, 0, 0, 1)', fill: 'forwards' }
+      );
+      flight.finished.then(finish, finish);
+    });
   };
 
   useEffect(() => {
