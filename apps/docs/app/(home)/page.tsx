@@ -22,6 +22,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { CopyInstall } from '@/components/copy-install';
+import { HomeWebSection } from '@/components/home-web-section';
 import { IsoFigure, type IsoFigureKind } from '@/components/iso-figures';
 import { LayoutLink } from '@/components/layout-link';
 import { Showcase } from '@/components/showcase';
@@ -156,6 +157,10 @@ const FAQ = [
     q: 'How many components are there?',
     a: `${COMPONENT_COUNT}, covering overlays, forms, feedback, data and layout — from bottom sheets and popovers to chat transcripts, animated line charts, file attachments, timelines and toasts.`,
   },
+  {
+    q: 'Does PanelUI work on the web?',
+    a: 'The React Native library is for iOS and Android. For the web there is a separate collection of React components built on shadcn/ui, installed one at a time from a registry or from npm. Components that exist in both, such as KPI and Flow, have the same parts and props.',
+  },
 ];
 
 export default function HomePage() {
@@ -198,12 +203,16 @@ export default function HomePage() {
       <section className="flex flex-col items-center gap-6 px-6 py-24 text-center">
         <Badge variant="secondary">{COMPONENT_COUNT} components · MIT · Expo SDK 57+</Badge>
         <h1 className="max-w-3xl font-heading text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-          React Native UI components for Expo, styled with Tailwind CSS
+          React Native and web UI components, styled with Tailwind CSS
         </h1>
         <p className="max-w-2xl text-lg text-muted-foreground text-balance">
           Accessible, high-performance components — bottom sheets, dialogs, selects, toasts,
           forms — animated on the UI thread with Reanimated. Zero native code, so it runs in
-          Expo Go.
+          Expo Go. And now a{' '}
+          <Link href="/docs/web" className="text-foreground underline underline-offset-4">
+            collection for React on the web
+          </Link>
+          , built on shadcn/ui.
         </p>
 
         <CopyInstall command={INSTALL} />
@@ -220,6 +229,8 @@ export default function HomePage() {
       </section>
 
       <Showcase />
+
+      <HomeWebSection />
 
       {/* Features */}
       <section className="border-t px-6 py-20" id="features">
