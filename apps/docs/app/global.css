@@ -510,3 +510,43 @@ html[data-platform='web'] [data-platform-only='app'] {
     @apply font-sans;
   }
 }
+/*
+ * The home page's wall of previews. Each column drifts up until its last card
+ * is at the bottom of the wall, and back; `translate` percentages are of the
+ * column's own height, so a column travels exactly its overhang whatever is in
+ * it. Alternate columns start from the other end, so no two neighbours move
+ * together. Everything holds still while the pointer or the keyboard is on the
+ * wall, because the cards are there to be used.
+ */
+@keyframes showcase-drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(min(0px, calc(-100% + var(--wall) / var(--zoom))));
+  }
+}
+
+.showcase-column {
+  animation: showcase-drift 48s ease-in-out infinite alternate;
+}
+
+.showcase-column:nth-child(even) {
+  animation-direction: alternate-reverse;
+  animation-duration: 60s;
+}
+
+.showcase-column:nth-child(3n) {
+  animation-duration: 54s;
+}
+
+.showcase-wall:hover .showcase-column,
+.showcase-wall:focus-within .showcase-column {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .showcase-column {
+    animation: none;
+  }
+}
