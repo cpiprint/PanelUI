@@ -224,17 +224,15 @@ export default function HomePage() {
       {/* Hero */}
       <section className="flex flex-col items-center gap-6 px-6 py-24 text-center">
         <Badge variant="secondary">{COMPONENT_COUNT} components · MIT · Expo SDK 57+</Badge>
-        <h1 className="max-w-3xl font-heading text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-          React Native and web UI components, styled with Tailwind CSS
+        <h1 className="max-w-3xl font-heading text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
+          Native-feeling UI. Zero native code.
         </h1>
-        <p className="max-w-2xl text-lg text-muted-foreground text-balance">
-          Accessible, high-performance components — bottom sheets, dialogs, selects, toasts,
-          forms — animated on the UI thread with Reanimated. Zero native code, so it runs in
-          Expo Go. And now a{' '}
+        <p className="max-w-xl text-lg text-muted-foreground text-balance">
+          Tailwind-styled components for Expo that run in Expo Go, and now{' '}
           <Link href="/docs/web" className="text-foreground underline underline-offset-4">
-            collection for React on the web
-          </Link>
-          , built on shadcn/ui.
+            on the web
+          </Link>{' '}
+          too.
         </p>
 
         <CopyInstall command={INSTALL} />
