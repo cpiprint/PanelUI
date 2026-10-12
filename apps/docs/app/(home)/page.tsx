@@ -516,7 +516,9 @@ export default function HomePage() {
               </a>
             </p>
           </div>
-          <nav className="flex gap-6" aria-label="Footer">
+          {/* Six links are wider than a phone, so they wrap to a second row
+              there in place of pushing the page sideways. */}
+          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2" aria-label="Footer">
             <LayoutLink href="/docs" className="hover:text-foreground">
               Documentation
             </LayoutLink>
