@@ -19,9 +19,10 @@
  * ## One surface that opens
  *
  * The button and the panel are the same surface. Closed, it is a pill as
- * wide as its label. Opened, it widens into a panel with a field in it, and
- * grows downwards as rows arrive. Nothing appears from elsewhere, so it is
- * clear what was pressed and where the answer belongs.
+ * wide as its label. Opened, it widens, the label fades into a field in the
+ * same place, and it grows downwards as rows arrive. Closing runs the same
+ * steps backwards: the rows fold up, then it narrows. Nothing appears from
+ * elsewhere, so it is clear what was pressed and where the answer belongs.
  *
  * ## It runs nothing
  *
@@ -42,6 +43,7 @@ import {
   useContext,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -54,14 +56,21 @@ import { tv } from 'tailwind-variants';
 const commandDockVariants = tv({
   slots: {
     root: 'relative flex w-full justify-center',
-    // The widths are both real lengths, so the change between them can be
-    // animated. `auto` cannot.
+    /*
+     * The widths are both real lengths, so the change between them can be
+     * animated; `auto` cannot. The easing has no overshoot: a surface this
+     * size that bounces as it closes reads as a mistake.
+     */
     surface:
-      'overflow-hidden border bg-card text-card-foreground shadow-sm transition-[width,border-radius,box-shadow] duration-500 ease-[cubic-bezier(0.3,1.15,0.5,1)] motion-reduce:transition-none',
+      'overflow-hidden border bg-card text-card-foreground shadow-sm transition-[width,border-radius,box-shadow] duration-[400ms] ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none',
+    // The label keeps its row whether or not it can be seen, so the surface
+    // is never shorter than one row and never jumps as the two trade places.
     trigger:
-      'flex h-11 w-full cursor-pointer items-center justify-center gap-2 whitespace-nowrap px-4 text-sm font-medium outline-none transition-colors hover:bg-accent focus-visible:bg-accent [&_svg]:size-4 [&_svg]:shrink-0',
-    panel: 'flex flex-col',
-    form: 'flex h-11 items-center gap-2 ps-4 pe-1.5',
+      'flex h-11 w-full cursor-pointer items-center justify-center gap-2 whitespace-nowrap px-4 text-sm font-medium outline-none transition-[opacity,background-color] duration-200 hover:bg-accent focus-visible:bg-accent [&_svg]:size-4 [&_svg]:shrink-0',
+    // Pulled up over the label's row: the field sits exactly where the label
+    // was, and the two fade through each other.
+    panel: '-mt-11 flex flex-col',
+    form: 'flex h-11 items-center gap-2 pe-1.5 ps-4 transition-opacity duration-200 motion-reduce:transition-none',
     input:
       'h-full min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground',
     submit:
@@ -77,12 +86,29 @@ const commandDockVariants = tv({
     dot: 'size-1 animate-pulse rounded-full bg-muted-foreground',
   },
   variants: {
+    /*
+     * Opening and closing are the same steps in opposite orders. Opening, the
+     * surface widens and the rows follow it down. Closing, the rows fold up
+     * first and the surface narrows after them, so what is seen is one thing
+     * putting itself away and not two things changing at once.
+     */
     open: {
-      true: { surface: 'w-full max-w-md rounded-3xl shadow-lg' },
-      false: { surface: 'w-[var(--pu-closed)] rounded-[1.375rem]' },
+      true: {
+        // One length, not a width and a limit on it: a change of width is
+        // animated from the width as written, and `100%` with a `max-width`
+        // would start the closing from the full width of whatever it is in.
+        surface: 'w-[min(100%,28rem)] rounded-3xl shadow-lg',
+        trigger: 'pointer-events-none opacity-0',
+        form: 'opacity-100 delay-150',
+      },
+      false: {
+        surface: 'w-[var(--pu-closed)] rounded-[1.375rem] delay-200',
+        trigger: 'opacity-100 delay-300',
+        form: 'pointer-events-none opacity-0',
+      },
     },
     filled: {
-      true: { results: 'grid-rows-[1fr]' },
+      true: { results: 'grid-rows-[1fr] delay-200' },
       false: { results: 'grid-rows-[0fr]' },
     },
     interactive: {
@@ -212,19 +238,33 @@ function CommandDockRoot({
 }
 CommandDockRoot.displayName = 'CommandDock';
 
+/** Keeps an element out of the tab order and the accessibility tree while it cannot be seen. */
+function useInert<T extends HTMLElement>(inert: boolean) {
+  const ref = useRef<T>(null);
+  // Before anything else runs: the field asks for focus as the dock opens,
+  // and an element inside something still inert cannot take it.
+  useLayoutEffect(() => {
+    // Set on the element, not passed as a prop: how a boolean `inert` prop is
+    // written to the page differs between React versions.
+    ref.current?.toggleAttribute('inert', inert);
+  }, [inert]);
+  return ref;
+}
+
 export interface CommandDockTriggerProps extends ComponentProps<'button'> {}
 
 /** The closed form: a button that opens the dock. */
 function CommandDockTrigger({ className, onClick, ...props }: CommandDockTriggerProps) {
   const dock = useDock('CommandDock.Trigger');
-  if (dock.open) return null;
+  const ref = useInert<HTMLButtonElement>(dock.open);
   return (
     <button
+      ref={ref}
       type="button"
       data-dock-trigger=""
-      aria-expanded={false}
+      aria-expanded={dock.open}
       aria-controls={dock.panelId}
-      className={commandDockVariants().trigger({ className })}
+      className={commandDockVariants({ open: dock.open }).trigger({ className })}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) dock.setOpen(true);
@@ -240,8 +280,18 @@ export interface CommandDockPanelProps extends ComponentProps<'div'> {}
 /** The open form: the field, and the rows under it. */
 function CommandDockPanel({ className, ...props }: CommandDockPanelProps) {
   const dock = useDock('CommandDock.Panel');
-  if (!dock.open) return null;
-  return <div id={dock.panelId} className={commandDockVariants().panel({ className })} {...props} />;
+  // Kept in the page while closed, so it can be seen folding away. Inert, so
+  // nothing in it can be reached while it cannot be seen.
+  const ref = useInert<HTMLDivElement>(!dock.open);
+  return (
+    <div
+      ref={ref}
+      id={dock.panelId}
+      data-open={dock.open ? '' : undefined}
+      className={commandDockVariants().panel({ className })}
+      {...props}
+    />
+  );
 }
 CommandDockPanel.displayName = 'CommandDock.Panel';
 
@@ -259,13 +309,14 @@ function CommandDockInput({
   ...props
 }: CommandDockInputProps) {
   const dock = useDock('CommandDock.Input');
-  const slots = commandDockVariants();
+  const slots = commandDockVariants({ open: dock.open });
   const field = useRef<HTMLInputElement>(null);
 
-  // It is opened in order to type in it.
+  // It is opened in order to type in it. Asked for without scrolling: the
+  // surface is still on its way to its size, and the page should not chase it.
   useEffect(() => {
-    field.current?.focus();
-  }, []);
+    if (dock.open) field.current?.focus({ preventScroll: true });
+  }, [dock.open]);
 
   const send = (event: FormEvent) => {
     event.preventDefault();
@@ -315,7 +366,8 @@ export interface CommandDockResultsProps extends ComponentProps<'div'> {
 function CommandDockResults({ className, label = 'Results', children, ...props }: CommandDockResultsProps) {
   const dock = useDock('CommandDock.Results');
   const rows = Array.isArray(children) ? children.flat().filter(Boolean).length : children ? 1 : 0;
-  const filled = rows > 0 || dock.busy;
+  // Closed, it folds away whatever it holds.
+  const filled = dock.open && (rows > 0 || dock.busy);
   const slots = commandDockVariants({ filled });
   return (
     <div className={slots.results()}>

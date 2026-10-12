@@ -153,7 +153,7 @@ import { CommandDock } from "@/components/panelui/command-dock"
 ```
 
 - **`CommandDock.Trigger`** — The closed form: a button with your label that opens the dock.
-- **`CommandDock.Panel`** — The open form. It is only rendered while the dock is open.
+- **`CommandDock.Panel`** — The open form. It stays in the page while closed, folded away and inert, so opening and closing can both be seen.
 - **`CommandDock.Input`** — The field, with a send button. Enter sends too.
 - **`CommandDock.Results`** — Where the rows go. It takes no room until there is a row or the dock is busy.
 - **`CommandDock.Row`** — One row of the answer. It slides in when it is added, and `onSelect` makes it a button.
@@ -267,9 +267,11 @@ Closed, the dock is `closedWidth` wide, 9rem unless you set it. It has to be a r
 
 The dock grows downwards as rows arrive and pushes what is under it. Give its container a `min-h-*` if that should not move the page.
 
-### Closing
+### Opening and closing
 
-Escape closes the dock and returns focus to its button. A press outside it closes it too. What was typed is kept.
+Opening, the surface widens, the label fades into the field, and the rows follow. Closing runs the other way: the rows fold up first and the surface narrows after them. With reduced motion on, both happen at once.
+
+Escape closes the dock and returns focus to its button. A press outside it closes it too. What was typed, and the rows, are kept.
 
 ### Screen readers
 
