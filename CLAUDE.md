@@ -670,6 +670,15 @@ Two pieces make the current arrangement, and they have to stay in step:
   `main`. Deploy hooks are unaffected by `deploymentEnabled: false` — that setting gates the Git
   integration, not the hook.
 
+**Vercel installs from `apps/docs`, and CI does not.** An `npm install` run inside a workspace
+brings only what that workspace depends on, directly or through another workspace it names. CI
+runs `npm ci` at the root, which brings everything, so a package the docs build needs and
+`apps/docs` never declared is present in CI and missing on Vercel. The first deploy of the web
+collection failed this way, on `tailwind-variants`, with every check green. The docs app
+therefore depends on `panelui-web` by name, because its pages import that source by path, and a
+contract test holds it there. To see what Vercel will see, clone the repository fresh, then
+`cd apps/docs && npm install && npm run build`.
+
 **A documentation change that is not part of a release does not reach panelui.dev on its own.**
 New previews, a corrected props table and a typo fix all sit on `main` until the next release. To
 publish them now, run the **Deploy docs** workflow by hand from the Actions tab — that is what the
