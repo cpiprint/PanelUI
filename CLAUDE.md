@@ -645,6 +645,7 @@ Five workflows, and nothing else runs on its own. This is the whole picture:
 | Release published, tag `cli-v*` | `publish-cli.yml` | `panelui-cli` on npm. |
 | Release published, tag `create-v*` | `publish-cli.yml` | `create-panelui-app` on npm. |
 | Release published, tag `web-v*` | `publish-web.yml` | `panelui-web` on npm. |
+| Release published, tag `web-v*` | `deploy-docs.yml` | panelui.dev, because the web docs and the registry at `/r/web` are served from it. |
 | **Deploy docs** run by hand | `deploy-docs.yml` | panelui.dev, from the current `main`. |
 
 Every workflow on `release: published` sees **every** release and filters by tag prefix itself, so
