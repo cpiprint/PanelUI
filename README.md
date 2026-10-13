@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/header/surface.svg?title=PanelUI&amp;subtitle=High-performance+React+Native+components+for+Expo&amp;logo=https%3A%2F%2Fraw.githubusercontent.com%2Fpanel-ui%2FPanelUI%2Fmain%2F.github%2Fassets%2Flogo-dark.png&amp;mode=dark&amp;align=center&amp;font=geist-mono&amp;border=false" />
-    <img alt="PanelUI — high-performance React Native components for Expo" src="https://shieldcn.dev/header/surface.svg?title=PanelUI&amp;subtitle=High-performance+React+Native+components+for+Expo&amp;logo=https%3A%2F%2Fraw.githubusercontent.com%2Fpanel-ui%2FPanelUI%2Fmain%2F.github%2Fassets%2Flogo-light.png&amp;mode=light&amp;align=center&amp;font=geist-mono&amp;border=false" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/header/surface.svg?title=PanelUI&amp;subtitle=High-performance+UI+components+for+Expo+and+the+web&amp;logo=https%3A%2F%2Fraw.githubusercontent.com%2Fpanel-ui%2FPanelUI%2Fmain%2F.github%2Fassets%2Flogo-dark.png&amp;mode=dark&amp;align=center&amp;font=geist-mono&amp;border=false" />
+    <img alt="PanelUI — high-performance UI components for Expo and the web" src="https://shieldcn.dev/header/surface.svg?title=PanelUI&amp;subtitle=High-performance+UI+components+for+Expo+and+the+web&amp;logo=https%3A%2F%2Fraw.githubusercontent.com%2Fpanel-ui%2FPanelUI%2Fmain%2F.github%2Fassets%2Flogo-light.png&amp;mode=light&amp;align=center&amp;font=geist-mono&amp;border=false" />
   </picture>
 </p>
 
@@ -12,13 +12,15 @@
 </p>
 
 <p align="center">
-  Semantic design tokens · Tailwind v4 via Uniwind · Reanimated on the UI thread.
+  Semantic design tokens · Tailwind v4 · Reanimated on the UI thread.<br />
+  React Native for Expo, and now React on the web.
 </p>
 
 <p align="center">
   <a href="https://panelui.dev/docs"><b>Documentation</b></a> ·
   <a href="https://panelui.dev/docs/installation">Installation</a> ·
   <a href="https://panelui.dev/docs/components/button">Components</a> ·
+  <a href="https://panelui.dev/docs/web">Web</a> ·
   <a href="https://panelui.dev/docs/customization/theming">Theming</a> ·
   <a href="https://panelui.dev/docs/cli">CLI</a>
 </p>
@@ -51,6 +53,10 @@ in one coherent visual language, with light and dark themes out of the box.
 
 Pure TypeScript with no native modules, so it runs in **Expo Go** with no `prebuild`, no Xcode and
 no Android Studio.
+
+**New: PanelUI for the web.** [`panelui-web`](#panelui-for-the-web) is a collection of eleven
+components for React on the web, in the same visual language and drawn in your project's own
+theme: a board of cards you drag, a canvas of nodes and edges, a globe, KPI cards and more.
 
 ## Why PanelUI
 
@@ -173,6 +179,49 @@ Every component takes `className`, so anything can be restyled with Tailwind cla
 Plus the primitives: `PanelUIProvider`, `Portal`, `AnimatedPressable`, `useTheme`, `useThemeMode`,
 `useToast`, `cn`.
 
+## PanelUI for the web
+
+`panelui-web` is a separate collection for React on the web: Next.js, Vite, React Router, or
+anything else that runs React 18 or newer with Tailwind CSS v4. It is not a port of the components
+above. It is eleven of its own, styled with Tailwind on the tokens a shadcn project already
+defines, so they take your colours and radius in light and dark.
+
+Copy a component's source into your project with the shadcn CLI. It lands in
+`components/panelui/` and is yours to edit:
+
+```bash
+npx shadcn@latest add https://panelui.dev/r/web/lane-board.json
+```
+
+Or install the package, and let Tailwind see the classes it uses:
+
+```bash
+npm install panelui-web
+```
+
+```css
+/* app/globals.css */
+@import "tailwindcss";
+@source "../node_modules/panelui-web/dist";
+```
+
+```tsx
+import { RollingNumber } from 'panelui-web/rolling-number';
+
+<RollingNumber value={298} className="text-6xl font-bold" />
+```
+
+- **Lane Board** — lanes of cards, dragged with a pointer or carried with the keyboard
+- **Flow** — a canvas of nodes joined by edges, to pan, zoom and rearrange
+- **Planet** — the world as dots on a globe you can turn, with markers pinned to it
+- **Day Grid**, **Bar Picker**, **Range Meter**, **KPI**, **Rolling Number** — figures, to read and
+  to pick from
+- **Command Dock**, **Feedback**, **Tilt Card** — asking, answering and showing
+
+KPI and Flow have the same parts and props as the app library's, so a screen written for one reads
+the same in the other. Every component runs live in the docs, with its source under it, at
+**[panelui.dev/docs/web](https://panelui.dev/docs/web)**.
+
 ## Theming
 
 Six themes ship in [`theme.css`](packages/panelui/theme.css) — `light`, `dark`, `moon`,
@@ -224,6 +273,17 @@ tool is not left guessing.
 The skill activates on its own once a project has `panelui-native` in its dependencies or a
 `panelui.json` beside it. Full details, and the URLs everything is served from, at
 **[panelui.dev/docs/skills](https://panelui.dev/docs/skills)**.
+
+The web collection has a skill of its own, generated the same way from its source:
+
+```sh
+npx skills add panel-ui/PanelUI --skill panelui-web
+```
+
+Its components are shadcn registry items, so the shadcn MCP server can search and add them once
+the registry is named in `components.json`. Both are covered at
+**[panelui.dev/docs/web/skills](https://panelui.dev/docs/web/skills)** and
+**[panelui.dev/docs/web/mcp](https://panelui.dev/docs/web/mcp)**.
 
 ## Example app
 

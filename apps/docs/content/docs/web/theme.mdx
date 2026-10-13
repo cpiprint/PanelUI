@@ -1,0 +1,77 @@
+---
+title: Theme
+description: The tokens the web components read, the three a stock shadcn theme does not have, and how light and dark work.
+---
+
+The web components have no theme of their own. They read the tokens your shadcn theme already
+defines, so they match the rest of your interface and change with it.
+
+## The five colour roles
+
+A component's colour is a role, passed as `color`. Each role is one token:
+
+| Role | Token | Use it for |
+| --- | --- | --- |
+| `primary` | `--primary` | The default. Your theme's main colour |
+| `info` | `--info` | Neutral emphasis: worth noticing, neither good nor bad |
+| `success` | `--success` | Good news, progress, a healthy state |
+| `warning` | `--warning` | Something that wants attention before it is a problem |
+| `destructive` | `--destructive` | Bad news, a failure, a limit passed |
+
+## Three tokens a stock theme lacks
+
+`--primary` and `--destructive` are in every shadcn theme. `--success`, `--warning` and `--info`
+are not, and a component drawn in a role whose token is missing has no colour where the colour
+should be.
+
+Installed from the registry, a component that uses one of them brings it: the CLI adds the tokens
+to your stylesheet and leaves any you have already defined alone.
+
+Installed from npm, add them yourself:
+
+```css title="globals.css"
+:root {
+  --success: oklch(0.696 0.17 162.48);
+  --warning: oklch(0.769 0.188 70.08);
+  --info: oklch(0.623 0.214 259.815);
+}
+```
+
+They are mid-tones that read on a light and a dark background, so one value serves both. Give
+`.dark` its own values if your theme wants them.
+
+## Surfaces
+
+These come from your theme as it is, and every shadcn theme has them:
+
+| Token | Where the components use it |
+| --- | --- |
+| `--background`, `--foreground` | The page, and text on it |
+| `--card`, `--card-foreground` | Cards, nodes, panels |
+| `--muted`, `--muted-foreground` | Trays, tracks, quiet text, unlit marks |
+| `--accent` | Hover and focus fills |
+| `--border`, `--ring` | Hairlines and focus rings |
+
+## Light and dark
+
+There is nothing to switch on. The components read tokens, and your theme changes the tokens.
+Planet draws on a canvas and reads its colours from the page each time it draws, so it follows
+a theme change too.
+
+## Changing a colour everywhere
+
+Change the token. To make every `success` in the collection your brand's green:
+
+```css
+:root {
+  --success: oklch(0.72 0.19 150);
+}
+```
+
+To change one component, use its `color` prop or the ways on the [Style](/docs/web/style) page.
+
+## Matching PanelUI's own look
+
+The pages here are drawn in PanelUI's theme: a neutral `--primary` that is near black in light
+mode and near white in dark, with tints of 4% for `--muted` and `--accent`. The components do
+not depend on it. In your project they are drawn in your theme.

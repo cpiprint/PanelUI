@@ -1,0 +1,17 @@
+{
+  "title": "Components",
+  "pages": [
+    "!index",
+    "bar-picker",
+    "command-dock",
+    "day-grid",
+    "feedback",
+    "flow",
+    "kpi",
+    "lane-board",
+    "planet",
+    "range-meter",
+    "rolling-number",
+    "tilt-card"
+  ]
+}

@@ -147,8 +147,16 @@ function usePress() {
   ] as const;
 }
 
-function Frame({ n, name, hint, readout, label, bounds, onKey, children }: {
+function Frame({ n, name, hint, readout, label, bounds, onKey, aspect = 'aspect-[3/2]', view, children }: {
   n: number;
+  /** The panel's shape. The wide figure on the home page asks for a wider one. */
+  aspect?: string;
+  /**
+   * The part of the drawing to show, where the box round `bounds` would not
+   * do. Two objects side by side on the page sit at opposite corners of the
+   * box that holds them both, and framing that box frames mostly nothing.
+   */
+  view?: string;
   bounds: Bounds;
   name: string;
   hint: string;
@@ -168,12 +176,12 @@ function Frame({ n, name, hint, readout, label, bounds, onKey, children }: {
         <span className="uppercase">{name}</span>
       </div>
       <svg
-        viewBox={viewBox(bounds)}
+        viewBox={view ?? viewBox(bounds)}
         role="img"
         tabIndex={0}
         aria-label={label}
         onKeyDown={handleKey}
-        className="block aspect-[3/2] w-full touch-manipulation rounded-md select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        className={`block ${aspect} w-full touch-manipulation rounded-md select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring`}
       >
         {children}
       </svg>
@@ -631,6 +639,282 @@ function Package() {
 }
 
 /* -------------------------------------------------------------------------- */
+/* The web collection's figures                                               */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * A second set, for the section on the web collection. The same rules: an
+ * object you can press, drawn on the planes of an isometric box, in two greys
+ * and one live colour, with a readout that says what the press did.
+ *
+ * There are three, and the first is a bench with two machines on it. The
+ * section makes three claims, and two of them are about one act: adding a
+ * component and having it come out in your colours. One bench shows that as
+ * one thing happening, where two cards would have shown two.
+ */
+
+const ADDED = ['planet.tsx', 'kpi.tsx', 'flow.tsx'];
+const ROLES = ['primary', 'info', 'success', 'warning', 'destructive'] as const;
+
+/** Web 1 — a key that drops files into a tray, and five keys that colour what comes out. */
+function Workbench() {
+  const [count, setCount] = useState(2);
+  const [role, setRole] = useState(2);
+  const [down, flash] = usePress();
+  const add = () => {
+    flash('add');
+    setCount((current) => (current >= ADDED.length ? 0 : current + 1));
+  };
+  const pick = (index: number) => {
+    flash(ROLES[index]!);
+    setRole(index);
+  };
+  return (
+    <Frame
+      n={1}
+      aspect="aspect-[5/2]"
+      bounds={[8, 4, 0, 272, 254, 44]}
+      view="-222 34 462 186"
+      name="Add and colour"
+      hint="add · space / role · p i s w d"
+      readout={`${count} file${count === 1 ? '' : 's'} · --${ROLES[role]}`}
+      label="A bench with two machines. On the left, a key marked add drops component files into a tray, up to three, and then empties it. On the right, five keys pick the colour role of a component, which lights the matching light on it. Press space to add, and P, I, S, W or D to pick a role."
+      onKey={(k) => {
+        if (k === ' ' || k === 'Enter') {
+          add();
+          return true;
+        }
+        const index = ROLES.findIndex((name) => name[0] === k);
+        if (index < 0) return false;
+        pick(index);
+        return true;
+      }}
+    >
+      {/*
+        The two machines are level on the page, which on the ground means one
+        is further along x and the other further along y by the same amount.
+      */}
+      <Key x={12} y={190} w={50} d={32} label="add" down={down === 'add'} onPress={add} />
+      <Box x={76} y={160} z={0} w={84} d={90} h={8} r={4} />
+      <g transform={TOP(76, 160, 8)}>
+        <rect className="iso-face iso-glass" x={5} y={5} width={74} height={80} rx={3} />
+        <text className="iso-label iso-dim" x={10} y={15} fontSize={6.5}>
+          components/panelui
+        </text>
+      </g>
+      {ADDED.map((file, index) => (
+        <g key={file} className={cx('iso-fade', index >= count && 'iso-hidden')}>
+          <Box x={84} y={180} z={8 + index * 9} w={68} d={62} h={7} r={3} />
+          <g transform={TOP(84, 180, 15 + index * 9)}>
+            <text className="iso-label" x={8} y={14} fontSize={8}>
+              {file}
+            </text>
+          </g>
+        </g>
+      ))}
+
+      <Box x={176} y={10} z={0} w={92} d={40} h={26} r={4} />
+      <g transform={TOP(176, 10, 26)}>
+        {ROLES.map((name, index) => (
+          <rect
+            key={name}
+            className={index === role ? 'iso-fill-live iso-anim' : 'iso-bar iso-anim'}
+            x={8 + index * 16}
+            y={14}
+            width={12}
+            height={12}
+            rx={3}
+          />
+        ))}
+      </g>
+      <g transform={FRONT(176, 50, 26)}>
+        <text className="iso-label" x={46} y={16} fontSize={7.5} textAnchor="middle">
+          {`color="${ROLES[role]}"`}
+        </text>
+      </g>
+      {ROLES.map((name, index) => (
+        <Key
+          key={name}
+          x={177 + index * 18.4}
+          y={68}
+          w={16}
+          d={22}
+          h={7}
+          size={8}
+          label={name[0]!.toUpperCase()}
+          on={index === role}
+          down={down === name}
+          onPress={() => pick(index)}
+        />
+      ))}
+    </Frame>
+  );
+}
+
+const ARROWS: [string, string, number, number, number, number][] = [
+  // key, label, x, y, row step, column step
+  ['ArrowUp', '↑', 36, 20, -1, 0],
+  ['ArrowLeft', '←', 14, 44, 0, -1],
+  ['ArrowDown', '↓', 36, 44, 1, 0],
+  ['ArrowRight', '→', 58, 44, 0, 1],
+];
+
+/** Web 2 — arrow keys that walk a mark round a grid, and a key that stops it gliding. */
+function Arrows() {
+  const [at, setAt] = useState<[number, number]>([1, 1]);
+  const [still, setStill] = useState(false);
+  const [down, flash] = usePress();
+  const move = (key: string) => {
+    const arrow = ARROWS.find((entry) => entry[0] === key);
+    if (!arrow) return false;
+    flash(key);
+    setAt(([row, column]) => [
+      Math.min(2, Math.max(0, row + arrow[4])),
+      Math.min(2, Math.max(0, column + arrow[5])),
+    ]);
+    return true;
+  };
+  const hold = () => {
+    flash('still');
+    setStill((current) => !current);
+  };
+  return (
+    <Frame
+      n={2}
+      bounds={[10, 8, 0, 184, 100, 20]}
+      name="Keys and motion"
+      hint="arrows · space"
+      readout={`row ${at[0] + 1} · column ${at[1] + 1} · ${still ? 'jumps' : 'glides'}`}
+      label="Four arrow keys beside a grid of nine cells with one cell marked, and a key marked glide. An arrow moves the mark one cell. The glide key switches between the mark sliding to its cell and jumping there, which is what reduced motion does. Use the arrow keys, and space for the glide key."
+      onKey={(k) => {
+        if (k === ' ' || k === 'Enter') {
+          hold();
+          return true;
+        }
+        return move(k);
+      }}
+    >
+      {ARROWS.map(([key, label, x, y]) => (
+        <Key
+          key={key}
+          x={x}
+          y={y}
+          w={20}
+          d={20}
+          h={7}
+          size={10}
+          label={label}
+          down={down === key}
+          onPress={() => move(key)}
+        />
+      ))}
+      <Key
+        x={14}
+        y={74}
+        w={64}
+        d={22}
+        h={7}
+        size={8}
+        label={still ? 'still' : 'glide'}
+        on={!still}
+        down={down === 'still'}
+        onPress={hold}
+      />
+      <Box x={92} y={12} z={0} w={88} d={88} h={6} r={4} />
+      <g transform={TOP(92, 12, 6)}>
+        {[0, 1, 2].flatMap((row) =>
+          [0, 1, 2].map((column) => (
+            <rect
+              key={`${row}-${column}`}
+              className="iso-face iso-glass"
+              x={8 + column * 25}
+              y={8 + row * 25}
+              width={21}
+              height={21}
+              rx={4}
+            />
+          ))
+        )}
+        <rect
+          className={cx('iso-fill-live', !still && 'iso-anim')}
+          x={8}
+          y={8}
+          width={21}
+          height={21}
+          rx={4}
+          style={{ transform: `translate(${at[1] * 25}px, ${at[0] * 25}px)` }}
+        />
+      </g>
+    </Frame>
+  );
+}
+
+const KPI_PARTS = ['Title', 'Value', 'Trend'] as const;
+/** Each part's bar on a screen: how far down it starts, and how tall and wide it is. */
+const PART_BARS: [number, number, number][] = [
+  [16, 5, 0.4],
+  [28, 12, 0.62],
+  [48, 5, 0.3],
+];
+
+/** Web 3 — a phone and a browser window holding the same three parts. */
+function Twins() {
+  const [part, setPart] = useState(1);
+  const [down, flash] = usePress();
+  const pick = (index: number) => {
+    flash('screens');
+    setPart(index);
+  };
+  const next = () => pick((part + 1) % KPI_PARTS.length);
+  /** The three parts, drawn on a screen `width` wide. */
+  const bars = (width: number) =>
+    PART_BARS.map(([top, height, share], index) => (
+      <rect
+        key={index}
+        className={index === part ? 'iso-fill-live iso-anim' : 'iso-bar iso-anim'}
+        x={8}
+        y={top}
+        width={(width - 16) * share}
+        height={height}
+        rx={2}
+        onClick={(event) => {
+          event.stopPropagation();
+          pick(index);
+        }}
+      />
+    ));
+  return (
+    <Frame
+      n={3}
+      bounds={[14, 12, 0, 186, 98, 12]}
+      name="Same parts"
+      hint="next part · space"
+      readout={`Kpi.${KPI_PARTS[part]} · app + web`}
+      label="A phone and a browser window lying side by side, each showing the same three parts of a KPI. Pressing either one picks the next part on both, and names it. Press space."
+      onKey={(k) => {
+        if (k !== ' ' && k !== 'Enter') return false;
+        next();
+        return true;
+      }}
+    >
+      <g className={cx('iso-press', down === 'screens' && 'down')} onClick={next}>
+        <Box x={18} y={16} z={0} w={50} d={78} h={6} r={7} />
+        <g transform={TOP(18, 16, 6)}>
+          <rect className="iso-face iso-glass" x={4} y={4} width={42} height={70} rx={5} />
+          {bars(50)}
+        </g>
+        <Box x={82} y={16} z={0} w={100} d={78} h={6} r={4} />
+        <g transform={TOP(82, 16, 6)}>
+          <rect className="iso-face iso-glass" x={4} y={4} width={92} height={70} rx={3} />
+          <rect className="iso-detail" x={4} y={4} width={92} height={7} rx={3} />
+          {bars(100)}
+        </g>
+      </g>
+    </Frame>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 
 const FIGURES = {
   tailwind: ClassPress,
@@ -639,6 +923,9 @@ const FIGURES = {
   dark: DarkRocker,
   a11y: ScreenReader,
   native: Package,
+  workbench: Workbench,
+  arrows: Arrows,
+  twins: Twins,
 } as const;
 
 export type IsoFigureKind = keyof typeof FIGURES;

@@ -1,0 +1,47 @@
+---
+title: Skills
+description: Give a coding agent working knowledge of the web collection, so it uses the components and the theme's colours and does not invent its own.
+---
+
+An agent working in your project does not know the web collection is there. It writes a custom
+chart where there is a KPI, guesses at props, and gives every component the same colour. The
+skill is a folder of markdown the agent loads when it recognises a project that uses the
+collection: what exists, every part and prop, how colour works, and how to install a component.
+
+It carries the props themselves, read from the source, so it works for an agent with no network
+access. For looking things up live in the registry, add the [MCP server](/docs/web/mcp) as well.
+
+## Install
+
+<InstallTabs kind="dlx" packages="skills add panel-ui/PanelUI --skill panelui-web" />
+
+That writes the skill into your project for whichever agent you use. Run it again to update.
+Leave out `--skill` to be offered every skill in the repository, which includes the one for the
+React Native library.
+
+## What is in it
+
+| File | What it holds |
+| --- | --- |
+| `SKILL.md` | When the skill applies, and the rules: colour is a role, parts in Server Components, lead with a frame |
+| `components.md` | Every component, with a line on what it is for |
+| `components/<name>.md` | One component in full: import, when to use it, parts, every prop, notes and a worked example |
+| `setup.md` | Installing from the registry or from npm |
+| `theming.md` | The five colour roles and the three tokens a stock theme lacks |
+
+The component files are generated from the same source as these pages, so a prop described here
+is described the same way there.
+
+## When it applies
+
+The skill activates on its own in a React project that has a `@panelui` registry in
+`components.json` or `panelui-web` in its dependencies, and when you ask for something the
+collection has, such as a globe, a KPI card or a board of lanes.
+
+## Asking for things
+
+Name what you want and let the agent find the component:
+
+- "Show this week's deploys with one day picked."
+- "Put the pipeline stages on a board I can drag cards across."
+- "Add a KPI row for subscribers, with the trend. Fewer unsubscribes is good."

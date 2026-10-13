@@ -1,0 +1,74 @@
+{
+  "name": "panelui-web",
+  "version": "0.1.0",
+  "description": "PanelUI for the web: animated, data-rich React components styled with Tailwind CSS on shadcn tokens.",
+  "type": "module",
+  "sideEffects": false,
+  "//exports": "One subpath per component, so importing one does not pull in the rest. The root entry re-exports all of them for a project that would rather not care.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./*": {
+      "types": "./dist/components/*/index.d.ts",
+      "default": "./dist/components/*/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "prepack": "npm run build"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "react",
+    "ui",
+    "ui-components",
+    "components",
+    "component-library",
+    "shadcn",
+    "tailwind",
+    "tailwindcss",
+    "nextjs",
+    "vite",
+    "animation",
+    "dashboard",
+    "dark-mode",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/panel-ui/PanelUI.git",
+    "directory": "packages/web"
+  },
+  "bugs": {
+    "url": "https://github.com/panel-ui/PanelUI/issues"
+  },
+  "author": "Khalid Abdi",
+  "license": "MIT",
+  "homepage": "https://panelui.dev/docs/web",
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "tailwindcss": ">=4.0.0"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.6.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.1",
+    "tailwind-variants": "^3.2.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "typescript": "~6.0.3"
+  }
+}

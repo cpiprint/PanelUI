@@ -1,0 +1,46 @@
+{
+  "slug": "kpi",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 520
+  },
+  "intro": "Use it for a number someone checks, with whatever says how it is doing: the change since last time, the shape of it over a period, how far it is towards a target. It has the same parts as the app library's KPI, so a metric reads the same on both.\n\nThe number comes first. The trend, the chart and the bar are all small on purpose, and none of them can be read to a value.\n\nFor a chart someone needs to read values from, use a chart with an axis. For one bare figure with a label, a `Kpi.Title` and a `Kpi.Value` are enough.",
+  "usage": "<Kpi>\n  <Kpi.Title>Subscribers</Kpi.Title>\n  <Kpi.Value>18,240</Kpi.Value>\n  <Kpi.Trend value={6.4} caption=\"this month\" />\n</Kpi>",
+  "anatomy": "<Kpi>\n  <Kpi.Header>\n    <Kpi.Icon />\n    <Kpi.Title />\n    <Kpi.Actions />\n  </Kpi.Header>\n  <Kpi.Content>\n    <Kpi.Stat>\n      <Kpi.Value />\n      <Kpi.Trend />\n    </Kpi.Stat>\n    <Kpi.Chart />\n  </Kpi.Content>\n  <Kpi.Progress />\n  <Kpi.Footer />\n</Kpi>",
+  "parts": {
+    "Header": "The row over the number. A title in it takes the room between the icon and the actions.",
+    "Icon": "A small tile for an icon. `tone` colours it as good or bad news.",
+    "Title": "What the number measures.",
+    "Actions": "Whatever belongs at the end of the header: a period, a trend badge, a button.",
+    "Content": "The row the number is in. `layout=\"inline\"` is for a chart beside it.",
+    "Stat": "Title, value and trend stacked as one block, for a row with a chart at its other end.",
+    "Value": "The number.",
+    "Trend": "The change, given as a number. It writes the sign and picks the colour.",
+    "Chart": "A sparkline of a list of numbers. `inline` gives it a fixed box, `filled` a wash under the line.",
+    "Progress": "A bar towards a target, with a label and the percentage over it.",
+    "Footer": "A quiet line under everything.",
+    "Separator": "A rule between two parts of one card.",
+    "Group": "Several metrics as one panel, side by side or stacked, with a rule between each and the next."
+  },
+  "examples": [
+    {
+      "title": "A card of its own",
+      "description": "`surface` draws the metric as a card. The trend is a badge in the header, and the chart runs the width of the card under the number with a wash beneath the line.",
+      "demo": "card",
+      "height": 380
+    },
+    {
+      "title": "Towards a target",
+      "description": "`Kpi.Progress` takes a value and what it is out of. `Kpi.Icon` takes a `tone`, so the tile can agree with the news beside it.",
+      "demo": "targets",
+      "height": 560
+    },
+    {
+      "title": "Several as one panel",
+      "description": "`Kpi.Group` puts a rule between metrics and shares the width between them. Without a header each metric is a title, a value and a trend.",
+      "demo": "panel",
+      "height": 260
+    }
+  ],
+  "notes": "### Trend colours\n\n`Kpi.Trend` is drawn in the success colour when the number moved the good way, in the destructive colour when it moved the bad way, and in the muted colour when it did not move. Up is good unless you say otherwise: pass `goodDirection=\"down\"` for a metric where less is better, or `\"none\"` for one where neither is.\n\n`threshold` is the size of change that still counts as none. With `threshold={0.5}`, a change of 0.3 is drawn flat.\n\n### Writing the change\n\nThe change is written as a signed percentage with one decimal. `format` is given the value and returns the text, for a change in another unit. `caption` adds quiet words after it and is read out with it.\n\n### The chart\n\n`data` is a list of numbers, oldest first. The line is scaled between the lowest and highest of them, so it shows the shape of the change and says nothing about its size. That is why it has no axis.\n\n`inline` fixes the chart at 128 by 56 pixels. In a column of cards with titles of different lengths, the charts are then all one width and line up down the right-hand edge.\n\n### Colour\n\n`color` on `Kpi.Chart` and `Kpi.Progress` names one of the theme's roles and defaults to `primary`.\n\n### In a group\n\n`Kpi.Group` pads its children on the sides that face a rule. Put `Kpi` elements straight inside it. In a horizontal group the metrics share the width equally, so keep titles to a word or two, or stack them with `orientation=\"vertical\"`.\n\n### Server Components\n\nKPI holds no state, so it is not a client module. It can be rendered from a Server Component as written, and it adds no JavaScript to the page."
+}

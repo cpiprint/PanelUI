@@ -1,0 +1,22 @@
+{
+  "slug": "tilt-card",
+  "demo": "figures",
+  "demoOptions": {
+    "height": 440
+  },
+  "intro": "Use it where a card is there to be looked at more than read: a feature on a landing page, a plan, something collectable. The card leans a few degrees towards the pointer and a soft light sits under it. Layers inside the card are lifted off it and move against it as it leans, which gives a flat drawing a front and a back.\n\nThe lean is decoration. It does nothing on a touch screen and holds still under reduced motion, so anything the card has to say goes in its contents.\n\nFor cards in a dense grid that someone works through, such as a list of records, use a plain card. A screen where everything leans is tiring to use.",
+  "usage": "<TiltCard color=\"info\" cardClassName=\"p-5\">\n  <TiltCard.Layer depth={24}>{figure}</TiltCard.Layer>\n  <TiltCard.Layer depth={8}>\n    <h3>Sync</h3>\n  </TiltCard.Layer>\n</TiltCard>",
+  "anatomy": "<TiltCard>\n  <TiltCard.Layer depth={…}>…</TiltCard.Layer>\n</TiltCard>",
+  "parts": {
+    "Layer": "Something lifted off the card by `depth`, in pixels. The further out, the further it moves as the card leans."
+  },
+  "examples": [
+    {
+      "title": "Without layers or light",
+      "description": "A card with nothing but its contents still leans. `tilt` is how far, in degrees, and `glare={false}` leaves out the light under the pointer.",
+      "demo": "plain",
+      "height": 320
+    }
+  ],
+  "notes": "### Two boxes\n\nThe component is a box that sets the viewpoint, with the card inside it. `className` goes on the outer box, which is where a width belongs. `cardClassName` goes on the card, which is where padding and layout belong.\n\n### Depth\n\nA layer's `depth` is how many pixels it stands off the card. At the edge of the card a layer moves by about that many pixels, so depths between 6 and 36 read well, and anything over 50 starts to come apart from the card. Text reads best at 12 or under.\n\nLayers can be positioned however you like, absolutely included. A layer's own transform is used for the movement, so put any transform of your own on an element inside it.\n\n### Colour\n\n`color` names one of the theme's roles and tints the light under the pointer. It defaults to `primary`.\n\n### What it is clipped by\n\nThe card clips its contents to its rounded corners, so a layer that moves past the edge is cut off there. Leave a layer room to move.\n\n### Touch and reduced motion\n\nThe card does not lean under a finger, and does not lean at all for anyone who has asked their system for reduced motion. It is then a card."
+}

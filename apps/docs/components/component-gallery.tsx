@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import meta from '@/scripts/meta.json';
 import { getComponentThumbnail } from '@/components/component-thumbnails';
+import { SECTIONS } from '@/components/gallery-sections';
 
 /**
  * The components index: every module in the library, as a card with a picture
@@ -27,26 +28,6 @@ type MetaOptions = {
   beta?: boolean;
 };
 type MetaEntry = [string, string, string, MetaOptions?];
-
-/**
- * The sections, in the order the page prints them, each with the sentence that
- * goes under its heading.
- *
- * Kept here rather than in the generator: the generator writes one line of MDX
- * now, and having the headings in two places is how they drift.
- */
-const SECTIONS: [string, string, string][] = [
-  ['actions', 'Actions', 'The things a screen can be told to do, and the controls that ask.'],
-  ['forms', 'Forms and input', 'Everything that takes a value from someone and hands it back typed.'],
-  ['overlays', 'Overlays', 'Surfaces that arrive over the page and leave again.'],
-  ['navigation', 'Navigation', 'Moving between places, and showing where you are in them.'],
-  ['layout', 'Layout and structure', 'The surfaces the rest of it sits on.'],
-  ['data', 'Data', 'Rows, sequences and numbers, laid out to be read.'],
-  ['charts', 'Charts', 'Series drawn on the UI thread, one file each, no chart library.'],
-  ['feedback', 'Feedback and status', 'Saying what happened, what is happening, and what is missing.'],
-  ['media', 'Media and motion', 'Pictures, conversation and things that move.'],
-  ['ai', 'AI components', 'The parts an assistant interface is built from.'],
-];
 
 /*
  * Through `unknown`: the JSON import is inferred as a heterogeneous tuple per

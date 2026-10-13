@@ -1,0 +1,72 @@
+---
+title: MCP
+description: Let a coding agent look the web components up in the registry, and add them, through the shadcn MCP server.
+---
+
+The web collection is a shadcn registry, so the MCP server for it is shadcn's own. Pointed at the
+registry, it lets an agent list the components, read one in full with its source, and get the
+command that adds it, without leaving the editor.
+
+It reads the registry. It does not know your project's conventions, which is what the
+[skill](/docs/web/skills) is for. Most projects want both.
+
+## Add the registry
+
+The server reads the registries named in `components.json`. Add PanelUI's once:
+
+```json title="components.json"
+{
+  "registries": {
+    "@panelui": "https://panelui.dev/r/web/{name}.json"
+  }
+}
+```
+
+That is also what lets you add a component by name:
+
+<InstallTabs kind="dlx" packages="shadcn@latest add @panelui/planet" />
+
+## Start the server
+
+<InstallTabs kind="dlx" packages="shadcn@latest mcp init --client claude" />
+
+`--client` is `claude`, `cursor`, `vscode`, `codex` or `opencode`. The command writes the server
+into that client's config file and merges with whatever is there.
+
+By hand, it is:
+
+```json title=".mcp.json"
+{
+  "mcpServers": {
+    "shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"]
+    }
+  }
+}
+```
+
+| Client | Config file |
+| --- | --- |
+| Claude Code | `.mcp.json` |
+| Cursor | `.cursor/mcp.json` |
+| VS Code | `.vscode/mcp.json` |
+
+Restart the client after adding it.
+
+## What to ask
+
+The server answers for every registry in `components.json`, so name PanelUI when you mean it.
+
+- "List the components in the @panelui registry."
+- "Show me the KPI component from @panelui and its props."
+- "Add the Lane Board from @panelui and put my tasks in it."
+
+## Without the server
+
+The same lookups are CLI commands, and an agent that can run a shell can use them:
+
+```bash
+npx shadcn@latest search @panelui
+npx shadcn@latest view @panelui/kpi
+```

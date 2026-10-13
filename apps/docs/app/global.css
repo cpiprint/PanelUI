@@ -18,6 +18,11 @@
 @source '../app';
 @source '../content';
 @source '../components';
+/*
+ * The web collection is rendered live on its own docs pages, from source, so
+ * its classes have to be compiled here like any other file in the site.
+ */
+@source '../../../packages/web/src';
 
 /*
  * The design tokens, in their web form.
@@ -438,6 +443,30 @@ body {
     font-weight: 500;
   }
 }
+
+/*
+ * The web section lists Installation once. Its framework pages (Next.js,
+ * Vite and the rest) are chosen from the grid on that page, so listing them
+ * again under it would be the same seven links twice.
+ *
+ * They are hidden here and not left out of the page tree, because the tree is
+ * also how the layout decides which section a page belongs to: a page it
+ * cannot find is treated as an app page, and the sidebar would switch to the
+ * app's sections the moment a framework was picked.
+ */
+#nd-sidebar,
+#nd-sidebar-mobile {
+  & a[href^='/docs/web/installation/'] {
+    display: none;
+  }
+
+  /* On a framework page, Installation is still where the reader is. */
+  &:has(a[href^='/docs/web/installation/'][data-active='true']) a[href='/docs/web/installation'] {
+    background-color: var(--secondary);
+    color: var(--foreground);
+    font-weight: 500;
+  }
+}
 /*
  * Studio pages with an App / Web toggle (components/platform*.tsx). With no
  * `data-platform` on <html> the reader sees the app version, so the page is
@@ -479,5 +508,45 @@ html[data-platform='web'] [data-platform-only='app'] {
      code. */
   html {
     @apply font-sans;
+  }
+}
+/*
+ * The home page's wall of previews. Each column drifts up until its last card
+ * is at the bottom of the wall, and back; `translate` percentages are of the
+ * column's own height, so a column travels exactly its overhang whatever is in
+ * it. Alternate columns start from the other end, so no two neighbours move
+ * together. Everything holds still while the pointer or the keyboard is on the
+ * wall, because the cards are there to be used.
+ */
+@keyframes showcase-drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(min(0px, calc(-100% + var(--wall) / var(--zoom))));
+  }
+}
+
+.showcase-column {
+  animation: showcase-drift 48s ease-in-out infinite alternate;
+}
+
+.showcase-column:nth-child(even) {
+  animation-direction: alternate-reverse;
+  animation-duration: 60s;
+}
+
+.showcase-column:nth-child(3n) {
+  animation-duration: 54s;
+}
+
+.showcase-wall:hover .showcase-column,
+.showcase-wall:focus-within .showcase-column {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .showcase-column {
+    animation: none;
   }
 }

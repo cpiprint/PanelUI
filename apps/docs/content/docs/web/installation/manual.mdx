@@ -1,0 +1,138 @@
+---
+title: Manual
+description: Add PanelUI web components to any React project with Tailwind CSS, without the shadcn CLI.
+---
+
+For a React project the CLI does not support, or one where you would rather set things up by
+hand. You need Tailwind CSS 4 already working.
+
+<Steps>
+
+<Step>
+
+### Add the theme tokens
+
+The components are styled with these variables. Put them in the CSS file that imports Tailwind,
+and change the values to suit your design:
+
+```css title="src/styles/globals.css"
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+```
+
+Dark mode follows a `dark` class on an ancestor, usually `<html>`.
+
+</Step>
+
+<Step>
+
+### Install the package
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Tell Tailwind to read its classes, in the same CSS file. The path is relative to that file:
+
+```css title="src/styles/globals.css"
+@source "../../node_modules/panelui-web/dist";
+```
+
+</Step>
+
+<Step>
+
+### Use a component
+
+```tsx
+import { RollingNumber } from "panelui-web/rolling-number"
+
+export function Events() {
+  return <RollingNumber value={121} className="text-6xl font-semibold" />
+}
+```
+
+</Step>
+
+</Steps>
+
+## Copying the source instead
+
+Every component page has a **Manual** tab with the source and the packages it needs. The copied
+file imports `cn` from `@/lib/utils`, so add that helper and the alias if your project has
+neither:
+
+<InstallTabs kind="add" packages="clsx tailwind-merge" />
+
+```ts title="lib/utils.ts"
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+```

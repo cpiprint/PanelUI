@@ -1,0 +1,592 @@
+---
+title: Feedback
+description: A dialog with a well to write in and two actions in the band around it.
+status: new
+---
+
+<ComponentPreview name="feedback/in-the-page" height={520}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Feedback } from '@/components/panelui/feedback';
+
+export default function FeedbackInThePage() {
+  const [message, setMessage] = useState('');
+  const [sent, setSent] = useState(false);
+
+  // Inline, there is nothing to close. Cancel and the ✕ report here instead,
+  // and this page takes that to mean "start again".
+  const reset = () => {
+    setMessage('');
+    setSent(false);
+  };
+
+  return (
+    <Feedback value={message} onValueChange={setMessage} onOpenChange={reset}>
+      <Feedback.Content inline>
+        <Feedback.Panel>
+          {sent ? (
+            <>
+              <Feedback.Title>Thank you</Feedback.Title>
+              <p className="min-h-[200px] text-[17px] leading-6 text-muted-foreground">
+                We read every message. If yours needs a reply, you will have one
+                within a working day.
+              </p>
+            </>
+          ) : (
+            <>
+              <Feedback.Title>What should we fix first?</Feedback.Title>
+              <Feedback.Close label="Clear the message" />
+              <Feedback.Field placeholder="Tell us what got in your way" />
+            </>
+          )}
+        </Feedback.Panel>
+        <Feedback.Footer>
+          {sent ? (
+            <Feedback.Cancel>Write another</Feedback.Cancel>
+          ) : (
+            <>
+              <Feedback.Cancel>Clear</Feedback.Cancel>
+              <Feedback.Submit onSubmit={() => setSent(true)} />
+            </>
+          )}
+        </Feedback.Footer>
+      </Feedback.Content>
+    </Feedback>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it to ask for a sentence: what went wrong, what to fix first, why somebody gave the score they did. It is a dialog whose body is a place to write, with Cancel and Submit in the band around it.
+
+`Submit` cannot be pressed while the field is empty, and it does not close the dialog. You close it once the message has been sent, so a send that fails still has somewhere to say so.
+
+For a yes-or-no confirmation use a plain dialog. For a form with several fields, build the form.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/feedback.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/feedback` instead of `@/components/panelui/feedback`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/feedback.tsx`:
+
+<RegistrySource name="feedback" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { Feedback } from "@/components/panelui/feedback"
+```
+
+```tsx
+<Feedback>
+  <Feedback.Trigger>Send feedback</Feedback.Trigger>
+  <Feedback.Content>
+    <Feedback.Panel>
+      <Feedback.Title>What should we fix first?</Feedback.Title>
+      <Feedback.Close />
+      <Feedback.Field placeholder="Tell us what got in your way" />
+    </Feedback.Panel>
+    <Feedback.Footer>
+      <Feedback.Cancel />
+      <Feedback.Submit onSubmit={(message) => send(message)} />
+    </Feedback.Footer>
+  </Feedback.Content>
+</Feedback>
+```
+
+## Composition
+
+```tsx
+<Feedback>
+  <Feedback.Trigger />
+  <Feedback.Content>
+    <Feedback.Panel>
+      <Feedback.Title />
+      <Feedback.Close />
+      <Feedback.Field />
+    </Feedback.Panel>
+    <Feedback.Footer>
+      <Feedback.Cancel />
+      <Feedback.Submit />
+    </Feedback.Footer>
+  </Feedback.Content>
+</Feedback>
+```
+
+- **`Feedback.Trigger`** — What opens the dialog. A plain button, or your own through `render`.
+- **`Feedback.Content`** — The shell: the darker band and everything set in it. `inline` draws it in the page instead of over it.
+- **`Feedback.Panel`** — The well. The title, the close button and the field go here, along with anything else the question needs.
+- **`Feedback.Title`** — The question. In a dialog it is also the dialog's accessible name.
+- **`Feedback.Close`** — The ✕ in the corner of the panel.
+- **`Feedback.Field`** — The text area. It has no border of its own, because it is already inside a well.
+- **`Feedback.Footer`** — The row the two actions sit in.
+- **`Feedback.Cancel`** — Closes the dialog. Call `preventDefault` in `onClick` to do something else, such as going back a step.
+- **`Feedback.Submit`** — Calls `onSubmit` with the message. Disabled while the field is empty unless you pass `disabled` yourself.
+
+## Examples
+
+### In a dialog
+
+The usual shape. `Feedback.Trigger` opens it, and `render` makes your own button the trigger. Hold `open` yourself so you can close the dialog when the message has gone.
+
+<ComponentPreview name="feedback/dialog" height={220}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Feedback } from '@/components/panelui/feedback';
+
+export default function FeedbackDialog() {
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState('');
+
+  return (
+    <Feedback open={open} onOpenChange={setOpen} value={message} onValueChange={setMessage}>
+      <Feedback.Trigger render={<Button variant="outline" />}>Send feedback</Feedback.Trigger>
+      <Feedback.Content>
+        <Feedback.Panel>
+          <Feedback.Title>What should we fix first?</Feedback.Title>
+          <Feedback.Close />
+          <Feedback.Field autoFocus placeholder="Tell us what got in your way" />
+        </Feedback.Panel>
+        <Feedback.Footer>
+          <Feedback.Cancel />
+          <Feedback.Submit
+            onSubmit={() => {
+              // Send `message` here, then close and clear for next time.
+              setOpen(false);
+              setMessage('');
+            }}
+          />
+        </Feedback.Footer>
+      </Feedback.Content>
+    </Feedback>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A send that fails
+
+Because `Submit` leaves the dialog open, a failed request can say so in the panel, with the message still in the field. This demo fails the first time and succeeds on the retry.
+
+<ComponentPreview name="feedback/failed" height={220}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Feedback } from '@/components/panelui/feedback';
+
+/** Stands in for a request. It fails once, so there is a failure to look at. */
+function send(attempt: number) {
+  return new Promise<void>((resolve, reject) => {
+    setTimeout(() => (attempt === 0 ? reject(new Error('offline')) : resolve()), 900);
+  });
+}
+
+export default function FeedbackFailed() {
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState('The export button does nothing on Safari.');
+  const [status, setStatus] = useState<'idle' | 'sending' | 'failed'>('idle');
+  const [attempt, setAttempt] = useState(0);
+
+  const submit = async () => {
+    setStatus('sending');
+    try {
+      await send(attempt);
+      setOpen(false);
+      setMessage('');
+      setStatus('idle');
+      setAttempt(0);
+    } catch {
+      // The dialog is still open, so the failure has somewhere to be said
+      // and the message is still in the field to send again.
+      setStatus('failed');
+      setAttempt((current) => current + 1);
+    }
+  };
+
+  return (
+    <Feedback open={open} onOpenChange={setOpen} value={message} onValueChange={setMessage}>
+      <Feedback.Trigger render={<Button variant="outline" />}>Report a problem</Feedback.Trigger>
+      <Feedback.Content>
+        <Feedback.Panel>
+          <Feedback.Title>What went wrong?</Feedback.Title>
+          <Feedback.Close />
+          <Feedback.Field minHeight={160} placeholder="What were you doing when it happened?" />
+          {status === 'failed' ? (
+            <p role="alert" className="text-sm text-destructive">
+              That did not send. Your message is still here.
+            </p>
+          ) : null}
+        </Feedback.Panel>
+        <Feedback.Footer>
+          <Feedback.Cancel />
+          <Feedback.Submit disabled={status === 'sending' ? true : undefined} onSubmit={submit}>
+            {status === 'sending' ? 'Sending…' : status === 'failed' ? 'Try again' : 'Submit'}
+          </Feedback.Submit>
+        </Feedback.Footer>
+      </Feedback.Content>
+    </Feedback>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Tags over the field
+
+Anything can go in the panel above the field. Here a tag is enough to send on its own, so `Submit` is given its own `disabled` and the field becomes optional.
+
+<ComponentPreview name="feedback/tags" height={220}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { Feedback } from '@/components/panelui/feedback';
+
+const TAGS = ['Bug', 'Slow', 'Confusing', 'Missing feature', 'Praise'];
+
+export default function FeedbackTags() {
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+
+  const toggle = (tag: string) =>
+    setTags((current) =>
+      current.includes(tag) ? current.filter((item) => item !== tag) : [...current, tag]
+    );
+
+  // A tag on its own says something, so it is enough to send.
+  const nothingToSend = tags.length === 0 && message.trim().length === 0;
+
+  return (
+    <Feedback open={open} onOpenChange={setOpen} value={message} onValueChange={setMessage}>
+      <Feedback.Trigger render={<Button variant="outline" />}>Send feedback</Feedback.Trigger>
+      <Feedback.Content>
+        <Feedback.Panel>
+          <Feedback.Title>What is this about?</Feedback.Title>
+          <Feedback.Close />
+          <div className="flex flex-wrap gap-2">
+            {TAGS.map((tag) => {
+              const picked = tags.includes(tag);
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  aria-pressed={picked}
+                  onClick={() => toggle(tag)}
+                  className={cn(
+                    'h-8 cursor-pointer rounded-full px-3 text-sm font-medium transition-colors',
+                    picked
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-foreground/10 text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {tag}
+                </button>
+              );
+            })}
+          </div>
+          <Feedback.Field minHeight={120} placeholder="Anything to add? (optional)" />
+        </Feedback.Panel>
+        <Feedback.Footer>
+          <Feedback.Cancel />
+          <Feedback.Submit
+            disabled={nothingToSend}
+            onSubmit={() => {
+              setOpen(false);
+              setMessage('');
+              setTags([]);
+            }}
+          />
+        </Feedback.Footer>
+      </Feedback.Content>
+    </Feedback>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Score first, words second
+
+Two steps in one dialog. Asking for the score first gives the sentence something to be about. Back is a `Feedback.Cancel` whose `onClick` calls `preventDefault`, which stops it closing.
+
+<ComponentPreview name="feedback/score" height={220}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { Feedback } from '@/components/panelui/feedback';
+
+const SCORES = [1, 2, 3, 4, 5];
+
+export default function FeedbackScore() {
+  const [open, setOpen] = useState(false);
+  const [score, setScore] = useState<number | null>(null);
+  const [message, setMessage] = useState('');
+
+  const close = (next: boolean) => {
+    setOpen(next);
+    if (!next) {
+      setScore(null);
+      setMessage('');
+    }
+  };
+
+  return (
+    <Feedback open={open} onOpenChange={close} value={message} onValueChange={setMessage}>
+      <Feedback.Trigger render={<Button variant="outline" />}>Rate the new editor</Feedback.Trigger>
+      <Feedback.Content>
+        {score === null ? (
+          <>
+            <Feedback.Panel>
+              <Feedback.Title>How is the new editor?</Feedback.Title>
+              <Feedback.Close />
+              <div className="flex min-h-[120px] flex-col justify-center gap-3">
+                <div className="flex justify-between gap-2">
+                  {SCORES.map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      aria-label={`${value} out of 5`}
+                      onClick={() => setScore(value)}
+                      className="flex size-12 cursor-pointer items-center justify-center rounded-full bg-foreground/10 text-lg font-semibold transition-colors hover:bg-primary hover:text-primary-foreground"
+                    >
+                      {value}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>Worse</span>
+                  <span>Much better</span>
+                </div>
+              </div>
+            </Feedback.Panel>
+            <Feedback.Footer>
+              <Feedback.Cancel>Not now</Feedback.Cancel>
+            </Feedback.Footer>
+          </>
+        ) : (
+          <>
+            <Feedback.Panel>
+              <Feedback.Title>
+                What made it a <span className={cn(score >= 4 && 'text-emerald-500')}>{score}</span>?
+              </Feedback.Title>
+              <Feedback.Close />
+              <Feedback.Field autoFocus minHeight={120} placeholder="In your own words" />
+            </Feedback.Panel>
+            <Feedback.Footer>
+              {/* Back, not Cancel: preventDefault keeps the dialog open. */}
+              <Feedback.Cancel
+                onClick={(event) => {
+                  event.preventDefault();
+                  setScore(null);
+                }}
+              >
+                Back
+              </Feedback.Cancel>
+              <Feedback.Submit onSubmit={() => close(false)} />
+            </Feedback.Footer>
+          </>
+        )}
+      </Feedback.Content>
+    </Feedback>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Keeping a draft
+
+Pass `value` and `onValueChange` to hold the message yourself. It survives the dialog being closed, and you can check it as it is typed. This one needs twenty characters before it can be sent.
+
+<ComponentPreview name="feedback/draft" height={240}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Feedback } from '@/components/panelui/feedback';
+
+/** Short answers are rarely useful ones. */
+const ENOUGH = 20;
+
+export default function FeedbackDraft() {
+  const [open, setOpen] = useState(false);
+  // Held here, so it is still there when the dialog is opened again.
+  const [draft, setDraft] = useState('');
+  const written = draft.trim().length;
+
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <Feedback open={open} onOpenChange={setOpen} value={draft} onValueChange={setDraft}>
+        <Feedback.Trigger render={<Button variant="outline" />}>
+          {written > 0 ? 'Continue your message' : 'Send feedback'}
+        </Feedback.Trigger>
+        <Feedback.Content>
+          <Feedback.Panel>
+            <Feedback.Title>What would you change?</Feedback.Title>
+            <Feedback.Close />
+            <Feedback.Field autoFocus minHeight={160} placeholder="One thing is plenty" />
+            <p className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
+              {written < ENOUGH ? `${ENOUGH - written} more characters` : 'Ready to send'}
+            </p>
+          </Feedback.Panel>
+          <Feedback.Footer>
+            <Feedback.Cancel>Keep for later</Feedback.Cancel>
+            <Feedback.Submit
+              disabled={written < ENOUGH}
+              onSubmit={() => {
+                setOpen(false);
+                setDraft('');
+              }}
+            />
+          </Feedback.Footer>
+        </Feedback.Content>
+      </Feedback>
+      <p className="text-sm text-muted-foreground">
+        {written > 0 ? `Draft kept: ${written} characters` : 'No draft'}
+      </p>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### Feedback
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `open` | `boolean` | — | Whether the dialog is open, when the caller holds that. |
+| `onOpenChange` | `(open: boolean) => void` | — | Called when the dialog asks to open or close. |
+| `defaultOpen` | `boolean` | `false` | Whether it starts open, when the caller does not hold it. |
+| `value` | `string` | — | The message, when the caller holds it. Leave unset to let the field keep it. |
+| `defaultValue` | `string` | `''` | The message to start with, when the caller does not hold it. |
+| `onValueChange` | `(value: string) => void` | — | Called with the message each time it changes. |
+| `dismissible` | `boolean` | `true` | Whether a click outside or the Escape key closes the dialog. Turn it off for a message that would be lost by a stray click; Cancel and the close button still work. |
+
+### Feedback.Trigger
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `render` | `ReactElement` | — | Your own element to be the trigger, such as a styled button. It is given the click handler and the attributes that tie it to the dialog. |
+
+### Feedback.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `inline` | `boolean` | `false` | Draw it in the page instead of over it: no backdrop, no trigger, always there. For a feedback box that is part of the page, such as the end of an article. `open` is ignored, and Cancel and the close button only report through `onOpenChange`. |
+| `blur` | `boolean` | `false` | Frost the page behind the dialog instead of only dimming it. |
+
+### Feedback.Close
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `label` | `string` | — | How the button announces itself to a screen reader. |
+
+### Feedback.Field
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — | The message. Leave unset to let the dialog hold it. |
+| `onValueChange` | `(value: string) => void` | — | Called with the message each time it changes. |
+| `minHeight` | `number` | `200` | Room to write in, in pixels, before the field starts to grow. |
+| `maxHeight` | `number` | `360` | How tall the field may grow, in pixels, before the area round it scrolls. |
+
+### Feedback.Submit
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `onSubmit` | `(value: string) => void` | — | Called with the message. The dialog stays open: close it yourself once the message has been sent, so a failure still has somewhere to be shown. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### In the page
+
+`<Feedback.Content inline>` draws the same shell in the page, with no backdrop and nothing to open. Cancel and the close button have nothing to close there, so they only call `onOpenChange(false)`. Use that to clear the field or to hide the box.
+
+### Closing
+
+A click outside the dialog or the Escape key closes it. Pass `dismissible={false}` to `Feedback` to turn both off, for a message that a stray click should not throw away. Cancel and the close button still work.
+
+### Keyboard
+
+Enter adds a new line. Command+Enter on a Mac, or Control+Enter elsewhere, sends the message, as long as `Submit` is enabled. Focus is kept inside the dialog while it is open and returns to the trigger when it closes.
+
+### The empty state
+
+While `Submit` is disabled it drops its fill, where most buttons would only dim. A dimmed accent button still looks like the one to press. Pass `disabled` to decide for yourself when the message can be sent: `disabled={false}` allows an empty one.
+
+### What it is built on
+
+The dialog is the Base UI dialog, which the package depends on directly. It does not use your project's own dialog component, so it looks the same whichever one you have.
+
+### Server Components
+
+`Feedback` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Feedback.Trigger` off the import, so each part is also exported by name: `FeedbackTrigger` is `Feedback.Trigger`, and so on for the others.
+
+```tsx
+import { Feedback, FeedbackTrigger, FeedbackContent, FeedbackPanel, FeedbackTitle, FeedbackClose, FeedbackField, FeedbackFooter, FeedbackCancel, FeedbackSubmit } from "@/components/panelui/feedback"
+```

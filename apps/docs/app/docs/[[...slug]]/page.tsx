@@ -165,6 +165,7 @@ const SECTIONS: Record<string, string> = {
   hooks: 'Hooks',
   utilities: 'Utilities',
   integrations: 'Integrations',
+  web: 'Web',
 };
 
 function sectionOf(slug: string[] | undefined): string {

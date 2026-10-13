@@ -1,0 +1,78 @@
+---
+title: Style
+description: Changing how a web component looks, with className on every part, the colour prop, the variables meant to be set, and the frame.
+---
+
+The components are styled with Tailwind classes on your theme's tokens. There are four ways to
+change how one looks, from the lightest touch to the heaviest.
+
+## The colour prop
+
+Every component with a colour of its own takes `color`, one of the theme's five roles:
+
+```tsx
+<DayGrid cells={days} color="success" />
+<BarPicker data={week} color="info" />
+```
+
+`primary` is the default. Pick the role by what the colour means, and compute it where it
+depends on a value. The roles and the tokens behind them are on the [Theme](/docs/web/theme) page.
+
+## className
+
+Every part takes `className`, and it is merged over the part's own classes, so a class you pass
+wins over the one it replaces:
+
+```tsx
+<Planet className="max-w-xs">
+  <Planet.Globe className="text-muted-foreground" />
+</Planet>
+
+<Flow.Node id="a" position={{ x: 0, y: 0 }} className="rounded-xl px-4 py-3" />
+```
+
+Use it for size, spacing and layout. Do not use it to recolour a component with a palette class
+such as `bg-emerald-500`: that stops following the theme. Change the role or the token.
+
+## Variables meant to be set
+
+A few measurements are held in a CSS variable so they can be changed without rewriting the
+component. Set one with an arbitrary property class:
+
+```tsx
+<RangeMeter value={62} className="[--pu-thumb:4.5rem]" />
+```
+
+Each component's page lists the variables it reads, under Notes. A variable that is not listed
+there is internal and may change.
+
+## Editing the source
+
+Installed from the registry, a component is a file in `components/panelui/`, and it is yours.
+Open it and change it. Run the CLI with `--diff` before updating to see what an update would
+overwrite:
+
+<InstallTabs kind="dlx" packages="shadcn@latest add @panelui/kpi --diff" />
+
+Installed from npm, the source is in the package and cannot be edited. Use the three ways above,
+or switch that component to the registry.
+
+## The frame
+
+The demos on these pages put a component in a frame: a muted band with a title, round an inner
+bordered panel. It is plain markup, not a component:
+
+```tsx
+<div className="rounded-3xl bg-muted p-1.5">
+  <div className="flex items-center justify-between px-3.5 py-2.5">
+    <h3 className="text-sm font-medium">Deploys</h3>
+    <p className="text-sm text-muted-foreground">This week</p>
+  </div>
+  <div className="rounded-[1.125rem] border bg-card p-5 shadow-xs">
+    {/* the component */}
+  </div>
+</div>
+```
+
+The inner radius is the outer one less the padding between them, which keeps the two curves
+concentric.

@@ -34,6 +34,12 @@
       ],
       "panelui-native/*": [
         "../../packages/panelui/src/*"
+      ],
+      "panelui-web": [
+        "../../packages/web/src/index.ts"
+      ],
+      "panelui-web/*": [
+        "../../packages/web/src/components/*/index.tsx"
       ]
     }
   },

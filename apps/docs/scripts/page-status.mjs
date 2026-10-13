@@ -48,11 +48,18 @@ const libVersion = JSON.parse(
  */
 const BADGE_FOR_MINORS = { new: 3, updated: 1 };
 
-/** True while `version` is recent enough to still be worth marking. */
-function isRecent(version, mark) {
+/**
+ * True while `version` is recent enough to still be worth marking.
+ *
+ * `current` is the version of the package the page documents. It is the
+ * library's unless the caller says otherwise, which the web collection does:
+ * it is versioned on its own, and a component added in its 0.1.0 is not six
+ * releases old because the library happens to be at 0.109.
+ */
+function isRecent(version, mark, current) {
   if (!version) return false;
   const [thenMajor, thenMinor] = version.split('.').map(Number);
-  const [major, minor] = libVersion.split('.').map(Number);
+  const [major, minor] = current.split('.').map(Number);
   if (major !== thenMajor) return major < thenMajor;
   return minor - thenMinor < BADGE_FOR_MINORS[mark];
 }
@@ -65,14 +72,14 @@ function isRecent(version, mark) {
  * `updatedIn` is bumped by hand when a component's API changes, and forgetting
  * to clear it costs nothing — it clears itself at the next release.
  */
-export function statusOf({ alpha, beta, addedIn, updatedIn }) {
+export function statusOf({ alpha, beta, addedIn, updatedIn }, current = libVersion) {
   // `alpha` and `beta` win and never expire: they state how settled the API
   // is, not which release it landed in, so they come off the page when someone
   // decides it has settled and not a version sooner. Alpha outranks beta so a
   // half-finished promotion reads as the more cautious of the two.
   if (alpha) return 'alpha';
   if (beta) return 'beta';
-  if (isRecent(addedIn, 'new')) return 'new';
-  if (isRecent(updatedIn, 'updated')) return 'updated';
+  if (isRecent(addedIn, 'new', current)) return 'new';
+  if (isRecent(updatedIn, 'updated', current)) return 'updated';
   return null;
 }

@@ -623,6 +623,7 @@ independently of the library and of each other. Which package a release is for c
 | `vX.Y.Z` | `packages/panelui` → `panelui-native` |
 | `cli-vX.Y.Z` | `packages/cli` → `panelui-cli` |
 | `create-vX.Y.Z` | `packages/create-panelui-app` → `create-panelui-app` |
+| `web-vX.Y.Z` | `packages/web` → `panelui-web`, by `publish-web.yml` |
 
 `create-panelui-app` depends on `panelui-cli`, so a breaking change to the `panelui-cli/init` or
 `panelui-cli/ui` subpath exports needs both released, cli first.
@@ -633,7 +634,7 @@ counts as that go-ahead for the release they just approved, and for that one onl
 
 ### What builds when
 
-Four workflows, and nothing else runs on its own. This is the whole picture:
+Five workflows, and nothing else runs on its own. This is the whole picture:
 
 | Event | What runs | What it produces |
 | --- | --- | --- |
@@ -643,6 +644,8 @@ Four workflows, and nothing else runs on its own. This is the whole picture:
 | Release published, tag `vX.Y.Z` | `deploy-docs.yml` | panelui.dev, by firing a Vercel deploy hook. |
 | Release published, tag `cli-v*` | `publish-cli.yml` | `panelui-cli` on npm. |
 | Release published, tag `create-v*` | `publish-cli.yml` | `create-panelui-app` on npm. |
+| Release published, tag `web-v*` | `publish-web.yml` | `panelui-web` on npm. |
+| Release published, tag `web-v*` | `deploy-docs.yml` | panelui.dev, because the web docs and the registry at `/r/web` are served from it. |
 | **Deploy docs** run by hand | `deploy-docs.yml` | panelui.dev, from the current `main`. |
 
 Every workflow on `release: published` sees **every** release and filters by tag prefix itself, so

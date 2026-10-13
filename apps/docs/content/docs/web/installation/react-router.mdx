@@ -1,0 +1,64 @@
+---
+title: React Router
+description: Add PanelUI web components to a React Router app.
+---
+
+For React Router in framework mode. Its default import alias is `~`, so imports start with `~/` where the other guides have `@/`.
+
+## A new project
+
+<Steps>
+
+<Step>
+
+### Create the project
+
+The shadcn CLI creates the app, sets up Tailwind CSS and writes the theme tokens in one go:
+
+<InstallTabs kind="dlx" packages="shadcn@latest init -t react-router" />
+
+</Step>
+
+<Step>
+
+### Add a component
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/rolling-number.json" />
+
+The source is written to `components/panelui/rolling-number.tsx`, and the packages it uses are
+installed for you.
+
+</Step>
+
+<Step>
+
+### Use it
+
+```tsx title="app/routes/home.tsx"
+import { RollingNumber } from "~/components/panelui/rolling-number"
+
+export default function Home() {
+  return (
+    <main className="flex min-h-svh items-center justify-center">
+      <RollingNumber value={121} className="text-6xl font-semibold" />
+    </main>
+  )
+}
+```
+
+</Step>
+
+</Steps>
+
+## An existing project
+
+Run the CLI in the project. It adds the theme tokens to your CSS and writes `components.json`:
+
+<InstallTabs kind="dlx" packages="shadcn@latest init" />
+
+Then add a component as in the steps above.
+
+## From npm
+
+To install the package instead of copying source, follow
+[From npm](/docs/web/installation#from-npm) once the project has its shadcn theme.

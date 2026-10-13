@@ -22,8 +22,8 @@ import { radioIndexForKey } from '../composite-keyboard';
  *   this one is the site's: it drives the same state the toggle in the
  *   navigation does, and the previews follow it.
  *
- * Only the picker is interactive, so only the picker is a client component —
- * the previews are passed in as `children` and stay server-rendered.
+ * The picker sits in the page's column; the previews it themes run the full
+ * width of the window under it.
  */
 
 /**
@@ -83,7 +83,7 @@ export function Themer({ children }: { children: ReactNode }): React.ReactElemen
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-center gap-3 px-6">
         <div
           className="flex items-center gap-1 rounded-full border bg-card p-1"
           role="radiogroup"
@@ -137,23 +137,14 @@ export function Themer({ children }: { children: ReactNode }): React.ReactElemen
 
       <div
         data-panel-theme={theme}
-        /*
-         * `inert`, because none of this does anything. Ten cards of controls
-         * between the hero and the rest of the page is sixty tab stops that
-         * lead nowhere, and a screen reader reading out a form nobody can
-         * submit. The previews are a picture of the components; the links to
-         * the real ones are underneath.
-         */
-        inert
         style={{ colorScheme: mode }}
         /*
-         * A background, because the previews carry their own theme: a Moon-dark
-         * card on a white page would be a dark tile floating in daylight. No
-         * border, though — a frame around a frame around every card is one
-         * frame too many, and with the page in the same theme this surface
-         * disappears, which is the point.
+         * A background, because the previews carry their own theme: a Moon
+         * card on Panel's page would be a tile of another colour floating on
+         * it. It runs edge to edge and has no border, so with the page in the
+         * same theme this surface disappears, which is the point.
          */
-        className="rounded-3xl bg-background p-3 text-foreground sm:p-4"
+        className="relative bg-background text-foreground"
       >
         {children}
       </div>

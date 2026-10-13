@@ -1,4 +1,4 @@
-# Deploys panelui.dev when a library release is published.
+# Deploys panelui.dev when a library release or a web release is published.
 #
 # The docs site used to build on every push and every pull request, through
 # Vercel's Git integration. That is a full Next.js build of a site whose content
@@ -24,8 +24,11 @@
 #
 # `release: published` fires for every release in the repository, and the CLI
 # packages are released under their own tag prefixes. A `cli-v0.4.2` release
-# does not change a component page, so it should not spend a build. Only a plain
-# `vX.Y.Z` gets through — the same filter publish.yml uses, for the same reason.
+# does not change a component page, so it should not spend a build. A plain
+# `vX.Y.Z` gets through — the same filter publish.yml uses, for the same reason
+# — and so does `web-vX.Y.Z`: the web collection's pages and its registry at
+# /r/web are served from this site, so a web release that did not deploy would
+# put a new version on npm and leave the old source behind the shadcn CLI.
 #
 # ## One-time setup
 #
@@ -53,7 +56,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref_name, 'v')
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref_name, 'v') || startsWith(github.ref_name, 'web-v')
     steps:
       - name: Trigger the production deployment
         env:

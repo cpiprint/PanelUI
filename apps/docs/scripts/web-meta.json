@@ -1,0 +1,110 @@
+{
+  "rolling-number": [
+    "RollingNumber",
+    "A number whose digits roll to their new values.",
+    "react rolling number animated counter",
+    {
+      "addedIn": "0.1.0",
+      "category": "data",
+      "title": "Rolling Number"
+    }
+  ],
+  "planet": [
+    "Planet",
+    "The world as dots on a globe you can turn, with markers pinned to it.",
+    "react globe component dotted world map markers",
+    {
+      "addedIn": "0.1.0",
+      "category": "data"
+    }
+  ],
+  "feedback": [
+    "Feedback",
+    "A dialog with a well to write in and two actions in the band around it.",
+    "react feedback dialog form component",
+    {
+      "addedIn": "0.1.0",
+      "category": "feedback"
+    }
+  ],
+  "day-grid": [
+    "DayGrid",
+    "A run of days as a field of dots, each sized by how much happened on it.",
+    "react activity grid contribution heatmap component",
+    {
+      "addedIn": "0.1.0",
+      "category": "data",
+      "title": "Day Grid"
+    }
+  ],
+  "range-meter": [
+    "RangeMeter",
+    "A reading on a ruler of ticks that rises where the value is, with the number above it.",
+    "react range slider meter value thumb component",
+    {
+      "addedIn": "0.1.0",
+      "category": "data",
+      "title": "Range Meter"
+    }
+  ],
+  "bar-picker": [
+    "BarPicker",
+    "A short run of values as columns of lights, one column picked.",
+    "react bar chart selector radio group component",
+    {
+      "addedIn": "0.1.0",
+      "category": "data",
+      "title": "Bar Picker"
+    }
+  ],
+  "kpi": [
+    "Kpi",
+    "One number and what it is doing: its change, its shape over time, its progress to a target.",
+    "react kpi metric card sparkline trend component",
+    {
+      "addedIn": "0.1.0",
+      "category": "data",
+      "title": "KPI"
+    }
+  ],
+  "lane-board": [
+    "LaneBoard",
+    "Lanes of cards that can be dragged within a lane and from one lane to another.",
+    "react kanban board drag and drop lanes component",
+    {
+      "addedIn": "0.1.0",
+      "category": "layout",
+      "title": "Lane Board"
+    }
+  ],
+  "flow": [
+    "Flow",
+    "A canvas of nodes joined by edges, that you pan, zoom and rearrange.",
+    "react flow diagram node graph canvas component",
+    {
+      "addedIn": "0.1.0",
+      "category": "data",
+      "title": "Flow"
+    }
+  ],
+  "tilt-card": [
+    "TiltCard",
+    "A card that leans towards the pointer, with layers inside it that move by their depth.",
+    "react tilt card 3d parallax hover component",
+    {
+      "addedIn": "0.1.0",
+      "category": "layout",
+      "title": "Tilt Card"
+    }
+  ],
+  "command-dock": [
+    "CommandDock",
+    "A small button that opens into a field, with the answer arriving under it a row at a time.",
+    "react command palette prompt search dock component",
+    {
+      "addedIn": "0.1.0",
+      "category": "overlays",
+      "title": "Command Dock"
+    }
+  ]
+}

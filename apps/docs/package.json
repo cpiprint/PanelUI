@@ -10,9 +10,9 @@
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test test/*.test.mjs",
     "test:a11y:browser": "node test/accessibility-smoke.mjs",
-    "docs:generate": "node scripts/extract.mjs && node scripts/gen.mjs && node scripts/extract-icons.mjs && node scripts/build-registry.mjs && node scripts/gen-blocks.mjs && node scripts/build-api-reference.mjs && node scripts/build-skill.mjs && node scripts/build-skill-assets.mjs && node ../../scripts/theme-manifest.mjs && node ../../scripts/catalogue-manifest.mjs",
-    "registry:build": "node scripts/build-registry.mjs",
-    "prebuild": "node scripts/extract.mjs && node scripts/extract-icons.mjs && node scripts/build-registry.mjs && node scripts/build-api-reference.mjs --check && node scripts/build-skill.mjs && node scripts/build-skill-assets.mjs"
+    "docs:generate": "node scripts/extract.mjs && node scripts/gen.mjs && node scripts/extract-icons.mjs && node scripts/build-registry.mjs && node scripts/build-web-registry.mjs && node scripts/gen-web.mjs && node scripts/gen-blocks.mjs && node scripts/build-api-reference.mjs && node scripts/build-skill.mjs && node scripts/build-web-skill.mjs && node scripts/build-skill-assets.mjs && node ../../scripts/theme-manifest.mjs && node ../../scripts/catalogue-manifest.mjs",
+    "registry:build": "node scripts/build-registry.mjs && node scripts/build-web-registry.mjs",
+    "prebuild": "node scripts/extract.mjs && node scripts/extract-icons.mjs && node scripts/build-registry.mjs && node scripts/build-web-registry.mjs && node scripts/build-api-reference.mjs --check && node scripts/build-skill.mjs && node scripts/build-web-skill.mjs && node scripts/build-skill-assets.mjs"
   },
   "//browserslist": "Next's default target still down-levels Array.prototype.at, Object.hasOwn and friends, shipping ~14KB of polyfills for engines that have had them since 2021. This is a docs site for a React Native library — its readers are on current browsers.",
   "browserslist": [

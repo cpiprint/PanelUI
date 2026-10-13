@@ -48,6 +48,29 @@ export const metadata: Metadata = {
  */
 const INSTALL = 'npx create-panelui-app@latest';
 
+/**
+ * What the web collection holds itself to. The first is the wide card: two of
+ * its claims are one act, adding a component and having it come out in your
+ * colours, and it gets the room to show that as one thing.
+ */
+const WEB_FEATURES: { figure: IsoFigureKind; title: string; body: string }[] = [
+  {
+    figure: 'workbench',
+    title: 'Copied in, and drawn in your theme',
+    body: 'A component is a file the shadcn CLI adds to your project, yours to read and to change. Its colour is one of five roles your theme defines, so it matches the rest of your interface in light and dark.',
+  },
+  {
+    figure: 'arrows',
+    title: 'Keyboard first, motion optional',
+    body: 'Grids, boards and canvases take the arrow keys. Every animation stops for anyone who has asked for reduced motion.',
+  },
+  {
+    figure: 'twins',
+    title: 'The same parts as the app',
+    body: 'KPI and Flow have the parts and props of the React Native library. KPI runs on the server and sends no JavaScript.',
+  },
+];
+
 const FEATURES: { figure: IsoFigureKind; title: string; body: string }[] = [
   {
     figure: 'tailwind',
@@ -156,6 +179,10 @@ const FAQ = [
     q: 'How many components are there?',
     a: `${COMPONENT_COUNT}, covering overlays, forms, feedback, data and layout — from bottom sheets and popovers to chat transcripts, animated line charts, file attachments, timelines and toasts.`,
   },
+  {
+    q: 'Does PanelUI work on the web?',
+    a: 'The React Native library is for iOS and Android. For the web there is a separate collection of React components built on shadcn/ui, installed one at a time from a registry or from npm. Components that exist in both, such as KPI and Flow, have the same parts and props.',
+  },
 ];
 
 export default function HomePage() {
@@ -197,13 +224,15 @@ export default function HomePage() {
       {/* Hero */}
       <section className="flex flex-col items-center gap-6 px-6 py-24 text-center">
         <Badge variant="secondary">{COMPONENT_COUNT} components · MIT · Expo SDK 57+</Badge>
-        <h1 className="max-w-3xl font-heading text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-          React Native UI components for Expo, styled with Tailwind CSS
+        <h1 className="max-w-3xl font-heading text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
+          Native-feeling UI. Zero native code.
         </h1>
-        <p className="max-w-2xl text-lg text-muted-foreground text-balance">
-          Accessible, high-performance components — bottom sheets, dialogs, selects, toasts,
-          forms — animated on the UI thread with Reanimated. Zero native code, so it runs in
-          Expo Go.
+        <p className="max-w-xl text-lg text-muted-foreground text-balance">
+          Tailwind-styled components for Expo that run in Expo Go, and now{' '}
+          <Link href="/docs/web" className="text-foreground underline underline-offset-4">
+            on the web
+          </Link>{' '}
+          too.
         </p>
 
         <CopyInstall command={INSTALL} />
@@ -220,6 +249,66 @@ export default function HomePage() {
       </section>
 
       <Showcase />
+
+      {/* The web collection */}
+      <section className="border-t px-6 py-20" id="web">
+        <div className="mx-auto flex max-w-5xl flex-col gap-10">
+          <div className="flex flex-col gap-2">
+            <h2 className="font-heading text-3xl font-semibold tracking-tight">
+              And built for the web you already have
+            </h2>
+            <p className="max-w-2xl text-muted-foreground">
+              A collection of components for React, built on shadcn/ui. Each one is copied into
+              your project, drawn in your theme, and usable from the keyboard.
+            </p>
+          </div>
+
+          {/*
+            One card the width of the section over two that share it, where
+            the section above is a grid of six equals. The wide card is the
+            figure with two machines on it, so its panel is the shape of a
+            bench, and its words sit beside the bench and not under it.
+          */}
+          <div className="grid gap-4 lg:grid-cols-2">
+            {WEB_FEATURES.map(({ figure, title, body }, index) =>
+              index === 0 ? (
+                <Card
+                  key={title}
+                  className="lg:col-span-2 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.9fr)]"
+                >
+                  <CardHeader className="justify-center lg:py-10">
+                    <CardTitle className="text-2xl leading-tight">{title}</CardTitle>
+                    <CardDescription className="text-base">{body}</CardDescription>
+                  </CardHeader>
+                  <div className="flex flex-col justify-center border-t px-5 pt-4 pb-3 lg:border-s lg:border-t-0">
+                    <IsoFigure kind={figure} />
+                  </div>
+                </Card>
+              ) : (
+                <Card key={title}>
+                  <div className="border-b px-5 pt-4 pb-3">
+                    <IsoFigure kind={figure} />
+                  </div>
+                  <CardHeader>
+                    <CardTitle>{title}</CardTitle>
+                    <CardDescription>{body}</CardDescription>
+                  </CardHeader>
+                </Card>
+              )
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <Button render={<Link href="/docs/web/components" />}>
+              See the web components
+              <ArrowRightIcon />
+            </Button>
+            <Button variant="outline" render={<Link href="/docs/web/installation" />}>
+              Install for your framework
+            </Button>
+          </div>
+        </div>
+      </section>
 
       {/* Features */}
       <section className="border-t px-6 py-20" id="features">
@@ -425,7 +514,9 @@ export default function HomePage() {
               </a>
             </p>
           </div>
-          <nav className="flex gap-6" aria-label="Footer">
+          {/* Six links are wider than a phone, so they wrap to a second row
+              there in place of pushing the page sideways. */}
+          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2" aria-label="Footer">
             <LayoutLink href="/docs" className="hover:text-foreground">
               Documentation
             </LayoutLink>

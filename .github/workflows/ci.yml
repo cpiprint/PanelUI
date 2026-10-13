@@ -43,6 +43,12 @@ jobs:
       - name: Build library
         run: npm run build
 
+      # Compiled file by file, then each relative import is completed against
+      # what was emitted. An import the second half cannot resolve only fails
+      # here: the typecheck follows the same specifier without its extension.
+      - name: Build web package
+        run: npm run build --workspace=panelui-web
+
       # A real production Metro export catches dependency and asset growth that
       # source-level package budgets cannot see. Offline mode and a cold cache
       # keep this reproducible; the current export takes about 15 seconds.

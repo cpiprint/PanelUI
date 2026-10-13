@@ -1,0 +1,77 @@
+---
+title: Next.js
+description: Add PanelUI web components to a Next.js app.
+---
+
+For the App Router. The components are Client Components, and a Server Component page can render them.
+
+## A new project
+
+<Steps>
+
+<Step>
+
+### Create the project
+
+The shadcn CLI creates the app, sets up Tailwind CSS and writes the theme tokens in one go:
+
+<InstallTabs kind="dlx" packages="shadcn@latest init -t next" />
+
+</Step>
+
+<Step>
+
+### Add a component
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/rolling-number.json" />
+
+The source is written to `components/panelui/rolling-number.tsx`, and the packages it uses are
+installed for you.
+
+</Step>
+
+<Step>
+
+### Use it
+
+```tsx title="app/page.tsx"
+import { RollingNumber } from "@/components/panelui/rolling-number"
+
+export default function Home() {
+  return (
+    <main className="flex min-h-svh items-center justify-center">
+      <RollingNumber value={121} className="text-6xl font-semibold" />
+    </main>
+  )
+}
+```
+
+</Step>
+
+</Steps>
+
+## An existing project
+
+Run the CLI in the project. It adds the theme tokens to your CSS and writes `components.json`:
+
+<InstallTabs kind="dlx" packages="shadcn@latest init" />
+
+Then add a component as in the steps above.
+
+## Server Components
+
+A component that holds state starts with `"use client"`, so it runs in the browser and can be
+rendered from a Server Component without a wrapper.
+
+Two things need a Client Component of your own:
+
+- **A value that changes.** State lives in the browser, so the part of the page that holds it
+  needs `"use client"`.
+- **Dotted parts.** A Server Component cannot read `Planet.Globe` off a client import. Either put
+  `"use client"` at the top of the file, or import the part by name: every `Planet.Globe` is
+  also exported as `PlanetGlobe`. Each component's page lists its names under **Notes**.
+
+## From npm
+
+To install the package instead of copying source, follow
+[From npm](/docs/web/installation#from-npm) once the project has its shadcn theme.

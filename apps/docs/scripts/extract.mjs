@@ -6,7 +6,17 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 /** Repo root, three levels up from apps/docs/scripts. */
 const ROOT = path.resolve(HERE, '../../..');
 
-const root = path.join(ROOT, 'packages/panelui/src/components');
+/*
+ * The library by default. The web collection is documented by the same parser,
+ * and `gen-web.mjs` runs this file again with these two set, so a props table
+ * is read off the source in the same way whichever package it describes.
+ */
+const root = process.env.PANELUI_EXTRACT_ROOT
+  ? path.resolve(process.env.PANELUI_EXTRACT_ROOT)
+  : path.join(ROOT, 'packages/panelui/src/components');
+const elsewhere = process.env.PANELUI_EXTRACT_OUT
+  ? path.resolve(process.env.PANELUI_EXTRACT_OUT)
+  : null;
 const out = {};
 
 for (const dir of fs.readdirSync(root).sort()) {
@@ -153,7 +163,8 @@ for (const dir of fs.readdirSync(root).sort()) {
   };
 }
 
-fs.writeFileSync(path.join(HERE, 'api.json'), JSON.stringify(out, null, 2));
+if (elsewhere) fs.writeFileSync(elsewhere, JSON.stringify(out, null, 2));
+else fs.writeFileSync(path.join(HERE, 'api.json'), JSON.stringify(out, null, 2));
 console.log('components:', Object.keys(out).length);
 for (const [k, v] of Object.entries(out)) {
   console.log(k.padEnd(15), 'ifaces=' + v.interfaces.length, 'variants=' + JSON.stringify(v.variants).slice(0, 90), 'parts=' + v.parts.join(','));

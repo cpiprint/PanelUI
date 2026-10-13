@@ -463,8 +463,16 @@ if (placeholders.length) {
  * 4. Write.
  * ------------------------------------------------------------------ */
 
-fs.rmSync(OUT, { recursive: true, force: true });
+/*
+ * Clear what this script wrote last time, and only that. The folder is shared:
+ * `r/web` holds the web collection's registry, built by a script of its own,
+ * and deleting the whole directory took that with it whenever this one ran
+ * second or ran alone.
+ */
 fs.mkdirSync(OUT, { recursive: true });
+for (const entry of fs.readdirSync(OUT, { withFileTypes: true })) {
+  if (entry.isFile() && entry.name.endsWith('.json')) fs.rmSync(path.join(OUT, entry.name));
+}
 
 for (const item of built) {
   fs.writeFileSync(path.join(OUT, `${item.name}.json`), JSON.stringify(item, null, 2) + '\n');
