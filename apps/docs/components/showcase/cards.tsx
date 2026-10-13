@@ -47,6 +47,13 @@ import { radioIndexForKey } from '../composite-keyboard';
  * They are also why the token work in `panel-themes.css` matters: nothing here
  * names a colour, so every one of these surfaces rethemes together.
  *
+ * One place they part from the components on purpose: text in a status colour
+ * is drawn in that status's `-foreground` token, and the days outside a month
+ * in the full muted one. On a device the brighter token is the library's
+ * choice. Here it is words on a web page, read and pressed, and has to clear
+ * 4.5 to 1 against the card in every theme, which the accessibility check on
+ * this page holds it to.
+ *
  * Each one does what the component it stands for does: a switch switches, the
  * slider drags, the calendar turns its month. A picture of a control tells a
  * visitor what it looks like; pressing it tells them what it is like to use,
@@ -369,7 +376,8 @@ function Avatar({ initials, className }: { initials: string; className?: string 
         className
       )}
     >
-      <span className="text-xs font-medium text-muted-foreground">{initials}</span>
+      {/* On the muted disc the muted text colour falls short of 4.5 to 1 in some themes. */}
+      <span className="text-xs font-medium text-foreground/80">{initials}</span>
     </span>
   );
 }
@@ -521,7 +529,7 @@ export function AttachmentCard() {
               <span
                 className={cn(
                   'truncate text-base font-medium',
-                  state === 'error' ? 'text-destructive' : 'text-foreground'
+                  state === 'error' ? 'text-destructive-foreground' : 'text-foreground'
                 )}
               >
                 {name}
@@ -532,7 +540,7 @@ export function AttachmentCard() {
                   onClick={() =>
                     setFiles(files.map((file) => (file.id === id ? { ...file, state: 'uploading', progress: 0 } : file)))
                   }
-                  className={cn('self-start rounded-sm text-sm text-destructive underline underline-offset-2', PRESS, FOCUS)}
+                  className={cn('self-start rounded-sm text-sm text-destructive-foreground underline underline-offset-2', PRESS, FOCUS)}
                 >
                   Upload failed. Try again
                 </button>
@@ -981,7 +989,7 @@ export function KpiCard() {
               <span className="text-sm font-medium text-muted-foreground">{name}</span>
               <span className="text-2xl font-bold tabular-nums text-foreground">{rows[index].value}</span>
               <span className="text-sm">
-                <span className="font-medium tabular-nums text-success">{rows[index].delta}</span>{' '}
+                <span className="font-medium tabular-nums text-success-foreground">{rows[index].delta}</span>{' '}
                 <span className="text-muted-foreground">vs the one before</span>
               </span>
             </div>
@@ -1040,7 +1048,7 @@ export function FormCard() {
             size="sm"
           />
           {state === 'missing' ? (
-            <span className="text-sm text-destructive" role="alert">
+            <span className="text-sm text-destructive-foreground" role="alert">
               Give the goal a name first.
             </span>
           ) : null}
@@ -1197,7 +1205,7 @@ export function AlertCard() {
           >
             {updated ? 'You are up to date' : 'Update available'}
           </span>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-foreground/75">
             {updated ? 'Installed a moment ago.' : 'A newer version is ready to install.'}
           </span>
         </div>
@@ -1427,7 +1435,7 @@ export function CalendarCard() {
                   isPicked
                     ? 'bg-primary font-medium text-primary-foreground'
                     : offset !== 0
-                      ? 'text-muted-foreground/56 hover:bg-accent'
+                      ? 'text-muted-foreground hover:bg-accent'
                       : 'text-foreground hover:bg-accent'
                 )}
               >
@@ -1483,7 +1491,7 @@ export function TabsCard() {
             className={cn(
               'relative flex flex-1 cursor-pointer items-center justify-center rounded-md py-1.5 text-sm transition-colors duration-200',
               FOCUS,
-              tab === index ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+              tab === index ? 'text-foreground' : 'text-foreground/75 hover:text-foreground'
             )}
           >
             {name}
