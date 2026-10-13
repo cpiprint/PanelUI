@@ -84,9 +84,20 @@ jobs:
           fi
           echo "Publishing panelui-web ${version} from ${GITHUB_REF_NAME}."
 
+      # The first version is published by hand (see the top of this file), and
+      # its release is cut afterwards so that there is a record of it. That
+      # run finds the version already on the registry and has nothing to do,
+      # which is not a failure. npm would refuse it anyway: a version cannot be
+      # published twice.
       - name: Publish
         if: github.event_name == 'release'
-        run: npm publish --provenance --access public
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if npm view "panelui-web@${version}" version >/dev/null 2>&1; then
+            echo "::notice::panelui-web ${version} is already on npm. Nothing to publish."
+            exit 0
+          fi
+          npm publish --provenance --access public
         working-directory: packages/web
 
       - name: Dry run
