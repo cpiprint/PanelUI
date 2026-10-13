@@ -34,6 +34,7 @@
     "lucide-react": "^1.25.0",
     "next": "^16.3.0",
     "next-themes": "^0.4.6",
+    "panelui-web": "*",
     "react": "^19.2.3",
     "react-day-picker": "^10.0.1",
     "react-dom": "^19.2.3",

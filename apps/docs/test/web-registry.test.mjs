@@ -114,3 +114,39 @@ test('every component has a thumb for the index, and the index shows the gallery
   }
   assert.match(read('content/docs/web/components/index.mdx'), /<WebComponentGallery \/>/);
 });
+
+/*
+ * The site is built on Vercel from `apps/docs`, and an install run from there
+ * brings only what the docs app depends on, directly or through a workspace
+ * it names. The pages import the web components' source by path, so that
+ * source's own imports have to arrive the same way. CI installs every
+ * workspace from the root and cannot see one that is missing: the first
+ * deploy of the web collection failed on exactly this, with every check green.
+ */
+test('the docs app can install what the web components import', () => {
+  const web = path.resolve(docs, '../../packages/web');
+  const webPackage = JSON.parse(fs.readFileSync(path.join(web, 'package.json'), 'utf8'));
+  const docsPackage = JSON.parse(read('package.json'));
+
+  assert.ok(
+    docsPackage.dependencies?.['panelui-web'],
+    'apps/docs must depend on panelui-web: its pages import that source, and Vercel installs from apps/docs'
+  );
+
+  // And the package says everything its source reaches for, so naming the package is enough.
+  const declared = new Set([
+    ...Object.keys(webPackage.dependencies ?? {}),
+    ...Object.keys(webPackage.peerDependencies ?? {}),
+  ]);
+  const sources = fs
+    .readdirSync(path.join(web, 'src'), { recursive: true })
+    .filter((file) => /\.tsx?$/.test(String(file)));
+  for (const file of sources) {
+    const source = fs.readFileSync(path.join(web, 'src', String(file)), 'utf8');
+    for (const [, specifier] of source.matchAll(/from\s+['"]([^'".][^'"]*)['"]/g)) {
+      // `@scope/name/sub/path` and `name/sub/path` both belong to the package before the sub path.
+      const name = specifier.startsWith('@') ? specifier.split('/').slice(0, 2).join('/') : specifier.split('/')[0];
+      assert.ok(declared.has(name), `${file} imports ${specifier}, which packages/web/package.json does not declare`);
+    }
+  }
+});
